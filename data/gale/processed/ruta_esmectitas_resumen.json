@@ -1,0 +1,70 @@
+{
+ "resumen": {
+  "celdas": 96,
+  "distancia_km": 10.3,
+  "largo_km": 10.3,
+  "llegada_lmst": "S+1 12:11",
+  "llegada": "S+1 12:11",
+  "dosis_uGy": 289.7,
+  "espera_nocturna_h": 13.91,
+  "espera_h": 13.91,
+  "costo_objetivo": 51.388,
+  "costo": 51.388,
+  "nodos_expandidos": 49094,
+  "objetivo_mineral": "Glen Etive",
+  "objetivo": "Glen Etive",
+  "sol_rad": 1360,
+  "sol_rems": 1360,
+  "material": "esmectitas"
+ },
+ "comparativa_dunas": {
+  "distancia_minima_a_duna_m": 0,
+  "celdas_arena_linea_recta": 28,
+  "celdas_linea_recta": 93,
+  "celdas_arena_ruta_optima": 3,
+  "ruta_modelo_global": {
+   "celdas_arena": 28,
+   "celdas_totales": 93,
+   "distancia_km": 9.7,
+   "llegada_lmst": "S+1 10:43",
+   "llegada_real_con_arena": "S+1 15:33",
+   "horas_en_arena": 8.44,
+   "dosis_real_uGy": 324.3
+  },
+  "horas_ahorradas_en_arena": 8.44,
+  "celdas_duna_ruta_adaptativa": 3,
+  "contrafactual_modelo_global": {
+   "celdas_duna": 28,
+   "celdas": 93,
+   "largo_km": 9.7,
+   "llegada": "S+1 10:43",
+   "llegada_real_con_arena": "S+1 15:33",
+   "horas_en_arena": 8.44,
+   "dosis_real_uGy": 324.3
+  },
+  "distancia_min_ruta_a_duna_m": 0
+ },
+ "control_calidad": {
+  "celdas_totales": 7560,
+  "celdas_validas": 7560,
+  "pct_celdas_validas": 100.0,
+  "pct_validas": 100.0,
+  "umbral_pct_celdas_validas": 90.0,
+  "umbral_pct_validas": 90.0,
+  "cobertura_ok": true,
+  "margen_seguridad": "inclinacion + 1.96*sigma <= 20.0",
+  "celdas_bloqueadas_por_margen": 117,
+  "conteo_tipos_suelo": {
+   "arena_dunas": 1433,
+   "lecho_rocoso_firme": 1955,
+   "regolito_compacto": 1695,
+   "rocoso_fracturado": 2477
+  },
+  "suelos": {
+   "arena_dunas": 1433,
+   "lecho_rocoso_firme": 1955,
+   "regolito_compacto": 1695,
+   "rocoso_fracturado": 2477
+  }
+ }
+}
