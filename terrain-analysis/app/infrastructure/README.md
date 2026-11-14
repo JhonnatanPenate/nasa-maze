@@ -5,8 +5,9 @@ Outer layer: concrete implementations of the `core/ports` contracts.
 ## Contents
 
 - `datasources/` — `RasterDatasource` implementations
-  (`SyntheticDemDatasource`, `GeoTiffRasterDatasource`) plus the
-  raw-payload → `DemWindow` mapper.
+  (`SyntheticDemDatasource`, `GeoTiffRasterDatasource`), the shared
+  `GridGeometry` pixel/geo index math, and the raw-payload → `DemWindow`
+  mapper.
 - `repositories/` — `DemTerrainRepository`: `TerrainRepository`
   implementation backed by a `RasterDatasource`.
 

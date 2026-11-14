@@ -5,19 +5,24 @@ edge case, and expected failure per feature, plus API contract tests).
 
 ## Contents
 
-- `conftest.py` — shared fixtures (default `Settings`; later: `TestClient`
-  wired with `SyntheticDemDatasource`, a deterministic DEM, and a
-  session-scoped generated test GeoTIFF).
-- `unit/` — domain, application, and repository unit tests
-  (`test_slope_calculator`, `test_terrain_classifier`,
-  `test_distance_calculator`, `test_path_sampler`,
-  `test_dem_terrain_repository`, `test_analyze_point`,
-  `test_analyze_profile`, `test_analyze_area`).
-- `api/` — endpoint contract tests (`test_health_endpoint`,
-  `test_point_endpoint`, `test_profile_endpoint`, `test_area_endpoint`)
-  verifying SPEC_MS4 schemas and 400/404/422/502 codes.
+- `conftest.py` — shared fixtures: `settings`, `small_dem` (deterministic
+  21×21 plane DEM with one nodata cell at (5,5), extent lon 77.4–77.6 /
+  lat 18.4–18.6), `dem_window_mapper`, `synthetic_datasource`,
+  `geotiff_datasource` (session-scoped GeoTIFF written via
+  `fixtures/make_test_dem.py` from the same array/extent), and the
+  parametrized `datasource` fixture (`synthetic`/`geotiff`) powering the
+  repository swap-proof tests.
+- `unit/` — domain, application, infrastructure, and repository unit tests
+  (domain calculators, `test_dem_window_mapper`, `test_grid_geometry`,
+  `test_synthetic_dem_datasource`, `test_geotiff_datasource`,
+  `test_dem_terrain_repository`,
+  `test_dependencies`, plus feature use-case tests in later WPs).
+- `api/` — endpoint contract tests verifying SPEC_MS4 schemas and
+  400/404/422/502 codes.
 - `fixtures/` — `make_test_dem.py`: deterministic test GeoTIFF generator
-  (generated at test time via rasterio; binaries are git-ignored).
+  (generated at test time via rasterio; binaries are never committed).
+- `fakes/` — reusable port test doubles (`FailingRasterDatasource` for the
+  502/`is_available` failure paths).
 
 ## Layer rules
 
