@@ -1,5 +1,7 @@
 # MS4 Terrain Analysis Service — Implementation Plan
 
+> **v2 notice (2026-11-14):** all WPs below are `done`. The delivered `data_usar/` package changed the terrain data source (slope pre-computed, no DEM). Follow [`REALIGNMENT_PLANMS4_1.md`](REALIGNMENT_PLANMS4_1.md) and spec **v0.2.0** for the current direction.
+
 **Version:** 1.0.0 | **Status:** Approved for execution | **Date:** 2026-11-14
 **Audience:** Manager (orchestrator) agent coordinating implementation subagents.
 **Contract of record:** [`docs/SPEC_MS4_TERRAIN_ANALYSIS.md`](../SPEC_MS4_TERRAIN_ANALYSIS.md) v0.1.0

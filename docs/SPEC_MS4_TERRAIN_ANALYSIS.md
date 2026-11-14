@@ -1,5 +1,7 @@
 # Spec: Terrain Analysis Service (MS4)
-**Version:** 0.1.0 | **Status:** Draft | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
+**Version:** 0.2.0 | **Status:** Draft — realigned with `data_usar/` package | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
+
+> **v0.2 changes:** the delivered data package provides slope **pre-computed** (`pendiente_grados`, band 1 of `rejilla_ruta_90m.tif`) and no elevation band. MS4 keeps its API contract but gains a second mode: read slope directly from the delivered grid when no DEM is available. Mars radius fixed to 3396.19 km (IAU_2015:49900). See `docs/terrain_analysis/REALIGNMENT_PLANMS4_1.md`.
 
 ## 1. Service Identity
 
@@ -8,14 +10,19 @@
 | Name | Terrain Analysis Service |
 | ID | MS4 |
 | Stack | Python + FastAPI, Rasterio/GDAL |
-| Depends on | Raster Service (MS3) for access to geospatial files |
+| Depends on | Raster Service (MS3) for access to geospatial files (MVP: local datasource, swappable) |
 | Consumed by | Core, Routing Engine (MS6), Risk Assessment Service (MS5) |
 
 ## 2. Purpose
 
-Analyzes the physical characteristics of the terrain along a point, path, or area on a planetary body (MVP: single body, e.g. Mars). It converts raw elevation data into navigation-relevant derived products: slope, elevation profile, and terrain classification (flat, moderate, steep, crater rim, rocky).
+Analyzes the physical characteristics of the terrain along a point, path, or area on a planetary body (MVP: Mars, Gale crater AOI). It converts terrain data into navigation-relevant products: slope, elevation profile (when a DEM is available), and terrain classification (flat, moderate, steep, hazardous).
 
-All heavy raster access goes through the Raster Service; this service only computes derived values and may optionally persist derived layers (e.g., a slope GeoTIFF) back into shared storage.
+Two data modes, selected by configuration:
+
+- **DEM mode** (original): slope computed from elevation via Horn's method.
+- **Grid mode** (delivered package): slope read from band `pendiente_grados` of `rejilla_ruta_90m.tif`; `elevation_m` is reported as `null` until the source DEM is delivered.
+
+All heavy raster access goes through a swappable `RasterDatasource`; this service only computes derived values and may optionally persist derived layers back into shared storage.
 
 ## 3. Inputs (API Contract)
 
@@ -55,9 +62,9 @@ Base URL: `/terrain`
 
 ### Data dependencies (what the service needs)
 
-- Elevation DEM (GeoTIFF) exposed via Raster Service query endpoints.
-- Dataset metadata (CRS, resolution, nodata value) from Raster Service catalog.
-- Configuration: slope thresholds (see §5), sampling limits (max path length, max samples).
+- **Grid mode (delivered):** `rejilla_ruta_90m.tif` band `pendiente_grados` (and optionally other bands for future enrichment), CRS `IAU_2015:49900`, bounds `[137.345, -4.740, 137.455, -4.580]`.
+- **DEM mode (pending):** elevation DEM (GeoTIFF) exposed via Raster Service / datasource — requested from the data team; spec assumes it will arrive with the same CRS/extent family.
+- Configuration: slope thresholds (see §5), sampling limits, `planet_radius_km = 3396.19` (mandatory IAU_2015:49900).
 
 ## 4. Outputs (API Contract)
 
@@ -65,13 +72,15 @@ Base URL: `/terrain`
 
 ```json
 {
-  "lat": 18.4,
-  "lon": 77.5,
+  "lat": -4.6,
+  "lon": 137.44,
   "elevation_m": -2540.3,
   "slope_deg": 12.7,
   "terrain_class": "moderate"
 }
 ```
+
+> `elevation_m` is `null` when the active datasource is the delivered grid (no elevation band). `slope_deg` and `terrain_class` are always populated.
 
 ### 4.2 Profile response `200`
 
@@ -108,9 +117,10 @@ Base URL: `/terrain`
 
 ## 5. Business Rules
 
-- Slope is computed from DEM using Horn's method (or GDAL `gdaldem slope` equivalent), in degrees.
+- Slope is computed from DEM using Horn's method (or GDAL `gdaldem slope` equivalent), in degrees — **or** read directly from the `pendiente_grados` band when operating on the delivered grid. The service must not recompute slope differently than the delivered band when that band is the source of truth.
 - `terrain_class` mapping (configurable): `flat` < 5°, `moderate` 5–15°, `steep` 15–30°, `hazardous` ≥ 30°.
-- All output coordinates echo the input CRS (planetocentric lat/lon for MVP).
+- All output coordinates echo the input CRS (planetocentric lat/lon, `IAU_2015:49900`).
+- Distances use Mars radius **3396.19 km** (59 274.69 m/degree) — never WGS84 constants.
 
 ## 6. Non-Functional Requirements
 
@@ -120,11 +130,12 @@ Base URL: `/terrain`
 
 ## 7. Acceptance Criteria (2-day scope)
 
-1. `/health`, `/terrain/point`, `/terrain/profile` implemented and tested (`/terrain/area` is stretch).
-2. Derived slope computed correctly against a known test DEM fixture.
-3. Service runs via Docker Compose and queries Raster Service for DEM data.
-4. Contract tests validate request/response schemas above.
+1. `/health`, `/terrain/point`, `/terrain/profile`, `/terrain/area` implemented and tested.
+2. Derived slope computed correctly against a known test DEM fixture (DEM mode) **and** slope read correctly from `rejilla_ruta_90m.tif` band 1 (grid mode).
+3. Service runs offline against the delivered data package (datasource selected via `MS4_DATASOURCE_KIND`; `rejilla` | `synthetic` | `geotiff`; `http` reserved for MS3).
+4. Contract tests validate request/response schemas above, including `elevation_m: null` in grid mode.
 
-## 8. Out of Scope (v0.1)
+## 8. Out of Scope (v0.2)
 
 - Rock/crater detection from imagery; real-time derived-layer persistence; multi-body support.
+- Recomputing slope/roughness science already produced by the data team (bands 2–6 belong to MS5/MS6 consumers).
