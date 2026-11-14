@@ -1,0 +1,570 @@
+{
+  "request_ejemplo": {
+    "lon": 137.4416,
+    "lat": -4.5895,
+    "material": "hematita",
+    "sol": 1360,
+    "hora": 9.0,
+    "vmax": 1000
+  },
+  "geojson": {
+    "type": "FeatureCollection",
+    "crs": {
+      "type": "name",
+      "properties": {
+        "name": "IAU_2015:49900"
+      }
+    },
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              137.44141550676412,
+              -4.589869303841997
+            ],
+            [
+              137.4398971523269,
+              -4.591387658279228
+            ]
+          ]
+        },
+        "properties": {
+          "capa": "ruta_optima",
+          "tipo_suelo": "regolito_compacto",
+          "modelo_usado": "regolito_compacto:gls_AR1",
+          "inclinacion_grados": 4.533427750056427
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              137.4398971523269,
+              -4.591387658279228
+            ],
+            [
+              137.43837879788967,
+              -4.592906012716458
+            ]
+          ]
+        },
+        "properties": {
+          "capa": "ruta_optima",
+          "tipo_suelo": "lecho_rocoso_firme",
+          "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+          "inclinacion_grados": 3.328937253890189
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              137.44141550676412,
+              -4.589869303841997
+            ],
+            [
+              137.4398971523269,
+              -4.591387658279228
+            ],
+            [
+              137.43837879788967,
+              -4.592906012716458
+            ],
+            [
+              137.43686044345245,
+              -4.594424367153689
+            ],
+            [
+              137.4353420890152,
+              -4.5959427215909185
+            ],
+            [
+              137.4353420890152,
+              -4.597461076028149
+            ],
+            [
+              137.43382373457797,
+              -4.59897943046538
+            ],
+            [
+              137.43230538014075,
+              -4.60049778490261
+            ],
+            [
+              137.43078702570352,
+              -4.60201613933984
+            ],
+            [
+              137.42926867126627,
+              -4.603534493777071
+            ],
+            [
+              137.42775031682905,
+              -4.605052848214301
+            ],
+            [
+              137.42623196239182,
+              -4.606571202651532
+            ],
+            [
+              137.4247136079546,
+              -4.608089557088762
+            ],
+            [
+              137.4247136079546,
+              -4.609607911525992
+            ],
+            [
+              137.42319525351735,
+              -4.611126265963223
+            ],
+            [
+              137.42167689908013,
+              -4.612644620400453
+            ],
+            [
+              137.4201585446429,
+              -4.614162974837684
+            ],
+            [
+              137.41864019020568,
+              -4.6156813292749135
+            ],
+            [
+              137.41712183576846,
+              -4.617199683712144
+            ],
+            [
+              137.4156034813312,
+              -4.618718038149375
+            ],
+            [
+              137.41408512689398,
+              -4.620236392586605
+            ],
+            [
+              137.41256677245676,
+              -4.621754747023835
+            ],
+            [
+              137.41104841801953,
+              -4.6232731014610655
+            ],
+            [
+              137.40953006358228,
+              -4.624791455898296
+            ],
+            [
+              137.40801170914506,
+              -4.626309810335527
+            ],
+            [
+              137.40649335470783,
+              -4.627828164772756
+            ],
+            [
+              137.4049750002706,
+              -4.629346519209987
+            ],
+            [
+              137.40345664583336,
+              -4.6308648736472176
+            ],
+            [
+              137.40193829139614,
+              -4.632383228084448
+            ],
+            [
+              137.4004199369589,
+              -4.633901582521678
+            ],
+            [
+              137.3989015825217,
+              -4.635419936958908
+            ],
+            [
+              137.39738322808444,
+              -4.636938291396139
+            ],
+            [
+              137.3958648736472,
+              -4.63845664583337
+            ],
+            [
+              137.39434651921,
+              -4.639975000270599
+            ],
+            [
+              137.39282816477277,
+              -4.64149335470783
+            ],
+            [
+              137.3913098103355,
+              -4.6430117091450605
+            ],
+            [
+              137.3897914558983,
+              -4.644530063582291
+            ],
+            [
+              137.38827310146107,
+              -4.646048418019521
+            ],
+            [
+              137.38675474702384,
+              -4.647566772456751
+            ],
+            [
+              137.3852363925866,
+              -4.649085126893982
+            ],
+            [
+              137.38371803814937,
+              -4.6506034813312125
+            ],
+            [
+              137.38219968371214,
+              -4.652121835768442
+            ],
+            [
+              137.38068132927492,
+              -4.653640190205673
+            ],
+            [
+              137.37916297483767,
+              -4.655158544642903
+            ],
+            [
+              137.37916297483767,
+              -4.656676899080134
+            ],
+            [
+              137.37764462040045,
+              -4.6581952535173645
+            ],
+            [
+              137.37612626596322,
+              -4.659713607954594
+            ],
+            [
+              137.374607911526,
+              -4.661231962391825
+            ],
+            [
+              137.37308955708875,
+              -4.662750316829055
+            ],
+            [
+              137.37157120265152,
+              -4.664268671266286
+            ],
+            [
+              137.37157120265152,
+              -4.665787025703516
+            ],
+            [
+              137.3700528482143,
+              -4.667305380140746
+            ],
+            [
+              137.36853449377708,
+              -4.668823734577977
+            ],
+            [
+              137.36701613933985,
+              -4.670342089015207
+            ],
+            [
+              137.3654977849026,
+              -4.671860443452437
+            ],
+            [
+              137.36397943046538,
+              -4.673378797889668
+            ],
+            [
+              137.36246107602815,
+              -4.674897152326898
+            ],
+            [
+              137.36094272159093,
+              -4.676415506764129
+            ],
+            [
+              137.35942436715368,
+              -4.677933861201359
+            ],
+            [
+              137.35790601271646,
+              -4.679452215638589
+            ]
+          ]
+        },
+        "properties": {
+          "capa": "contrafactual",
+          "nombre": "ruta_modelo_global"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            137.3577,
+            -4.6787
+          ]
+        },
+        "properties": {
+          "capa": "objetivo",
+          "nombre": "Oudam",
+          "material": "hematita"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            137.4416,
+            -4.5895
+          ]
+        },
+        "properties": {
+          "capa": "origen",
+          "nombre": "Bradbury Landing"
+        }
+      }
+    ]
+  },
+  "resumen": {
+    "distancia_km": 7.73,
+    "hora_llegada": "S+1 08:15",
+    "dosis_rad_acum_uGy": 247.8,
+    "horas_espera_nocturna": 13.84,
+    "costo_objetivo": 42.369,
+    "nodos_expandidos": 30699,
+    "objetivo": "Oudam",
+    "material": "hematita",
+    "comparativa_bagnold": {
+      "celdas_duna_ruta_optima": 0,
+      "celdas_duna_contrafactual": 0,
+      "horas_ahorradas_en_arena": 0.0,
+      "distancia_minima_a_duna_m": 201
+    }
+  },
+  "tramos": [
+    {
+      "tramo": 1,
+      "hora_lmst_inicio": "S+0 09:00",
+      "hora_lmst_fin": "S+0 09:09",
+      "tipo_suelo": "regolito_compacto",
+      "modelo_usado": "regolito_compacto:gls_AR1",
+      "r2_ajustado": 0.162,
+      "distancia_m": 127,
+      "inclinacion_media_grados": 4.5,
+      "inclinacion_max_grados": 4.5,
+      "dosis_tramo_uGy": 1.6,
+      "dosis_acumulada_uGy": 1.6,
+      "temp_suelo_K": "240-253"
+    },
+    {
+      "tramo": 2,
+      "hora_lmst_inicio": "S+0 09:09",
+      "hora_lmst_fin": "S+0 09:53",
+      "tipo_suelo": "lecho_rocoso_firme",
+      "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+      "r2_ajustado": 0.267,
+      "distancia_m": 652,
+      "inclinacion_media_grados": 3.4,
+      "inclinacion_max_grados": 3.8,
+      "dosis_tramo_uGy": 7.8,
+      "dosis_acumulada_uGy": 9.4,
+      "temp_suelo_K": "240-253"
+    },
+    {
+      "tramo": 3,
+      "hora_lmst_inicio": "S+0 09:53",
+      "hora_lmst_fin": "S+0 10:37",
+      "tipo_suelo": "lecho_rocoso_firme",
+      "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+      "r2_ajustado": 0.267,
+      "distancia_m": 636,
+      "inclinacion_media_grados": 3.7,
+      "inclinacion_max_grados": 4.6,
+      "dosis_tramo_uGy": 7.7,
+      "dosis_acumulada_uGy": 17.1,
+      "temp_suelo_K": "240-262"
+    },
+    {
+      "tramo": 4,
+      "hora_lmst_inicio": "S+0 10:37",
+      "hora_lmst_fin": "S+0 11:27",
+      "tipo_suelo": "lecho_rocoso_firme",
+      "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+      "r2_ajustado": 0.267,
+      "distancia_m": 726,
+      "inclinacion_media_grados": 3.9,
+      "inclinacion_max_grados": 4.9,
+      "dosis_tramo_uGy": 8.9,
+      "dosis_acumulada_uGy": 26.0,
+      "temp_suelo_K": "250-273"
+    },
+    {
+      "tramo": 5,
+      "hora_lmst_inicio": "S+0 11:27",
+      "hora_lmst_fin": "S+0 12:16",
+      "tipo_suelo": "lecho_rocoso_firme",
+      "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+      "r2_ajustado": 0.267,
+      "distancia_m": 689,
+      "inclinacion_media_grados": 5.0,
+      "inclinacion_max_grados": 5.9,
+      "dosis_tramo_uGy": 8.8,
+      "dosis_acumulada_uGy": 34.8,
+      "temp_suelo_K": "259-273"
+    },
+    {
+      "tramo": 6,
+      "hora_lmst_inicio": "S+0 12:16",
+      "hora_lmst_fin": "S+0 13:10",
+      "tipo_suelo": "regolito_compacto",
+      "modelo_usado": "regolito_compacto:gls_AR1",
+      "r2_ajustado": 0.162,
+      "distancia_m": 726,
+      "inclinacion_media_grados": 5.8,
+      "inclinacion_max_grados": 7.7,
+      "dosis_tramo_uGy": 9.5,
+      "dosis_acumulada_uGy": 44.3,
+      "temp_suelo_K": "262-275"
+    },
+    {
+      "tramo": 7,
+      "hora_lmst_inicio": "S+0 13:10",
+      "hora_lmst_fin": "S+0 13:56",
+      "tipo_suelo": "regolito_compacto",
+      "modelo_usado": "regolito_compacto:gls_AR1",
+      "r2_ajustado": 0.162,
+      "distancia_m": 615,
+      "inclinacion_media_grados": 5.9,
+      "inclinacion_max_grados": 6.7,
+      "dosis_tramo_uGy": 8.1,
+      "dosis_acumulada_uGy": 52.4,
+      "temp_suelo_K": "262-275"
+    },
+    {
+      "tramo": 8,
+      "hora_lmst_inicio": "S+0 13:56",
+      "hora_lmst_fin": "S+0 14:49",
+      "tipo_suelo": "regolito_compacto",
+      "modelo_usado": "regolito_compacto:gls_AR1",
+      "r2_ajustado": 0.162,
+      "distancia_m": 689,
+      "inclinacion_media_grados": 6.4,
+      "inclinacion_max_grados": 7.0,
+      "dosis_tramo_uGy": 8.5,
+      "dosis_acumulada_uGy": 60.9,
+      "temp_suelo_K": "262-275"
+    },
+    {
+      "tramo": 9,
+      "hora_lmst_inicio": "S+0 14:49",
+      "hora_lmst_fin": "S+0 15:40",
+      "tipo_suelo": "regolito_compacto",
+      "modelo_usado": "regolito_compacto:gls_AR1",
+      "r2_ajustado": 0.162,
+      "distancia_m": 689,
+      "inclinacion_media_grados": 5.5,
+      "inclinacion_max_grados": 6.5,
+      "dosis_tramo_uGy": 8.8,
+      "dosis_acumulada_uGy": 69.6,
+      "temp_suelo_K": "259-272"
+    },
+    {
+      "tramo": 10,
+      "hora_lmst_inicio": "S+0 15:40",
+      "hora_lmst_fin": "S+0 15:58",
+      "tipo_suelo": "regolito_compacto",
+      "modelo_usado": "regolito_compacto:gls_AR1",
+      "r2_ajustado": 0.162,
+      "distancia_m": 255,
+      "inclinacion_media_grados": 5.5,
+      "inclinacion_max_grados": 5.6,
+      "dosis_tramo_uGy": 3.3,
+      "dosis_acumulada_uGy": 72.9,
+      "temp_suelo_K": "259-269"
+    },
+    {
+      "tramo": 11,
+      "hora_lmst_inicio": "S+0 15:58",
+      "hora_lmst_fin": "S+0 16:50",
+      "tipo_suelo": "rocoso_fracturado",
+      "modelo_usado": "rocoso_fracturado:gls_AR1",
+      "r2_ajustado": 0.213,
+      "distancia_m": 689,
+      "inclinacion_media_grados": 6.1,
+      "inclinacion_max_grados": 7.1,
+      "dosis_tramo_uGy": 9.1,
+      "dosis_acumulada_uGy": 82.1,
+      "temp_suelo_K": "245-269"
+    },
+    {
+      "tramo": 12,
+      "hora_lmst_inicio": "S+0 16:50",
+      "hora_lmst_fin": "S+1 07:36",
+      "tipo_suelo": "rocoso_fracturado",
+      "modelo_usado": "rocoso_fracturado:gls_AR1",
+      "r2_ajustado": 0.213,
+      "distancia_m": 726,
+      "inclinacion_media_grados": 6.3,
+      "inclinacion_max_grados": 6.7,
+      "dosis_tramo_uGy": 158.8,
+      "dosis_acumulada_uGy": 240.9,
+      "temp_suelo_K": "170-259"
+    },
+    {
+      "tramo": 13,
+      "hora_lmst_inicio": "S+1 07:36",
+      "hora_lmst_fin": "S+1 08:15",
+      "tipo_suelo": "rocoso_fracturado",
+      "modelo_usado": "rocoso_fracturado:gls_AR1",
+      "r2_ajustado": 0.213,
+      "distancia_m": 509,
+      "inclinacion_media_grados": 6.3,
+      "inclinacion_max_grados": 6.7,
+      "dosis_tramo_uGy": 6.9,
+      "dosis_acumulada_uGy": 247.8,
+      "temp_suelo_K": "202-252"
+    }
+  ],
+  "control_calidad": {
+    "celdas_totales": 7560,
+    "celdas_validas": 7560,
+    "pct_celdas_validas": 100.0,
+    "pct_validas": 100.0,
+    "umbral_pct_celdas_validas": 90.0,
+    "umbral_pct_validas": 90.0,
+    "cobertura_ok": true,
+    "margen_seguridad": "inclinacion + 1.96*sigma <= 20.0",
+    "celdas_bloqueadas_por_margen": 117,
+    "conteo_tipos_suelo": {
+      "arena_dunas": 1433,
+      "lecho_rocoso_firme": 1955,
+      "regolito_compacto": 1695,
+      "rocoso_fracturado": 2477
+    },
+    "suelos": {
+      "arena_dunas": 1433,
+      "lecho_rocoso_firme": 1955,
+      "regolito_compacto": 1695,
+      "rocoso_fracturado": 2477
+    }
+  },
+  "nota": "geojson.features incluye muestra de segmentos (2), linea contrafactual, punto objetivo y punto origen. La respuesta completa trae todos los segmentos."
+}
