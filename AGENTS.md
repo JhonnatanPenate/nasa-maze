@@ -23,6 +23,12 @@ Cada integrante es dueño de un servicio.
 - Si existe `GLOSSARY.md`, usa sus términos en código y docs.
 - Trabaja en rama y abre PR; nada directo a `main`.
 
+## Orquestación
+
+Trabajo pedido por WhatsApp llega como issue con etiqueta `bobby`. Responde solo con
+comentarios que empiecen con `[necesito-info]`, `[PR-listo]`, `[bloqueado]` o `[listo]`
+(Bobby los reenvía al chat); detalles y delegados en `docs/ai/agentes.md`.
+
 ## Más contexto (leer solo si hace falta)
 
 - Skills del repo y por qué están: `docs/ai/README.md`
