@@ -1,0 +1,30 @@
+﻿# Datos (nunca al repo)
+data/
+*.tif
+*.tiff
+*.img
+*.pmtiles
+*.mbtiles
+
+# Secrets
+.env
+.env.*
+*-key.json
+credentials*.json
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# Node / front
+node_modules/
+dist/
+build/
+.firebase/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
