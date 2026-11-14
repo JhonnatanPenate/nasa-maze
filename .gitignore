@@ -1,10 +1,12 @@
-﻿# Datos (nunca al repo)
-data/
+# Datos (nunca al repo), salvo el paquete Gale de Javi (ver DATA_SOURCES.md)
+data/*
+!data/gale/
 *.tif
 *.tiff
 *.img
 *.pmtiles
 *.mbtiles
+!data/gale/**/*.tif
 
 # Secrets
 .env
