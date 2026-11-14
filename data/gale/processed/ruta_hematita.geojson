@@ -1,0 +1,2001 @@
+{
+ "type": "FeatureCollection",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "IAU_2015:49900"
+  }
+ },
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.44141550676412,
+      -4.589869303841997
+     ],
+     [
+      137.4398971523269,
+      -4.591387658279228
+     ],
+     [
+      137.43837879788967,
+      -4.592906012716458
+     ],
+     [
+      137.43837879788967,
+      -4.594424367153689
+     ],
+     [
+      137.43837879788967,
+      -4.5959427215909185
+     ],
+     [
+      137.43686044345245,
+      -4.597461076028149
+     ],
+     [
+      137.43686044345245,
+      -4.59897943046538
+     ],
+     [
+      137.4353420890152,
+      -4.60049778490261
+     ],
+     [
+      137.43382373457797,
+      -4.60201613933984
+     ],
+     [
+      137.43230538014075,
+      -4.603534493777071
+     ],
+     [
+      137.43078702570352,
+      -4.605052848214301
+     ],
+     [
+      137.42926867126627,
+      -4.606571202651532
+     ],
+     [
+      137.42775031682905,
+      -4.608089557088762
+     ],
+     [
+      137.42623196239182,
+      -4.609607911525992
+     ],
+     [
+      137.4247136079546,
+      -4.611126265963223
+     ],
+     [
+      137.42319525351735,
+      -4.612644620400453
+     ],
+     [
+      137.42319525351735,
+      -4.614162974837684
+     ],
+     [
+      137.42167689908013,
+      -4.6156813292749135
+     ],
+     [
+      137.4201585446429,
+      -4.617199683712144
+     ],
+     [
+      137.41864019020568,
+      -4.617199683712144
+     ],
+     [
+      137.41712183576846,
+      -4.618718038149375
+     ],
+     [
+      137.4156034813312,
+      -4.620236392586605
+     ],
+     [
+      137.41408512689398,
+      -4.620236392586605
+     ],
+     [
+      137.41256677245676,
+      -4.621754747023835
+     ],
+     [
+      137.41104841801953,
+      -4.6232731014610655
+     ],
+     [
+      137.40953006358228,
+      -4.624791455898296
+     ],
+     [
+      137.40801170914506,
+      -4.626309810335527
+     ],
+     [
+      137.40649335470783,
+      -4.627828164772756
+     ],
+     [
+      137.4049750002706,
+      -4.629346519209987
+     ],
+     [
+      137.4049750002706,
+      -4.6308648736472176
+     ],
+     [
+      137.40345664583336,
+      -4.632383228084448
+     ],
+     [
+      137.40345664583336,
+      -4.633901582521678
+     ],
+     [
+      137.40193829139614,
+      -4.635419936958908
+     ],
+     [
+      137.40193829139614,
+      -4.636938291396139
+     ],
+     [
+      137.40193829139614,
+      -4.63845664583337
+     ],
+     [
+      137.4004199369589,
+      -4.639975000270599
+     ],
+     [
+      137.4004199369589,
+      -4.64149335470783
+     ],
+     [
+      137.4004199369589,
+      -4.6430117091450605
+     ],
+     [
+      137.3989015825217,
+      -4.644530063582291
+     ],
+     [
+      137.3989015825217,
+      -4.646048418019521
+     ],
+     [
+      137.39738322808444,
+      -4.647566772456751
+     ],
+     [
+      137.3958648736472,
+      -4.649085126893982
+     ],
+     [
+      137.39434651921,
+      -4.6506034813312125
+     ],
+     [
+      137.39282816477277,
+      -4.6506034813312125
+     ],
+     [
+      137.3913098103355,
+      -4.6506034813312125
+     ],
+     [
+      137.3897914558983,
+      -4.652121835768442
+     ],
+     [
+      137.38827310146107,
+      -4.653640190205673
+     ],
+     [
+      137.38675474702384,
+      -4.655158544642903
+     ],
+     [
+      137.3852363925866,
+      -4.656676899080134
+     ],
+     [
+      137.38371803814937,
+      -4.6581952535173645
+     ],
+     [
+      137.38219968371214,
+      -4.659713607954594
+     ],
+     [
+      137.38068132927492,
+      -4.661231962391825
+     ],
+     [
+      137.37916297483767,
+      -4.662750316829055
+     ],
+     [
+      137.37764462040045,
+      -4.664268671266286
+     ],
+     [
+      137.37612626596322,
+      -4.664268671266286
+     ],
+     [
+      137.374607911526,
+      -4.665787025703516
+     ],
+     [
+      137.37308955708875,
+      -4.665787025703516
+     ],
+     [
+      137.37157120265152,
+      -4.667305380140746
+     ],
+     [
+      137.3700528482143,
+      -4.668823734577977
+     ],
+     [
+      137.36853449377708,
+      -4.670342089015207
+     ],
+     [
+      137.36701613933985,
+      -4.671860443452437
+     ],
+     [
+      137.3654977849026,
+      -4.671860443452437
+     ],
+     [
+      137.36397943046538,
+      -4.673378797889668
+     ],
+     [
+      137.36246107602815,
+      -4.674897152326898
+     ],
+     [
+      137.36094272159093,
+      -4.676415506764129
+     ],
+     [
+      137.35942436715368,
+      -4.677933861201359
+     ],
+     [
+      137.35790601271646,
+      -4.679452215638589
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "objetivo_mineral": "Oudam",
+    "sol_referencia": 1360,
+    "hora_salida": 9.0,
+    "llegada_lmst": "S+1 08:15",
+    "dosis_uGy": 247.8,
+    "distancia_km": 7.73,
+    "capa": "ruta_optima_completa"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.44141550676412,
+      -4.589869303841997
+     ],
+     [
+      137.4398971523269,
+      -4.591387658279228
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4398971523269,
+      -4.591387658279228
+     ],
+     [
+      137.43837879788967,
+      -4.592906012716458
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43837879788967,
+      -4.592906012716458
+     ],
+     [
+      137.43837879788967,
+      -4.594424367153689
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43837879788967,
+      -4.594424367153689
+     ],
+     [
+      137.43837879788967,
+      -4.5959427215909185
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43837879788967,
+      -4.5959427215909185
+     ],
+     [
+      137.43686044345245,
+      -4.597461076028149
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43686044345245,
+      -4.597461076028149
+     ],
+     [
+      137.43686044345245,
+      -4.59897943046538
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43686044345245,
+      -4.59897943046538
+     ],
+     [
+      137.4353420890152,
+      -4.60049778490261
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4353420890152,
+      -4.60049778490261
+     ],
+     [
+      137.43382373457797,
+      -4.60201613933984
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43382373457797,
+      -4.60201613933984
+     ],
+     [
+      137.43230538014075,
+      -4.603534493777071
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43230538014075,
+      -4.603534493777071
+     ],
+     [
+      137.43078702570352,
+      -4.605052848214301
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.43078702570352,
+      -4.605052848214301
+     ],
+     [
+      137.42926867126627,
+      -4.606571202651532
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.42926867126627,
+      -4.606571202651532
+     ],
+     [
+      137.42775031682905,
+      -4.608089557088762
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.42775031682905,
+      -4.608089557088762
+     ],
+     [
+      137.42623196239182,
+      -4.609607911525992
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.42623196239182,
+      -4.609607911525992
+     ],
+     [
+      137.4247136079546,
+      -4.611126265963223
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4247136079546,
+      -4.611126265963223
+     ],
+     [
+      137.42319525351735,
+      -4.612644620400453
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.42319525351735,
+      -4.612644620400453
+     ],
+     [
+      137.42319525351735,
+      -4.614162974837684
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.42319525351735,
+      -4.614162974837684
+     ],
+     [
+      137.42167689908013,
+      -4.6156813292749135
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.42167689908013,
+      -4.6156813292749135
+     ],
+     [
+      137.4201585446429,
+      -4.617199683712144
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4201585446429,
+      -4.617199683712144
+     ],
+     [
+      137.41864019020568,
+      -4.617199683712144
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.41864019020568,
+      -4.617199683712144
+     ],
+     [
+      137.41712183576846,
+      -4.618718038149375
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.41712183576846,
+      -4.618718038149375
+     ],
+     [
+      137.4156034813312,
+      -4.620236392586605
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4156034813312,
+      -4.620236392586605
+     ],
+     [
+      137.41408512689398,
+      -4.620236392586605
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.41408512689398,
+      -4.620236392586605
+     ],
+     [
+      137.41256677245676,
+      -4.621754747023835
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.41256677245676,
+      -4.621754747023835
+     ],
+     [
+      137.41104841801953,
+      -4.6232731014610655
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "lecho_rocoso_firme",
+    "modelo_usado": "lecho_rocoso_firme:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.41104841801953,
+      -4.6232731014610655
+     ],
+     [
+      137.40953006358228,
+      -4.624791455898296
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40953006358228,
+      -4.624791455898296
+     ],
+     [
+      137.40801170914506,
+      -4.626309810335527
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40801170914506,
+      -4.626309810335527
+     ],
+     [
+      137.40649335470783,
+      -4.627828164772756
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40649335470783,
+      -4.627828164772756
+     ],
+     [
+      137.4049750002706,
+      -4.629346519209987
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4049750002706,
+      -4.629346519209987
+     ],
+     [
+      137.4049750002706,
+      -4.6308648736472176
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4049750002706,
+      -4.6308648736472176
+     ],
+     [
+      137.40345664583336,
+      -4.632383228084448
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40345664583336,
+      -4.632383228084448
+     ],
+     [
+      137.40345664583336,
+      -4.633901582521678
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40345664583336,
+      -4.633901582521678
+     ],
+     [
+      137.40193829139614,
+      -4.635419936958908
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40193829139614,
+      -4.635419936958908
+     ],
+     [
+      137.40193829139614,
+      -4.636938291396139
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40193829139614,
+      -4.636938291396139
+     ],
+     [
+      137.40193829139614,
+      -4.63845664583337
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.40193829139614,
+      -4.63845664583337
+     ],
+     [
+      137.4004199369589,
+      -4.639975000270599
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4004199369589,
+      -4.639975000270599
+     ],
+     [
+      137.4004199369589,
+      -4.64149335470783
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4004199369589,
+      -4.64149335470783
+     ],
+     [
+      137.4004199369589,
+      -4.6430117091450605
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.4004199369589,
+      -4.6430117091450605
+     ],
+     [
+      137.3989015825217,
+      -4.644530063582291
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3989015825217,
+      -4.644530063582291
+     ],
+     [
+      137.3989015825217,
+      -4.646048418019521
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3989015825217,
+      -4.646048418019521
+     ],
+     [
+      137.39738322808444,
+      -4.647566772456751
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.39738322808444,
+      -4.647566772456751
+     ],
+     [
+      137.3958648736472,
+      -4.649085126893982
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3958648736472,
+      -4.649085126893982
+     ],
+     [
+      137.39434651921,
+      -4.6506034813312125
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.39434651921,
+      -4.6506034813312125
+     ],
+     [
+      137.39282816477277,
+      -4.6506034813312125
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.39282816477277,
+      -4.6506034813312125
+     ],
+     [
+      137.3913098103355,
+      -4.6506034813312125
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3913098103355,
+      -4.6506034813312125
+     ],
+     [
+      137.3897914558983,
+      -4.652121835768442
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3897914558983,
+      -4.652121835768442
+     ],
+     [
+      137.38827310146107,
+      -4.653640190205673
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.38827310146107,
+      -4.653640190205673
+     ],
+     [
+      137.38675474702384,
+      -4.655158544642903
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.38675474702384,
+      -4.655158544642903
+     ],
+     [
+      137.3852363925866,
+      -4.656676899080134
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3852363925866,
+      -4.656676899080134
+     ],
+     [
+      137.38371803814937,
+      -4.6581952535173645
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.38371803814937,
+      -4.6581952535173645
+     ],
+     [
+      137.38219968371214,
+      -4.659713607954594
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "regolito_compacto",
+    "modelo_usado": "regolito_compacto:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.38219968371214,
+      -4.659713607954594
+     ],
+     [
+      137.38068132927492,
+      -4.661231962391825
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.38068132927492,
+      -4.661231962391825
+     ],
+     [
+      137.37916297483767,
+      -4.662750316829055
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.37916297483767,
+      -4.662750316829055
+     ],
+     [
+      137.37764462040045,
+      -4.664268671266286
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.37764462040045,
+      -4.664268671266286
+     ],
+     [
+      137.37612626596322,
+      -4.664268671266286
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.37612626596322,
+      -4.664268671266286
+     ],
+     [
+      137.374607911526,
+      -4.665787025703516
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.374607911526,
+      -4.665787025703516
+     ],
+     [
+      137.37308955708875,
+      -4.665787025703516
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.37308955708875,
+      -4.665787025703516
+     ],
+     [
+      137.37157120265152,
+      -4.667305380140746
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.37157120265152,
+      -4.667305380140746
+     ],
+     [
+      137.3700528482143,
+      -4.668823734577977
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3700528482143,
+      -4.668823734577977
+     ],
+     [
+      137.36853449377708,
+      -4.670342089015207
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.36853449377708,
+      -4.670342089015207
+     ],
+     [
+      137.36701613933985,
+      -4.671860443452437
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.36701613933985,
+      -4.671860443452437
+     ],
+     [
+      137.3654977849026,
+      -4.671860443452437
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.3654977849026,
+      -4.671860443452437
+     ],
+     [
+      137.36397943046538,
+      -4.673378797889668
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.36397943046538,
+      -4.673378797889668
+     ],
+     [
+      137.36246107602815,
+      -4.674897152326898
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.36246107602815,
+      -4.674897152326898
+     ],
+     [
+      137.36094272159093,
+      -4.676415506764129
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.36094272159093,
+      -4.676415506764129
+     ],
+     [
+      137.35942436715368,
+      -4.677933861201359
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.35942436715368,
+      -4.677933861201359
+     ],
+     [
+      137.35790601271646,
+      -4.679452215638589
+     ]
+    ]
+   },
+   "properties": {
+    "material": "hematita",
+    "tipo_suelo": "rocoso_fracturado",
+    "modelo_usado": "rocoso_fracturado:gls_AR1",
+    "capa": "ruta_optima"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      137.44141550676412,
+      -4.589869303841997
+     ],
+     [
+      137.4398971523269,
+      -4.591387658279228
+     ],
+     [
+      137.43837879788967,
+      -4.592906012716458
+     ],
+     [
+      137.43686044345245,
+      -4.594424367153689
+     ],
+     [
+      137.4353420890152,
+      -4.5959427215909185
+     ],
+     [
+      137.4353420890152,
+      -4.597461076028149
+     ],
+     [
+      137.43382373457797,
+      -4.59897943046538
+     ],
+     [
+      137.43230538014075,
+      -4.60049778490261
+     ],
+     [
+      137.43078702570352,
+      -4.60201613933984
+     ],
+     [
+      137.42926867126627,
+      -4.603534493777071
+     ],
+     [
+      137.42775031682905,
+      -4.605052848214301
+     ],
+     [
+      137.42623196239182,
+      -4.606571202651532
+     ],
+     [
+      137.4247136079546,
+      -4.608089557088762
+     ],
+     [
+      137.4247136079546,
+      -4.609607911525992
+     ],
+     [
+      137.42319525351735,
+      -4.611126265963223
+     ],
+     [
+      137.42167689908013,
+      -4.612644620400453
+     ],
+     [
+      137.4201585446429,
+      -4.614162974837684
+     ],
+     [
+      137.41864019020568,
+      -4.6156813292749135
+     ],
+     [
+      137.41712183576846,
+      -4.617199683712144
+     ],
+     [
+      137.4156034813312,
+      -4.618718038149375
+     ],
+     [
+      137.41408512689398,
+      -4.620236392586605
+     ],
+     [
+      137.41256677245676,
+      -4.621754747023835
+     ],
+     [
+      137.41104841801953,
+      -4.6232731014610655
+     ],
+     [
+      137.40953006358228,
+      -4.624791455898296
+     ],
+     [
+      137.40801170914506,
+      -4.626309810335527
+     ],
+     [
+      137.40649335470783,
+      -4.627828164772756
+     ],
+     [
+      137.4049750002706,
+      -4.629346519209987
+     ],
+     [
+      137.40345664583336,
+      -4.6308648736472176
+     ],
+     [
+      137.40193829139614,
+      -4.632383228084448
+     ],
+     [
+      137.4004199369589,
+      -4.633901582521678
+     ],
+     [
+      137.3989015825217,
+      -4.635419936958908
+     ],
+     [
+      137.39738322808444,
+      -4.636938291396139
+     ],
+     [
+      137.3958648736472,
+      -4.63845664583337
+     ],
+     [
+      137.39434651921,
+      -4.639975000270599
+     ],
+     [
+      137.39282816477277,
+      -4.64149335470783
+     ],
+     [
+      137.3913098103355,
+      -4.6430117091450605
+     ],
+     [
+      137.3897914558983,
+      -4.644530063582291
+     ],
+     [
+      137.38827310146107,
+      -4.646048418019521
+     ],
+     [
+      137.38675474702384,
+      -4.647566772456751
+     ],
+     [
+      137.3852363925866,
+      -4.649085126893982
+     ],
+     [
+      137.38371803814937,
+      -4.6506034813312125
+     ],
+     [
+      137.38219968371214,
+      -4.652121835768442
+     ],
+     [
+      137.38068132927492,
+      -4.653640190205673
+     ],
+     [
+      137.37916297483767,
+      -4.655158544642903
+     ],
+     [
+      137.37916297483767,
+      -4.656676899080134
+     ],
+     [
+      137.37764462040045,
+      -4.6581952535173645
+     ],
+     [
+      137.37612626596322,
+      -4.659713607954594
+     ],
+     [
+      137.374607911526,
+      -4.661231962391825
+     ],
+     [
+      137.37308955708875,
+      -4.662750316829055
+     ],
+     [
+      137.37157120265152,
+      -4.664268671266286
+     ],
+     [
+      137.37157120265152,
+      -4.665787025703516
+     ],
+     [
+      137.3700528482143,
+      -4.667305380140746
+     ],
+     [
+      137.36853449377708,
+      -4.668823734577977
+     ],
+     [
+      137.36701613933985,
+      -4.670342089015207
+     ],
+     [
+      137.3654977849026,
+      -4.671860443452437
+     ],
+     [
+      137.36397943046538,
+      -4.673378797889668
+     ],
+     [
+      137.36246107602815,
+      -4.674897152326898
+     ],
+     [
+      137.36094272159093,
+      -4.676415506764129
+     ],
+     [
+      137.35942436715368,
+      -4.677933861201359
+     ],
+     [
+      137.35790601271646,
+      -4.679452215638589
+     ]
+    ]
+   },
+   "properties": {
+    "nombre": "ruta_modelo_global",
+    "capa": "contrafactual"
+   }
+  }
+ ]
+}

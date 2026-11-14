@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [development, main]
+  push:
+    branches: [development, main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      # Corre pytest en cada servicio con pyproject.toml (+ extra [dev] con pytest), p. ej. terrain-analysis/, routing-engine/
+      - name: Tests por servicio
+        run: |
+          set -e
+          for svc in */pyproject.toml; do
+            dir=$(dirname "$svc")
+            echo "::group::$dir"
+            python -m venv "/tmp/venv-$dir"
+            "/tmp/venv-$dir/bin/pip" install -q -e "$dir[dev]"
+            (cd "$dir" && "/tmp/venv-$dir/bin/pytest" -q)
+            echo "::endgroup::"
+          done
