@@ -1,20 +1,29 @@
-# AGENTS.md
+# Planetary Explorer (nasa-maze)
 
-## MS4 Terrain Analysis Service (`terrain-analysis/`)
+NASA Space Apps Challenge 2026, reto **Interplanetary Survival Guide: Martian Map**
+(https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/).
+Un "Waze para Marte": el usuario elige origen y destino y recibe una ruta segura según
+terreno (elevación, pendiente, cráteres) y riesgos ambientales, sobre un mapa interactivo
+que funciona offline con los datos ya descargados. MVP: Marte, una sola región.
 
-- Execution plan: `docs/terrain_analysis/IMPLEMENTATION_PLANMS4_1.md` (source of truth; update §8 WP status as work proceeds).
-- Contract: `docs/SPEC_MS4_TERRAIN_ANALYSIS.md`.
-- Subagent profiles: `.devin/agents/tdd-developer.md` (model `swe`) for WPs, `.devin/agents/code-reviewer.md` (model `opus`) for review.
+## Arquitectura
 
-### Decisions (confirmed by user)
-- Python: use **3.12** for the venv (rasterio wheel safety on Windows): `py -3.12 -m venv .venv`.
-- Commits: one conventional commit per WP on `feature/terrain-analysis` after green tests + clean review. Do not push.
+Monorepo de microservicios Python/FastAPI que hablan por REST, orquestados por un servicio
+Core y levantados con Docker Compose: Location, Data Management, Raster, Terrain Analysis,
+Risk Assessment, Routing Engine. Rasterio/GDAL para rásters, SQLite para el catálogo,
+GeoTIFF/GeoPackage en almacenamiento local compartido (`data/`, nunca en git).
+Cada integrante es dueño de un servicio.
 
-### Commands
-```bash
-cd terrain-analysis
-py -3.12 -m venv .venv && source .venv/Scripts/activate
-pip install -e ".[dev]"
-pytest -v
-uvicorn app.main:app --port 8004
-```
+## Reglas
+
+- Antes de trabajar dentro de un servicio, lee su `AGENTS.md`. No cambies el contrato REST
+  de otro servicio sin avisar a su dueño.
+- Hackathon: la solución más simple que funcione (skill `ponytail`).
+- Datos de Marte: skill `mars-geodata` (CRS, unidades y pendientes no son terrestres).
+- Si existe `GLOSSARY.md`, usa sus términos en código y docs.
+- Trabaja en rama y abre PR; nada directo a `main`.
+
+## Más contexto (leer solo si hace falta)
+
+- Skills del repo y por qué están: `docs/ai/README.md`
+- Declaración de uso de IA: `docs/ai/USO-DE-IA.md` (registrar con `/registrar-uso-ia`)
