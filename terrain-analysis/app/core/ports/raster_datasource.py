@@ -15,15 +15,11 @@ class RasterDatasource(ABC):
     """
 
     @abstractmethod
-    def read_window(
-        self, bbox: BoundingBox, halo_cells: int = 0
-    ) -> DemWindow:
+    def read_window(self, bbox: BoundingBox) -> DemWindow:
         """Return the cells covering bbox, clipped to the DEM extent.
 
-        With halo_cells > 0 the window additionally includes up to that
-        many real DEM rows/columns beyond the bbox on every side (clipped
-        at the DEM edge). Raises NoCoverageError if bbox does not
-        intersect the extent.
+        Raises NoCoverageError if bbox does not intersect the extent.
+        Haloed reads go through read_window_with_halo.
         """
 
     @abstractmethod

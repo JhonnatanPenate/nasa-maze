@@ -47,10 +47,8 @@ class DemTerrainRepository(TerrainRepository):
             lambda: self._datasource.read_window_around(point, radius_cells)
         )
 
-    def window_for(
-        self, bbox: BoundingBox, halo_cells: int = 0
-    ) -> DemWindow:
-        return self.window_for_with_halo(bbox, halo_cells).window
+    def window_for(self, bbox: BoundingBox) -> DemWindow:
+        return self.window_for_with_halo(bbox, 0).window
 
     def window_for_with_halo(
         self, bbox: BoundingBox, halo_cells: int

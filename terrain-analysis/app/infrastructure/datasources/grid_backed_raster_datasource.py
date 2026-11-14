@@ -39,10 +39,8 @@ class GridBackedRasterDatasource(RasterDatasource):
         """Raw elevation values for the cell range plus the nodata sentinel
         (or None). Never called with out-of-grid slices."""
 
-    def read_window(
-        self, bbox: BoundingBox, halo_cells: int = 0
-    ) -> DemWindow:
-        return self.read_window_with_halo(bbox, halo_cells).window
+    def read_window(self, bbox: BoundingBox) -> DemWindow:
+        return self.read_window_with_halo(bbox, 0).window
 
     def read_window_with_halo(
         self, bbox: BoundingBox, halo_cells: int
@@ -73,7 +71,10 @@ class GridBackedRasterDatasource(RasterDatasource):
             nodata,
             grid.res_lon_deg,
             grid.res_lat_deg,
-            grid.rows_mean_lat(halo_row_start, halo_row_stop),
+            # The core rows' mean latitude fixes cell_size_x_m so that
+            # HaloWindow.core() matches a plain read exactly, even when
+            # the halo was clipped asymmetrically at the DEM edge.
+            grid.rows_mean_lat(row_start, row_stop),
         )
         return HaloWindow(
             window=window,

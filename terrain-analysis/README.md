@@ -94,15 +94,15 @@ curl -X POST "http://localhost:8004/terrain/area" \
 
 | HTTP | Condition | Raised by |
 |---|---|---|
-| 400 | Invalid bbox/path, limits exceeded (`max_path_points`, `max_samples`, `max_window_cells`) | `DomainValidationError` |
+| 400 | Invalid coordinates, bbox or path (out-of-range lat/lon, inverted bbox, < 2 path points), limits exceeded (`max_path_points`, `max_samples`, `max_window_cells`) | `DomainValidationError` |
 | 404 | No DEM coverage at the requested location (nodata / outside extent) | `NoCoverageError` |
-| 422 | Malformed request shape/types (e.g. out-of-range `lat`/`lon` on `GET /terrain/point`) | Pydantic validation |
+| 422 | Malformed request shape/types (missing params, non-numeric values, wrong bbox length) | Pydantic validation |
 | 502 | Raster datasource failed or unbuildable | `UpstreamDatasourceError` |
 
-Errors return `{"detail": "..."}` per FastAPI convention.
-Note: out-of-range coordinates are 422 on `GET /terrain/point` (query-param
-constraints) but 400 on the POST endpoints, where `GeoPoint`/`BoundingBox`
-raise `DomainValidationError` by plan decision.
+Errors return `{"detail": "..."}` per FastAPI convention. All endpoints
+return 400 for invalid coordinates (spec §4.4): `GeoPoint`/`BoundingBox`
+raise `DomainValidationError` — query params and request schemas carry no
+range constraints.
 
 ## Configuration
 
@@ -143,4 +143,6 @@ Selected by `MS4_DATASOURCE_KIND` in `composition/dependencies.py`:
 If datasource construction itself fails (e.g. `geotiff` without
 `MS4_DEM_PATH`), the service still boots: `get_raster_datasource` falls
 back to an `UnavailableRasterDatasource` whose `ping()` is `False`
-(`/health` → `degraded`) and whose reads return 502.
+(`/health` → `degraded`) and whose reads return 502. The fallback is
+cached (`lru_cache`) for the process lifetime, so `/health` remains
+`degraded` until the service is restarted with corrected configuration.

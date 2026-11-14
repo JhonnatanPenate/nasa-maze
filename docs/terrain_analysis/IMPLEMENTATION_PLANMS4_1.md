@@ -288,7 +288,7 @@ WP0 → WP1 → WP2 → ┬─ WP3 (point)
 | **WP4 Profile feature** | F3 end-to-end | `features/profile_analysis/**` + its tests | `POST /terrain/profile` contract test green incl. limit/404 cases | done |
 | **WP5 Area feature** | F4 end-to-end | `features/area_analysis/**` + its tests | `POST /terrain/area` contract test green incl. bbox/404 cases | done |
 | **WP6 App wiring** | service assembly | `app/main.py`, `features/health/**`, `error_handlers` registration, root `README.md` | `uvicorn app.main:app` serves all 4 endpoints; `/health` works; `pytest -v` fully green | done |
-| **WP7 Review & docs** | quality gate | README completions, fixes from review | DoD checklist (§10) fully checked | pending |
+| **WP7 Review & docs** | quality gate | README completions, fixes from review | DoD checklist (§10) fully checked | done |
 
 **Execution order note for the manager:** WP0–WP2 are strictly sequential. WP3, WP4, WP5 touch disjoint directories and MAY run as parallel background subagents after WP2 merges. WP6 needs all three merged. WP7 runs last.
 
@@ -369,13 +369,13 @@ Check, in order:
 
 ## 10. Definition of Done (final gate, WP7)
 
-- [ ] `pytest -v` fully green; every feature has ≥3 tests incl. contract tests for all 4 endpoints.
-- [ ] Responses match SPEC_MS4 schemas and error codes (400/404/502 verified by tests).
-- [ ] `datasource_kind=synthetic` AND `geotiff` both pass the repository test suite (swap proof).
-- [ ] No import of `fastapi`, `rasterio`, or presentation DTOs inside `core/domain` or `application` (grep-verified).
-- [ ] Every directory in §3.4 has its `README.md`; service root README documents setup/run.
-- [ ] `uvicorn app.main:app` boots; smoke: `GET /health`, `GET /terrain/point?lat=18.4&lon=77.5`, `POST /terrain/profile`, `POST /terrain/area` return contract responses on the synthetic DEM.
-- [ ] No Docker artifacts; no secrets; English only.
+- [x] `pytest -v` fully green; every feature has ≥3 tests incl. contract tests for all 4 endpoints.
+- [x] Responses match SPEC_MS4 schemas and error codes (400/404/502 verified by tests).
+- [x] `datasource_kind=synthetic` AND `geotiff` both pass the repository test suite (swap proof).
+- [x] No import of `fastapi`, `rasterio`, or presentation DTOs inside `core/domain` or `application` (grep-verified).
+- [x] Every directory in §3.4 has its `README.md`; service root README documents setup/run.
+- [x] `uvicorn app.main:app` boots; smoke: `GET /health`, `GET /terrain/point?lat=18.4&lon=77.5`, `POST /terrain/profile`, `POST /terrain/area` return contract responses on the synthetic DEM.
+- [x] No Docker artifacts; no secrets; English only.
 
 ## 11. Verification Commands (manager runs at integration)
 
@@ -404,5 +404,15 @@ curl -X POST "http://localhost:8004/terrain/area" -H "Content-Type: application/
 | Layer violations creep in during parallel WPs | Architecture rules embedded in the dev subagent prompt + reviewer gate + §10 grep check |
 
 ---
+
+**Deviations from §3.4 recorded during execution (WP1–WP7):**
+
+- Added `app/core/application/` (`TerrainPointSampler`, `TerrainPointSample`) — shared point sampling for point + profile features.
+- Added domain files `bounding_box.py`, `path_sample.py`, `terrain_class.py`, `halo_window.py`.
+- Added `infrastructure/datasources/{grid_geometry,grid_backed_raster_datasource,unavailable_raster_datasource}.py`; `RasterDatasource` gained `read_window_with_halo` (area slope uses a 1-cell halo so border slopes use real neighbours); no `read_metadata()`.
+- Added per-feature providers `app/composition/{point,profile,area}_dependencies.py`; providers chain via FastAPI `Depends`.
+- Added `features/health/presentation/health_schemas.py`, `features/*/domain/` extra entities (`profile_sample.py`, `value_stats.py`), `tests/fakes/`.
+- `GET /terrain/point` returns **400** (not 422) for out-of-range coordinates, per spec §4.4 (spec wins over F2).
+- `steep_fraction` counts cells with slope ≥ `slope_moderate_max_deg` (steep + hazardous).
 
 **Execution tracking:** the manager agent SHOULD update the WP table (§8) with status (`pending → in_progress → done`) as work proceeds, keeping this file the auditable source of truth.

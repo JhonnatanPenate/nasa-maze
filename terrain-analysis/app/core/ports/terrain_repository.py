@@ -24,12 +24,10 @@ class TerrainRepository(ABC):
         """DEM window centred on the cell containing point."""
 
     @abstractmethod
-    def window_for(
-        self, bbox: BoundingBox, halo_cells: int = 0
-    ) -> DemWindow:
-        """DEM window covering bbox, optionally expanded by up to
-        halo_cells real DEM rows/columns on every side. Raises
-        NoCoverageError when bbox does not intersect the DEM extent."""
+    def window_for(self, bbox: BoundingBox) -> DemWindow:
+        """DEM window covering bbox. Raises NoCoverageError when bbox does
+        not intersect the DEM extent. Haloed reads go through
+        window_for_with_halo."""
 
     @abstractmethod
     def window_for_with_halo(

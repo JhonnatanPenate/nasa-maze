@@ -18,9 +18,7 @@ class UnavailableRasterDatasource(RasterDatasource):
     def __init__(self, error: Exception) -> None:
         self._error = error
 
-    def read_window(
-        self, bbox: BoundingBox, halo_cells: int = 0
-    ) -> DemWindow:
+    def read_window(self, bbox: BoundingBox) -> DemWindow:
         raise UpstreamDatasourceError(
             f"Raster datasource unavailable: {self._error}"
         ) from self._error

@@ -12,7 +12,9 @@ Composition root: dependency-injection wiring for FastAPI `Depends`.
   - `get_raster_datasource` (lru_cached singleton) — a build failure does
     **not** propagate: it falls back to `UnavailableRasterDatasource`,
     whose `ping()` is `False` (`/health` → `degraded`) and whose reads
-    raise `UpstreamDatasourceError` → 502.
+    raise `UpstreamDatasourceError` → 502. The fallback is cached for the
+    process lifetime, so `/health` stays `degraded` until the service
+    restarts — fix the configuration and restart.
   - `get_terrain_repository(datasource=Depends(get_raster_datasource))`,
     `get_terrain_classifier(settings=Depends(get_settings))`,
     `get_distance_calculator(settings=Depends(get_settings))`,

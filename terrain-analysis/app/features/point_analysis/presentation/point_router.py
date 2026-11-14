@@ -16,11 +16,11 @@ router = APIRouter(prefix="/terrain", tags=["terrain"])
 @router.get("/point", response_model=PointAnalysisResponse)
 def analyze_point(
     lat: Annotated[
-        float, Query(ge=-90.0, le=90.0, description="Planetocentric latitude")
+        float, Query(description="Planetocentric latitude")
     ],
     lon: Annotated[
         float,
-        Query(ge=-180.0, le=180.0, description="Planetocentric longitude"),
+        Query(description="Planetocentric longitude"),
     ],
     body: Annotated[
         str,

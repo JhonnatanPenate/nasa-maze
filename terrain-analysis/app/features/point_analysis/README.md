@@ -27,10 +27,10 @@ propagate.
 
 ## Behaviour notes
 
-- Out-of-range `lat`/`lon` returns **422** on this endpoint: the query
-  params carry Pydantic `ge`/`le` constraints. On the POST endpoints the
-  same values are **400** instead — request schemas are unconstrained so
-  `GeoPoint`/`BoundingBox` raise `DomainValidationError` (plan decision).
+- Out-of-range `lat`/`lon` returns **400** on every endpoint (spec §4.4):
+  the query params carry no range constraints, so `GeoPoint` raises
+  `DomainValidationError`. Missing or non-numeric params stay **422**
+  (Pydantic request validation).
 - A valid elevation cell whose slope is undefined (all neighbours nodata)
   raises `NoCoverageError("Slope undefined at ...")` → 404.
 

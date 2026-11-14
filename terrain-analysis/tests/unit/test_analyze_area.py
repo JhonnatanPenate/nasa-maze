@@ -84,11 +84,12 @@ class TestHappyPath:
 
 class TestEdgeCases:
     def test_bbox_partially_outside_extent_is_clipped(
-        self, use_case: AnalyzeArea
+        self, use_case: AnalyzeArea, repository: DemTerrainRepository
     ) -> None:
         # min_lon 77.35 lies west of the DEM edge: clipped to cols 0..4,
         # rows 5..15 (centres within lat 18.45..18.55).
-        stats = use_case.execute(_bbox(77.35, 18.45, 77.45, 18.55))
+        bbox = _bbox(77.35, 18.45, 77.45, 18.55)
+        stats = use_case.execute(bbox)
 
         rows, cols = np.indices((21, 21))
         expected = 500.0 + 2.0 * cols - 3.0 * rows
@@ -96,6 +97,19 @@ class TestEdgeCases:
         assert stats.elevation_m.min == pytest.approx(float(np.min(clipped)))
         assert stats.elevation_m.max == pytest.approx(float(np.max(clipped)))
         assert stats.elevation_m.mean == pytest.approx(float(np.mean(clipped)))
+
+        # On the plane every core cell has a computable slope equal to the
+        # true plane gradient — including the west-edge cells, whose missing
+        # neighbours are mirror-extrapolated exactly for planar terrain.
+        expected_slope = _full_plane_slope_deg(repository.window_for(bbox))
+        for value in (
+            stats.slope_deg.min,
+            stats.slope_deg.max,
+            stats.slope_deg.mean,
+        ):
+            assert math.isfinite(value)
+            assert value == pytest.approx(expected_slope)
+        assert stats.steep_fraction == pytest.approx(0.0)
 
     def test_nodata_cell_excluded_from_stats(
         self, use_case: AnalyzeArea

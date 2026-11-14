@@ -5,9 +5,8 @@ Abstract interfaces that keep inner layers independent of infrastructure.
 ## Contents
 
 - `raster_datasource.py` — `RasterDatasource` ABC (data-access contract):
-  - `read_window(bbox, halo_cells=0)` → `DemWindow` covering bbox clipped
-    to the DEM extent, optionally expanded by `halo_cells` real rows/cols
-    on every side; raises `NoCoverageError` when bbox does not intersect.
+  - `read_window(bbox)` → `DemWindow` covering bbox clipped to the DEM
+    extent; raises `NoCoverageError` when bbox does not intersect.
   - `read_window_with_halo(bbox, halo_cells)` → `HaloWindow`: the expanded
     window plus `core_rows`/`core_cols` slices selecting the requested
     bbox window inside it. `max_window_cells` caps the **core** cell
@@ -28,7 +27,7 @@ Abstract interfaces that keep inner layers independent of infrastructure.
   contract used by use cases):
   - `elevation_at(point)` → metres; `NoCoverageError` on nodata/outside.
   - `window_around(point, radius_cells=1)` → `DemWindow`.
-  - `window_for(bbox, halo_cells=0)` → `DemWindow`.
+  - `window_for(bbox)` → `DemWindow`.
   - `window_for_with_halo(bbox, halo_cells)` → `HaloWindow` (window plus
     core slices).
   - `is_available()` → datasource health.

@@ -11,9 +11,7 @@ class FailingRasterDatasource(RasterDatasource):
     Reusable by repository and API tests that need the 502 failure path.
     """
 
-    def read_window(
-        self, bbox: BoundingBox, halo_cells: int = 0
-    ) -> DemWindow:
+    def read_window(self, bbox: BoundingBox) -> DemWindow:
         raise OSError("failing datasource: read_window unavailable")
 
     def read_window_with_halo(

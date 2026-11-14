@@ -58,9 +58,12 @@ class TestPointValidation:
             {"lat": 18.5, "lon": -181.0},
         ],
     )
-    def test_out_of_range_coordinate_returns_422(self, client, params) -> None:
+    def test_out_of_range_coordinate_returns_400(self, client, params) -> None:
+        """Spec §4.4: invalid coordinates are 400 — GeoPoint raises
+        DomainValidationError (query params carry no range constraints)."""
         response = client.get("/terrain/point", params=params)
-        assert response.status_code == 422
+        assert response.status_code == 400
+        assert "detail" in response.json()
 
     @pytest.mark.parametrize("params", [{"lat": 18.5}, {"lon": 77.5}, {}])
     def test_missing_required_param_returns_422(self, client, params) -> None:

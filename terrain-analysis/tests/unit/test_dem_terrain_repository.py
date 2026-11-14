@@ -183,14 +183,22 @@ class TestWindowForWithHalo:
             halo.window.elevation, repository.window_for(bbox).elevation
         )
 
-    def test_window_for_with_halo_param_returns_demwindow(
+    def test_core_matches_plain_read_at_north_edge(
         self, repository: DemTerrainRepository
     ) -> None:
+        """Asymmetric clipping: the bbox core touches the north DEM edge
+        (row 0), so the halo grows south-only. core() must still match a
+        plain read exactly — including cell_size_x_m, which is computed
+        from the core rows' mean latitude, not the haloed span's."""
         bbox = BoundingBox(
-            min_lon=77.49, min_lat=18.49, max_lon=77.51, max_lat=18.51
+            min_lon=77.45, min_lat=18.55, max_lon=77.55, max_lat=18.65
         )
-        window = repository.window_for(bbox, halo_cells=1)
-        assert window.elevation.shape == (5, 5)
+        halo = repository.window_for_with_halo(bbox, 1)
+        plain = repository.window_for(bbox)
+        assert halo.core_rows.start == 0
+        np.testing.assert_array_equal(halo.core().elevation, plain.elevation)
+        assert halo.core().cell_size_x_m == plain.cell_size_x_m
+        assert halo.core().cell_size_y_m == plain.cell_size_y_m
 
     def test_max_window_cells_applies_to_core(
         self, capped_datasource: RasterDatasource
