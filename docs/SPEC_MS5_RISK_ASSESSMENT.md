@@ -1,5 +1,7 @@
 # Spec: Risk Assessment Service (MS5)
-**Version:** 0.1.0 | **Status:** Draft | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
+**Version:** 0.2.0 | **Status:** Draft — realigned with `data_usar/` package | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
+
+> **v0.2 changes:** the delivered package provides real environmental layers — `rejilla_ruta_90m.tif` bands (`rugosidad_m`, `fraccion_oscura`, `inercia_termica_tiu`, `albedo`, `distancia_duna_m`) plus hourly RAD dose and REMS thermal profiles per sol. The factor catalog expands beyond `slope/temperature/radiation`, and requests may carry `sol`/`hora` to select the environmental profile.
 
 ## 1. Service Identity
 
@@ -26,16 +28,30 @@ Base URL: `/risk`
 ```json
 {
   "body": "mars",
-  "path": [ {"lat": 18.4, "lon": 77.5}, {"lat": 18.5, "lon": 77.6} ],
-  "factors": ["slope", "temperature", "radiation"]
+  "path": [ {"lat": -4.60, "lon": 137.44}, {"lat": -4.65, "lon": 137.42} ],
+  "factors": ["slope", "roughness", "dunes", "temperature", "radiation"],
+  "sol": 1360,
+  "hora": 9
 }
 ```
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `path` | array of {lat, lon} | yes | Polyline, min 2 points |
-| `factors` | array of string | no | Subset of `slope`, `temperature`, `radiation`; default all available |
+| `factors` | array of string | no | Subset of the catalog below; default all available |
+| `sol` | int | no | Reference sol for hourly RAD/REMS profiles (typical: `1360`, `2140`, `3290`, `4710`); nearest available sol is used, echoed in response |
+| `hora` | int | no | Hour LMST (0–23) for selecting the hourly environmental profile; default `12` |
 | `body` | string | no | Celestial body, default `mars` |
+
+**Factor catalog (v0.2):**
+
+| Factor | Source | Notes |
+|---|---|---|
+| `slope` | MS4 `/terrain/profile` | Slope in degrees |
+| `roughness` | GeoTIFF band `rugosidad_m` | Surface roughness |
+| `dunes` | GeoTIFF bands `distancia_duna_m`, `fraccion_oscura` | Proximity to Bagnold dunes / dark sand fraction |
+| `temperature` | `raw/ambiental/rems_resumen_horario.csv` (+ band `inercia_termica_tiu` for terrain coupling) | Hourly ground/air temp |
+| `radiation` | `raw/ambiental/rad_dosis_observaciones.csv` | Hourly dose rate μGy/h; segment dose = rate × traversal time when MS6 provides it |
 
 ### 3.2 `GET /risk/point?lat=..&lon=..` — Risk at a single point
 
@@ -43,9 +59,11 @@ Base URL: `/risk`
 
 ### Data dependencies (what the service needs)
 
-- Slope/elevation values per sampled point — obtained by calling MS4 `/terrain/profile`.
-- Environmental raster layers (temperature, radiation) via Raster Service, **optional**: if a layer is missing, that factor is skipped with `available: false`.
-- Configuration: risk weights and thresholds per factor (see §5).
+- Slope values per sampled point — obtained by calling MS4 `/terrain/profile`.
+- Terrain bands (`rugosidad_m`, `fraccion_oscura`, `inercia_termica_tiu`, `albedo`, `distancia_duna_m`) via the raster datasource (MS3 or local file behind a swappable datasource, same pattern as MS4).
+- Environmental CSVs (`rad_dosis_observaciones.csv`, `rems_resumen_horario.csv`) — loaded as hourly profiles keyed by sol/hora.
+- All layers **optional**: if a layer is missing, that factor is skipped with `available: false`.
+- Configuration: risk weights and thresholds per factor (see §5); dataset paths via env vars (paths may change when the data team reorganizes).
 
 ## 4. Outputs (API Contract)
 
@@ -101,9 +119,9 @@ Base URL: `/risk`
 ## 5. Business Rules
 
 - Each factor is normalized to [0, 1] via configurable thresholds (e.g., slope: 0 at ≤5°, 1 at ≥30°, linear between).
-- Overall segment risk = weighted average over **available** factors; weights in config (default: slope 0.6, temperature 0.2, radiation 0.2).
+- Overall segment risk = weighted average over **available** factors; weights in config (default: slope 0.4, dunes 0.2, roughness 0.15, temperature 0.15, radiation 0.1).
 - If no factors are available, return `overall_risk: null`, `risk_level: "unknown"` — never silently zero.
-- Warning codes are emitted when a factor crosses its configured warning threshold.
+- Warning codes are emitted when a factor crosses its configured warning threshold. Suggested codes with delivered data: `STEEP_SLOPE_NDEG`, `BAGNOLD_DUNES_NEARBY` (distancia_duna below threshold), `HIGH_ROUGHNESS`, `EXTREME_COLD_ZONE`, `HIGH_RADIATION_RATE`.
 
 ## 6. Non-Functional Requirements
 
@@ -118,6 +136,7 @@ Base URL: `/risk`
 3. Weights/thresholds externalized in config file.
 4. Contract tests validate schemas and the "unknown risk" rule in §5.
 
-## 8. Out of Scope (v0.1)
+## 8. Out of Scope (v0.2)
 
-- Weather forecasts, dust storm modeling, time-of-day-dependent risk, custom per-user risk profiles.
+- Weather forecasts, dust storm modeling, custom per-user risk profiles.
+- Route-time-dependent accumulation (e.g., total dose over the route) remains MS6's job; MS5 scores per-segment rates using the requested `sol`/`hora` profile.
