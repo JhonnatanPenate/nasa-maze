@@ -223,9 +223,10 @@ All contracts below mirror `SPEC_MS4_TERRAIN_ANALYSIS.md` §3–§5. The spec fi
 
 ### F5 — Business rules (spec §5)
 
-- Slope: Horn's method on 3×3 neighborhood, degrees. `SlopeCalculator` operates on `DemWindow` (needs `cell_size_m`; convert degrees→meters via `Settings.planet_radius_km` when the datasource reports angular units — adapter's job).
+- Slope: Horn's method on 3×3 neighborhood, degrees. Nodata = NaN; out-of-array cells are treated as nodata; a NaN neighbour is replaced by linear extrapolation `2·centre − opposite` (exact for planes), falling back to the centre value when the opposite is also NaN; a cell with no valid neighbour → NaN (never a fabricated 0°). *(WP1 review decision)* `SlopeCalculator` operates on `DemWindow` (needs `cell_size_m`; convert degrees→meters via `Settings.planet_radius_km` when the datasource reports angular units — adapter's job).
 - `terrain_class` (configurable thresholds): `flat` < 5°, `moderate` [5, 15), `steep` [15, 30), `hazardous` ≥ 30°.
 - Coordinates echoed in planetocentric lat/lon.
+- WP1 decisions: `RasterDatasource` has no `read_metadata()` — each datasource mapper converts native resolution to `DemWindow.cell_size_x_m/cell_size_y_m`; `DemWindow` carries no origin; extra domain files `bounding_box.py`, `path_sample.py`, `terrain_class.py`; antimeridian-crossing paths/bboxes unsupported (bbox → 400); `error_handlers.py` moved to WP6 (imports FastAPI).
 
 ## 5. Configuration (`core/config/settings.py`)
 
@@ -281,8 +282,8 @@ WP0 → WP1 → WP2 → ┬─ WP3 (point)
 | WP | Scope | Files (new) | Acceptance | Status |
 |---|---|---|---|---|
 | **WP0 Bootstrap** | package skeleton, tooling | `pyproject.toml`, `app/__init__.py`, `app/core/config/settings.py`, dir skeleton + stub READMEs, `tests/conftest.py` (minimal) | `pip install -e ".[dev]"` works; `pytest` collects 0 tests exit 5→OK; `python -c "from app.core.config.settings import Settings"` passes | done |
-| **WP1 Core domain** | pure computation + ports + errors | everything under `core/domain/`, `core/ports/`, `core/errors/` + unit tests | all §7 domain tests green; zero imports of fastapi/rasterio in `core/` | in_progress |
-| **WP2 Infrastructure** | datasource port impls + repository | `infrastructure/**`, `composition/dependencies.py`, `tests/fixtures/make_test_dem.py` + repo/datasource tests | repository swap test green with BOTH datasources; error mapping verified | pending |
+| **WP1 Core domain** | pure computation + ports + errors | everything under `core/domain/`, `core/ports/`, `core/errors/` + unit tests | all §7 domain tests green; zero imports of fastapi/rasterio in `core/` | done |
+| **WP2 Infrastructure** | datasource port impls + repository | `infrastructure/**`, `composition/dependencies.py`, `tests/fixtures/make_test_dem.py` + repo/datasource tests | repository swap test green with BOTH datasources; error mapping verified | in_progress |
 | **WP3 Point feature** | F2 end-to-end | `features/point_analysis/**` + its tests | `GET /terrain/point` contract test green incl. 404/502 cases | pending |
 | **WP4 Profile feature** | F3 end-to-end | `features/profile_analysis/**` + its tests | `POST /terrain/profile` contract test green incl. limit/404 cases | pending |
 | **WP5 Area feature** | F4 end-to-end | `features/area_analysis/**` + its tests | `POST /terrain/area` contract test green incl. bbox/404 cases | pending |
