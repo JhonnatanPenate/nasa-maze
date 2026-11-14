@@ -2,6 +2,7 @@ import time
 
 import pytest
 
+from app.core.config.settings import Settings
 from app.features.profile_analysis.presentation.profile_router import router
 
 
@@ -39,6 +40,14 @@ def test_profile_returns_contract_response(client):
         "samples",
     }
     assert body["sample_count"] == 4
+    assert isinstance(body["sample_count"], int)
+    for key in (
+        "total_distance_m",
+        "elevation_gain_m",
+        "elevation_loss_m",
+        "max_slope_deg",
+    ):
+        assert isinstance(body[key], float)
     assert len(body["samples"]) == body["sample_count"]
     for sample in body["samples"]:
         assert set(sample.keys()) == {
@@ -48,6 +57,8 @@ def test_profile_returns_contract_response(client):
             "elevation_m",
             "slope_deg",
         }
+        for key, value in sample.items():
+            assert isinstance(value, float)
     assert body["samples"][0]["distance_m"] == pytest.approx(0.0)
     assert body["samples"][0]["lat"] == pytest.approx(18.55)
     assert body["samples"][0]["lon"] == pytest.approx(77.5)
@@ -117,6 +128,23 @@ def test_too_many_path_points_returns_400(client):
     response = client.post(
         "/terrain/profile",
         json={"path": [{"lat": 18.5, "lon": 77.5}] * 101},
+    )
+    assert response.status_code == 400
+
+
+def test_max_samples_exceeded_returns_400(make_client):
+    """A get_settings override lowers the sample cap; the Depends chain
+    must propagate it into AnalyzeProfile."""
+    client = make_client(router, settings=Settings(max_samples=3))
+    response = client.post(
+        "/terrain/profile",
+        json={
+            "path": [
+                {"lat": 18.55, "lon": 77.5},
+                {"lat": 18.45, "lon": 77.5},
+            ],
+            "sample_distance_m": 1000.0,
+        },
     )
     assert response.status_code == 400
 

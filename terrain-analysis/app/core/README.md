@@ -6,9 +6,12 @@ Cross-cutting layers shared by all features.
 
 - `config/` — `settings.py`: `Settings` (pydantic-settings), env prefix `MS4_`.
 - `domain/` — pure computation: `geo_point.py` (GeoPoint), `dem_window.py`
-  (DemWindow), `slope_calculator.py` (Horn's method), `terrain_classifier.py`
+  (DemWindow), `halo_window.py` (HaloWindow: window + core slices),
+  `slope_calculator.py` (Horn's method), `terrain_classifier.py`
   (TerrainClassifier + TerrainClass), `distance_calculator.py` (haversine),
   `path_sampler.py` (polyline interpolation).
+- `application/` — application services shared across features:
+  `TerrainPointSampler` (one window read → elevation + slope at a point).
 - `errors/` — `exceptions.py` (DomainError + subclasses) and
   `error_handlers.py` (`register_exception_handlers(app)`).
 - `ports/` — abstract contracts: `terrain_repository.py` (TerrainRepository)

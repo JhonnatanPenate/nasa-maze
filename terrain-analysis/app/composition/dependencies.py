@@ -1,5 +1,8 @@
 from functools import lru_cache
 
+from fastapi import Depends
+
+from app.core.application.terrain_point_sampler import TerrainPointSampler
 from app.core.config.settings import Settings
 from app.core.domain.distance_calculator import DistanceCalculator
 from app.core.domain.path_sampler import PathSampler
@@ -13,6 +16,9 @@ from app.infrastructure.datasources.geotiff_datasource import (
 )
 from app.infrastructure.datasources.synthetic_dem_datasource import (
     SyntheticDemDatasource,
+)
+from app.infrastructure.datasources.unavailable_raster_datasource import (
+    UnavailableRasterDatasource,
 )
 from app.infrastructure.repositories.dem_terrain_repository import (
     DemTerrainRepository,
@@ -46,19 +52,32 @@ def build_datasource(settings: Settings) -> RasterDatasource:
 
 @lru_cache(maxsize=None)
 def get_raster_datasource() -> RasterDatasource:
-    return build_datasource(get_settings())
+    """Process-wide datasource singleton.
+
+    A build failure (e.g. invalid datasource_kind or missing dem_path)
+    does not propagate: the fallback UnavailableRasterDatasource reports
+    ping() False so /health degrades, and its reads surface as
+    UpstreamDatasourceError -> 502.
+    """
+    try:
+        return build_datasource(get_settings())
+    except Exception as exc:
+        return UnavailableRasterDatasource(exc)
 
 
-def get_terrain_repository() -> TerrainRepository:
-    return DemTerrainRepository(get_raster_datasource())
+def get_terrain_repository(
+    datasource: RasterDatasource = Depends(get_raster_datasource),
+) -> TerrainRepository:
+    return DemTerrainRepository(datasource)
 
 
 def get_slope_calculator() -> SlopeCalculator:
     return SlopeCalculator()
 
 
-def get_terrain_classifier() -> TerrainClassifier:
-    settings = get_settings()
+def get_terrain_classifier(
+    settings: Settings = Depends(get_settings),
+) -> TerrainClassifier:
     return TerrainClassifier(
         flat_max_deg=settings.slope_flat_max_deg,
         moderate_max_deg=settings.slope_moderate_max_deg,
@@ -66,9 +85,20 @@ def get_terrain_classifier() -> TerrainClassifier:
     )
 
 
-def get_distance_calculator() -> DistanceCalculator:
-    return DistanceCalculator(get_settings().planet_radius_km * 1000.0)
+def get_distance_calculator(
+    settings: Settings = Depends(get_settings),
+) -> DistanceCalculator:
+    return DistanceCalculator(settings.planet_radius_km * 1000.0)
 
 
-def get_path_sampler() -> PathSampler:
-    return PathSampler(get_distance_calculator())
+def get_path_sampler(
+    distance_calculator: DistanceCalculator = Depends(get_distance_calculator),
+) -> PathSampler:
+    return PathSampler(distance_calculator)
+
+
+def get_terrain_point_sampler(
+    repository: TerrainRepository = Depends(get_terrain_repository),
+    slope_calculator: SlopeCalculator = Depends(get_slope_calculator),
+) -> TerrainPointSampler:
+    return TerrainPointSampler(repository, slope_calculator)

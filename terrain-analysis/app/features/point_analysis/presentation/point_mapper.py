@@ -14,5 +14,5 @@ class PointMapper:
             lon=analysis.lon,
             elevation_m=analysis.elevation_m,
             slope_deg=analysis.slope_deg,
-            terrain_class=analysis.terrain_class.value,
+            terrain_class=analysis.terrain_class,
         )

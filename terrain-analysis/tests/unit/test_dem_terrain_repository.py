@@ -121,6 +121,93 @@ class TestWindowFor:
             )
 
 
+class TestWindowForWithHalo:
+    """Swap proof for read_window_with_halo: identical expectations for
+    the synthetic and geotiff datasources."""
+
+    def test_halo_expands_window_with_real_cells(
+        self, repository: DemTerrainRepository
+    ) -> None:
+        # Core cells rows/cols 9..11 plus a 1-cell halo -> 5x5 window.
+        halo = repository.window_for_with_halo(
+            BoundingBox(
+                min_lon=77.49, min_lat=18.49, max_lon=77.51, max_lat=18.51
+            ),
+            1,
+        )
+        assert halo.window.elevation.shape == (5, 5)
+        assert halo.core_rows == slice(1, 4)
+        assert halo.core_cols == slice(1, 4)
+        rows, cols = np.indices((5, 5))
+        np.testing.assert_array_equal(
+            halo.window.elevation, 500.0 + 2.0 * (cols + 8) - 3.0 * (rows + 8)
+        )
+
+    def test_core_matches_plain_read(self, repository: DemTerrainRepository) -> None:
+        bbox = BoundingBox(
+            min_lon=77.35, min_lat=18.45, max_lon=77.45, max_lat=18.55
+        )
+        halo = repository.window_for_with_halo(bbox, 2)
+        plain = repository.window_for(bbox)
+        np.testing.assert_array_equal(halo.core().elevation, plain.elevation)
+        assert halo.core().cell_size_x_m == pytest.approx(plain.cell_size_x_m)
+        assert halo.core().cell_size_y_m == pytest.approx(plain.cell_size_y_m)
+
+    def test_halo_clipped_at_dem_edge(
+        self, repository: DemTerrainRepository
+    ) -> None:
+        # The bbox core touches the west edge (col 0): the halo can only
+        # grow north/south/east, so the core touches the window's west edge.
+        halo = repository.window_for_with_halo(
+            BoundingBox(
+                min_lon=77.35, min_lat=18.45, max_lon=77.45, max_lat=18.55
+            ),
+            1,
+        )
+        # Core: rows 5..15 (11 rows), cols 0..4 (5 cols). Halo adds 1 row
+        # each side and 1 col on the east only.
+        assert halo.window.elevation.shape == (13, 6)
+        assert halo.core_rows == slice(1, 12)
+        assert halo.core_cols == slice(0, 5)
+
+    def test_zero_halo_equals_read_window(
+        self, repository: DemTerrainRepository
+    ) -> None:
+        bbox = BoundingBox(
+            min_lon=77.49, min_lat=18.49, max_lon=77.51, max_lat=18.51
+        )
+        halo = repository.window_for_with_halo(bbox, 0)
+        assert halo.core_rows == slice(0, 3)
+        assert halo.core_cols == slice(0, 3)
+        np.testing.assert_array_equal(
+            halo.window.elevation, repository.window_for(bbox).elevation
+        )
+
+    def test_window_for_with_halo_param_returns_demwindow(
+        self, repository: DemTerrainRepository
+    ) -> None:
+        bbox = BoundingBox(
+            min_lon=77.49, min_lat=18.49, max_lon=77.51, max_lat=18.51
+        )
+        window = repository.window_for(bbox, halo_cells=1)
+        assert window.elevation.shape == (5, 5)
+
+    def test_max_window_cells_applies_to_core(
+        self, capped_datasource: RasterDatasource
+    ) -> None:
+        # Cap is 10 core cells; a 2x2 core + halo (4x4 = 16 cells read)
+        # must still succeed because the cap counts core cells only.
+        repository = DemTerrainRepository(capped_datasource)
+        halo = repository.window_for_with_halo(
+            BoundingBox(
+                min_lon=77.49, min_lat=18.49, max_lon=77.51, max_lat=18.51
+            ),
+            1,
+        )
+        # 3x3 core (9 cells <= 10) with halo -> 5x5 read.
+        assert halo.window.elevation.shape == (5, 5)
+
+
 class TestWindowAround:
     def test_shape_and_values(self, repository: DemTerrainRepository) -> None:
         window = repository.window_around(GeoPoint(lat=18.5, lon=77.5), 2)
@@ -229,6 +316,17 @@ class TestFailingDatasource:
         with pytest.raises(UpstreamDatasourceError):
             failing_repository.window_around(GeoPoint(lat=18.5, lon=77.5), 1)
 
+    def test_window_for_with_halo_wraps_failure(
+        self, failing_repository: DemTerrainRepository
+    ) -> None:
+        with pytest.raises(UpstreamDatasourceError):
+            failing_repository.window_for_with_halo(
+                BoundingBox(
+                    min_lon=77.49, min_lat=18.49, max_lon=77.51, max_lat=18.51
+                ),
+                1,
+            )
+
     def test_is_available_false(
         self, failing_repository: DemTerrainRepository
     ) -> None:
@@ -239,7 +337,7 @@ class TestDomainErrorPassthrough:
     def test_domain_error_not_wrapped(self) -> None:
         error = NoCoverageError("no data here")
         datasource = Mock(spec=RasterDatasource)
-        datasource.read_window.side_effect = error
+        datasource.read_window_with_halo.side_effect = error
         repository = DemTerrainRepository(datasource)
         with pytest.raises(NoCoverageError) as excinfo:
             repository.window_for(

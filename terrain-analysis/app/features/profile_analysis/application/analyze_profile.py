@@ -1,14 +1,9 @@
-import math
 from typing import Sequence
 
+from app.core.application.terrain_point_sampler import TerrainPointSampler
 from app.core.domain.geo_point import GeoPoint
 from app.core.domain.path_sampler import PathSampler
-from app.core.domain.slope_calculator import SlopeCalculator
-from app.core.errors.exceptions import (
-    DomainValidationError,
-    NoCoverageError,
-)
-from app.core.ports.terrain_repository import TerrainRepository
+from app.core.errors.exceptions import DomainValidationError
 from app.features.profile_analysis.domain.elevation_profile import (
     ElevationProfile,
 )
@@ -20,22 +15,20 @@ class AnalyzeProfile:
 
     PathSampler interpolates the path every sample_distance_m (enforcing
     <2 points, non-positive step and the max_samples cap as
-    DomainValidationError). Each sample issues one repository.window_around
+    DomainValidationError). Each sample issues one TerrainPointSampler
     read; a NaN centre elevation raises NoCoverageError for the whole
     request, per the plan edge rule.
     """
 
     def __init__(
         self,
-        repository: TerrainRepository,
+        sampler: TerrainPointSampler,
         path_sampler: PathSampler,
-        slope_calculator: SlopeCalculator,
         max_path_points: int,
         max_samples: int,
     ) -> None:
-        self._repository = repository
+        self._sampler = sampler
         self._path_sampler = path_sampler
-        self._slope_calculator = slope_calculator
         self._max_path_points = max_path_points
         self._max_samples = max_samples
 
@@ -54,21 +47,14 @@ class AnalyzeProfile:
 
         samples: list[ProfileSample] = []
         for path_sample in path_samples:
-            window = self._repository.window_around(path_sample.point, 1)
-            elevation_m = window.center_value()
-            if not math.isfinite(elevation_m):
-                raise NoCoverageError(
-                    f"No DEM coverage at lat={path_sample.point.lat}, "
-                    f"lon={path_sample.point.lon}"
-                )
-            slope_deg = self._slope_calculator.compute_at_center(window)
+            sample = self._sampler.sample(path_sample.point)
             samples.append(
                 ProfileSample(
                     lat=path_sample.point.lat,
                     lon=path_sample.point.lon,
                     distance_m=path_sample.distance_m,
-                    elevation_m=elevation_m,
-                    slope_deg=slope_deg,
+                    elevation_m=sample.elevation_m,
+                    slope_deg=sample.slope_deg,
                 )
             )
 

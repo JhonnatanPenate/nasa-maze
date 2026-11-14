@@ -42,15 +42,20 @@ class AnalyzeArea:
         self._steep_min_deg = threshold
 
     def execute(self, bbox: BoundingBox) -> AreaStats:
-        window = self._repository.window_for(bbox)
+        # A 1-cell halo supplies real DEM neighbours for the border cells
+        # of the bbox window, so their Horn slope equals an interior
+        # computation instead of relying on mirror extrapolation.
+        halo = self._repository.window_for_with_halo(bbox, halo_cells=1)
+        core = halo.core()
         # window_for on an all-nodata bbox returns an all-NaN window
         # instead of raising; treat it as no coverage.
-        if window.is_all_nodata():
+        if core.is_all_nodata():
             raise NoCoverageError(
                 "Requested bounding box covers only nodata cells"
             )
-        slopes = self._slope_calculator.compute(window)
-        valid_slopes = slopes[~np.isnan(slopes)]
+        slopes = self._slope_calculator.compute(halo.window)
+        core_slopes = slopes[halo.core_rows, halo.core_cols]
+        valid_slopes = core_slopes[~np.isnan(core_slopes)]
         if valid_slopes.size == 0:
             raise NoCoverageError(
                 "Requested bounding box contains no cells with "
@@ -58,9 +63,9 @@ class AnalyzeArea:
             )
         return AreaStats(
             elevation_m=ValueStats(
-                min=float(np.nanmin(window.elevation)),
-                max=float(np.nanmax(window.elevation)),
-                mean=float(np.nanmean(window.elevation)),
+                min=float(np.nanmin(core.elevation)),
+                max=float(np.nanmax(core.elevation)),
+                mean=float(np.nanmean(core.elevation)),
             ),
             slope_deg=ValueStats(
                 min=float(valid_slopes.min()),

@@ -30,6 +30,11 @@ class TerrainClassifier:
         self._moderate_max_deg = moderate_max_deg
         self._steep_max_deg = steep_max_deg
 
+    @property
+    def steep_min_deg(self) -> float:
+        """Lower bound of the `steep` terrain class."""
+        return self._moderate_max_deg
+
     def classify(self, slope_deg: float) -> TerrainClass:
         try:
             finite = math.isfinite(slope_deg)

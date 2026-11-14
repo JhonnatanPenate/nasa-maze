@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
+from app.core.application.terrain_point_sampler import TerrainPointSampler
 from app.core.domain.dem_window import DemWindow
 from app.core.domain.geo_point import GeoPoint
 from app.core.domain.slope_calculator import SlopeCalculator
@@ -40,7 +41,10 @@ def repository(
 
 @pytest.fixture
 def use_case(repository: DemTerrainRepository) -> AnalyzePoint:
-    return AnalyzePoint(repository, SlopeCalculator(), TerrainClassifier())
+    return AnalyzePoint(
+        TerrainPointSampler(repository, SlopeCalculator()),
+        TerrainClassifier(),
+    )
 
 
 def expected_plane_slope(window: DemWindow) -> float:
@@ -131,8 +135,10 @@ class TestExecuteFailures:
 
     def test_datasource_failure_raises_upstream_error(self) -> None:
         use_case = AnalyzePoint(
-            DemTerrainRepository(FailingRasterDatasource()),
-            SlopeCalculator(),
+            TerrainPointSampler(
+                DemTerrainRepository(FailingRasterDatasource()),
+                SlopeCalculator(),
+            ),
             TerrainClassifier(),
         )
         with pytest.raises(UpstreamDatasourceError):
@@ -148,7 +154,8 @@ class TestRepositoryUsage:
             cell_size_y_m=500.0,
         )
         use_case = AnalyzePoint(
-            repository, SlopeCalculator(), TerrainClassifier()
+            TerrainPointSampler(repository, SlopeCalculator()),
+            TerrainClassifier(),
         )
         point = GeoPoint(lat=18.5, lon=77.5)
 

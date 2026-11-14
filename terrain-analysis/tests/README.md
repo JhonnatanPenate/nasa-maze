@@ -15,10 +15,15 @@ edge case, and expected failure per feature, plus API contract tests).
 - `unit/` — domain, application, infrastructure, and repository unit tests
   (domain calculators, `test_dem_window_mapper`, `test_grid_geometry`,
   `test_synthetic_dem_datasource`, `test_geotiff_datasource`,
-  `test_dem_terrain_repository`,
-  `test_dependencies`, plus feature use-case tests in later WPs).
+  `test_dem_terrain_repository` (incl. `window_for_with_halo` swap-proof
+  cases), `test_terrain_point_sampler`, `test_dependencies`, plus feature
+  use-case tests).
 - `api/` — endpoint contract tests verifying SPEC_MS4 schemas and
-  400/404/422/502 codes.
+  400/404/422/502 codes (`test_health_endpoint`, `test_point_endpoint`,
+  `test_profile_endpoint`, `test_area_endpoint`) plus `test_app.py`
+  covering `create_app()` routes and the default-datasource smoke
+  requests. `api/conftest.py` `make_client` accepts optional `datasource`
+  and `settings` keyword overrides.
 - `fixtures/` — `make_test_dem.py`: deterministic test GeoTIFF generator
   (generated at test time via rasterio; binaries are never committed).
 - `fakes/` — reusable port test doubles (`FailingRasterDatasource` for the

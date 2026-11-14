@@ -2,15 +2,20 @@
 
 Health feature: liveness plus datasource connectivity (`GET /health`, plan F1).
 
-## Contents (planned)
+## Contents
 
-- `presentation/health_router.py` — router for `GET /health`; reports
-  `{"status": "ok", "datasource": "ok"}` or `{"status": "degraded",
-  "datasource": "unavailable"}` when `RasterDatasource.ping()` fails
-  (still HTTP 200).
+- `presentation/health_schemas.py` — `HealthResponse`: `status`
+  (`"ok" | "degraded"`) and `datasource` (`"ok" | "unavailable"`).
+- `presentation/health_router.py` — `GET /health`: always answers 200.
+  Reports `{"status": "ok", "datasource": "ok"}` when
+  `TerrainRepository.is_available()` is true, else
+  `{"status": "degraded", "datasource": "unavailable"}`. A datasource
+  that fails to build at provider time is covered too: the composition
+  root substitutes `UnavailableRasterDatasource` (ping `False`), so the
+  endpoint degrades instead of erroring.
 
 ## Layer rules
 
-Presentation may call the `RasterDatasource` port (obtained via
-`composition/dependencies.py`) but must not import concrete datasource
+The router depends on the `TerrainRepository` port via
+`Depends(get_terrain_repository)`; it must not import concrete datasource
 implementations or rasterio.

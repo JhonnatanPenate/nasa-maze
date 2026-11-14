@@ -12,8 +12,12 @@ Concrete `RasterDatasource` implementations behind the data-access port.
   is not duplicated.
 - `grid_backed_raster_datasource.py` — `GridBackedRasterDatasource`:
   template-method base holding the shared `read_window` /
-  `read_window_around` flow (window caps — including the `(2r+1)²` radius
-  cap — clipping, NaN padding). Subclasses implement only `_geometry()`
+  `read_window_with_halo` / `read_window_around` flow (window caps —
+  including the `(2r+1)²` radius cap — clipping, NaN padding).
+  `read_window_with_halo` expands the clipped bbox window by up to
+  `halo_cells` real rows/columns per side and returns a `HaloWindow` whose
+  core slices mark the plain-read region; `max_window_cells` caps the
+  core count only. Subclasses implement only `_geometry()`
   and `_read(row_slice, col_slice)`.
 - `dem_window_mapper.py` — `DemWindowMapper`: the adapter converting raw
   raster payloads into `DemWindow`. This is the only place degree cell
@@ -27,6 +31,10 @@ Concrete `RasterDatasource` implementations behind the data-access port.
   and a planar tilt (flat/moderate/steep mix). It contains a nodata hole
   at **lon 77.90–77.95, lat 18.90–18.95** so nodata/404 paths are testable;
   the smoke coordinates (18.4, 77.5) and (18.5, 77.6) hold real data.
+- `unavailable_raster_datasource.py` — `UnavailableRasterDatasource`:
+  fallback created by the composition root when `build_datasource` fails
+  (bad `datasource_kind`, missing `dem_path`). `ping()` returns `False`
+  (`/health` → `degraded`); reads raise `UpstreamDatasourceError` → 502.
 - `geotiff_datasource.py` — `GeoTiffRasterDatasource`: rasterio-backed
   reader over a north-up geographic (lon/lat degrees) single-band GeoTIFF
   (`Settings.dem_path`). Each open validates: ≥1 band, geographic CRS (if a

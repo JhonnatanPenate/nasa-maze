@@ -1,6 +1,6 @@
-from typing import Literal
-
 from pydantic import BaseModel
+
+from app.core.domain.terrain_class import TerrainClass
 
 
 class PointAnalysisResponse(BaseModel):
@@ -10,4 +10,4 @@ class PointAnalysisResponse(BaseModel):
     lon: float
     elevation_m: float
     slope_deg: float
-    terrain_class: Literal["flat", "moderate", "steep", "hazardous"]
+    terrain_class: TerrainClass

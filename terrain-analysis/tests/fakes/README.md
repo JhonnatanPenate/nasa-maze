@@ -5,10 +5,11 @@ Reusable test doubles implementing `core/ports` contracts.
 ## Contents
 
 - `failing_raster_datasource.py` — `FailingRasterDatasource`: a
-  `RasterDatasource` stub that raises `OSError` on every read and reports
-  `ping() == False`. Used by repository tests (`UpstreamDatasourceError`
-  mapping, `is_available() == False`) and by API tests in later work
-  packages that need the HTTP 502 path.
+  `RasterDatasource` stub that raises `OSError` on every read
+  (`read_window`, `read_window_with_halo`, `read_window_around`) and
+  reports `ping() == False`. Used by repository tests
+  (`UpstreamDatasourceError` mapping, `is_available() == False`) and by
+  API tests that need the HTTP 502 path or `/health` `degraded`.
 
 ## Rules
 

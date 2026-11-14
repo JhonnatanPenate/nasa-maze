@@ -7,19 +7,32 @@ Point analysis feature: elevation, slope, and terrain class at a coordinate
 
 - `domain/point_analysis.py` — `PointAnalysis` frozen result entity
   (`lat`, `lon`, `elevation_m`, `slope_deg`, `terrain_class`).
-- `application/analyze_point.py` — `AnalyzePoint` use case: one
-  `TerrainRepository.window_around(point, 1)` read feeds both the centre
-  elevation and `SlopeCalculator.compute_at_center`; the slope is classified
-  by `TerrainClassifier`.
+- `application/analyze_point.py` — `AnalyzePoint` use case: delegates the
+  sampling to the shared `TerrainPointSampler` (`core/application`, one
+  `window_around(point, 1)` read feeding elevation + slope); the slope is
+  classified by `TerrainClassifier`.
 - `presentation/point_router.py` — router for `GET /terrain/point`
   (`lat`, `lon`, `body` query params; `body` is accepted and ignored by the
   MVP).
-- `presentation/point_schemas.py` — `PointAnalysisResponse` pydantic DTO.
+- `presentation/point_schemas.py` — `PointAnalysisResponse` pydantic DTO;
+  `terrain_class` is typed as the `TerrainClass` domain enum (serializes
+  to its plain string value).
 - `presentation/point_mapper.py` — `PointMapper` domain → DTO adapter.
 
 The use case is wired in `app/composition/point_dependencies.py`
-(`get_analyze_point`), which builds `DemTerrainRepository` from
-`Depends(get_raster_datasource)` so test `dependency_overrides` propagate.
+(`get_analyze_point`), built from the Depends-chained providers
+`get_terrain_point_sampler` and `get_terrain_classifier`, so test
+`dependency_overrides` on `get_raster_datasource` or `get_settings`
+propagate.
+
+## Behaviour notes
+
+- Out-of-range `lat`/`lon` returns **422** on this endpoint: the query
+  params carry Pydantic `ge`/`le` constraints. On the POST endpoints the
+  same values are **400** instead — request schemas are unconstrained so
+  `GeoPoint`/`BoundingBox` raise `DomainValidationError` (plan decision).
+- A valid elevation cell whose slope is undefined (all neighbours nodata)
+  raises `NoCoverageError("Slope undefined at ...")` → 404.
 
 ## Layer rules
 

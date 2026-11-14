@@ -1,5 +1,6 @@
 import pytest
 
+from app.core.application.terrain_point_sampler import TerrainPointSampler
 from app.core.config.settings import Settings
 from app.core.domain.distance_calculator import DistanceCalculator
 from app.core.domain.geo_point import GeoPoint
@@ -34,9 +35,10 @@ def use_case_factory(settings: Settings):
             settings.planet_radius_km * 1000.0
         )
         return AnalyzeProfile(
-            repository=DemTerrainRepository(datasource),
+            sampler=TerrainPointSampler(
+                DemTerrainRepository(datasource), SlopeCalculator()
+            ),
             path_sampler=PathSampler(distance_calculator),
-            slope_calculator=SlopeCalculator(),
             max_path_points=(
                 settings.max_path_points
                 if max_path_points is None

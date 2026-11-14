@@ -284,10 +284,10 @@ WP0 → WP1 → WP2 → ┬─ WP3 (point)
 | **WP0 Bootstrap** | package skeleton, tooling | `pyproject.toml`, `app/__init__.py`, `app/core/config/settings.py`, dir skeleton + stub READMEs, `tests/conftest.py` (minimal) | `pip install -e ".[dev]"` works; `pytest` collects 0 tests exit 5→OK; `python -c "from app.core.config.settings import Settings"` passes | done |
 | **WP1 Core domain** | pure computation + ports + errors | everything under `core/domain/`, `core/ports/`, `core/errors/` + unit tests | all §7 domain tests green; zero imports of fastapi/rasterio in `core/` | done |
 | **WP2 Infrastructure** | datasource port impls + repository | `infrastructure/**`, `composition/dependencies.py`, `tests/fixtures/make_test_dem.py` + repo/datasource tests | repository swap test green with BOTH datasources; error mapping verified | done |
-| **WP3 Point feature** | F2 end-to-end | `features/point_analysis/**` + its tests | `GET /terrain/point` contract test green incl. 404/502 cases | in_progress |
-| **WP4 Profile feature** | F3 end-to-end | `features/profile_analysis/**` + its tests | `POST /terrain/profile` contract test green incl. limit/404 cases | in_progress |
-| **WP5 Area feature** | F4 end-to-end | `features/area_analysis/**` + its tests | `POST /terrain/area` contract test green incl. bbox/404 cases | in_progress |
-| **WP6 App wiring** | service assembly | `app/main.py`, `features/health/**`, `error_handlers` registration, root `README.md` | `uvicorn app.main:app` serves all 4 endpoints; `/health` works; `pytest -v` fully green | pending |
+| **WP3 Point feature** | F2 end-to-end | `features/point_analysis/**` + its tests | `GET /terrain/point` contract test green incl. 404/502 cases | done |
+| **WP4 Profile feature** | F3 end-to-end | `features/profile_analysis/**` + its tests | `POST /terrain/profile` contract test green incl. limit/404 cases | done |
+| **WP5 Area feature** | F4 end-to-end | `features/area_analysis/**` + its tests | `POST /terrain/area` contract test green incl. bbox/404 cases | done |
+| **WP6 App wiring** | service assembly | `app/main.py`, `features/health/**`, `error_handlers` registration, root `README.md` | `uvicorn app.main:app` serves all 4 endpoints; `/health` works; `pytest -v` fully green | done |
 | **WP7 Review & docs** | quality gate | README completions, fixes from review | DoD checklist (§10) fully checked | pending |
 
 **Execution order note for the manager:** WP0–WP2 are strictly sequential. WP3, WP4, WP5 touch disjoint directories and MAY run as parallel background subagents after WP2 merges. WP6 needs all three merged. WP7 runs last.

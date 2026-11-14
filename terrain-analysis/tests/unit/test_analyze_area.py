@@ -71,17 +71,14 @@ class TestHappyPath:
         assert stats.elevation_m.max == pytest.approx(495.0)
         assert stats.elevation_m.mean == pytest.approx(490.0)
 
+        # With the 1-cell halo, every core cell — including corners — is
+        # computed from real DEM neighbours, so on a plane all nine cells
+        # report the exact plane slope.
         window = repository.window_for(bbox)
-        slopes = SlopeCalculator().compute(window)
-        assert stats.slope_deg.min == pytest.approx(float(np.nanmin(slopes)))
-        assert stats.slope_deg.max == pytest.approx(float(np.nanmax(slopes)))
-        assert stats.slope_deg.mean == pytest.approx(float(np.nanmean(slopes)))
-        # Near-constant slope on a plane: interior cells hit the exact
-        # gradient, only window corners deviate slightly.
-        assert stats.slope_deg.max == pytest.approx(
-            _full_plane_slope_deg(window)
-        )
-        assert 0.0 <= stats.slope_deg.min <= stats.slope_deg.max
+        expected = _full_plane_slope_deg(window)
+        assert stats.slope_deg.min == pytest.approx(expected)
+        assert stats.slope_deg.max == pytest.approx(expected)
+        assert stats.slope_deg.mean == pytest.approx(expected)
         assert stats.steep_fraction == 0.0
 
 
@@ -155,13 +152,37 @@ class TestExpectedFailures:
         with pytest.raises(NoCoverageError):
             use_case.execute(_bbox(77.452, 18.547, 77.453, 18.548))
 
-    def test_window_without_computable_slopes_raises(
+    def test_single_cell_bbox_resolves_slope_via_halo(
         self, use_case: AnalyzeArea
     ) -> None:
-        # 1x1 window over cell (10, 10): valid elevation but no neighbour,
-        # so every slope cell is NaN.
+        # 1x1 core over cell (10, 10): the 1-cell halo supplies real DEM
+        # neighbours, so the single core cell gets a computable slope.
+        stats = use_case.execute(_bbox(77.4998, 18.4998, 77.5002, 18.5002))
+        assert stats.elevation_m.min == pytest.approx(490.0)
+        assert stats.slope_deg.min == pytest.approx(stats.slope_deg.max)
+        assert stats.slope_deg.min > 0.0
+
+    def test_isolated_cell_without_neighbours_raises(
+        self, dem_window_mapper: DemWindowMapper, settings: Settings
+    ) -> None:
+        # 5x5 DEM where every cell is nodata except (2, 2): even with the
+        # halo there is no valid neighbour, so the slope is undefined.
+        elevation = np.full((5, 5), TEST_NODATA)
+        elevation[2, 2] = 100.0
+        datasource = SyntheticDemDatasource(
+            elevation,
+            TEST_DEM_EXTENT,
+            dem_window_mapper,
+            settings.max_window_cells,
+            nodata=TEST_NODATA,
+        )
+        isolated_case = AnalyzeArea(
+            DemTerrainRepository(datasource),
+            SlopeCalculator(),
+            STEEP_MIN_DEG,
+        )
         with pytest.raises(NoCoverageError):
-            use_case.execute(_bbox(77.4998, 18.4998, 77.5002, 18.5002))
+            isolated_case.execute(_bbox(77.495, 18.495, 77.505, 18.505))
 
     def test_failing_datasource_raises(self) -> None:
         failing_case = AnalyzeArea(
@@ -171,3 +192,80 @@ class TestExpectedFailures:
         )
         with pytest.raises(UpstreamDatasourceError):
             failing_case.execute(_bbox(77.49, 18.49, 77.51, 18.51))
+
+
+def _bowl_datasource(
+    dem_window_mapper: DemWindowMapper, settings: Settings
+) -> SyntheticDemDatasource:
+    """Non-planar 21x21 DEM: elevation[r, c] = 1.5(r-10)^2 + 2.5(c-10)^2,
+    a quadratic bowl whose true slope varies from cell to cell."""
+    rows, cols = np.indices((21, 21))
+    elevation = 1.5 * (rows - 10.0) ** 2 + 2.5 * (cols - 10.0) ** 2
+    return SyntheticDemDatasource(
+        elevation,
+        TEST_DEM_EXTENT,
+        dem_window_mapper,
+        settings.max_window_cells,
+    )
+
+
+class TestHaloSlopeAccuracy:
+    """Review M1: slope at core border cells must use real DEM
+    neighbours, not mirror extrapolation — on non-planar terrain that is
+    only achievable with a halo of real cells around the bbox window."""
+
+    @pytest.fixture
+    def bowl_repository(
+        self, dem_window_mapper: DemWindowMapper, settings: Settings
+    ) -> DemTerrainRepository:
+        return DemTerrainRepository(
+            _bowl_datasource(dem_window_mapper, settings)
+        )
+
+    def test_border_cell_slope_equals_interior_computation(
+        self, bowl_repository: DemTerrainRepository
+    ) -> None:
+        use_case = AnalyzeArea(
+            bowl_repository, SlopeCalculator(), STEEP_MIN_DEG
+        )
+        # Reference: slope of every cell computed on the whole DEM, i.e.
+        # with its true 3x3 neighbourhood.
+        full = bowl_repository.window_for(
+            _bbox(77.4, 18.4, 77.6, 18.6)
+        )
+        reference = SlopeCalculator().compute(full)
+
+        # 3x3 core (cells rows/cols 9..11): every cell is on the window
+        # border, so without the halo their slopes would be extrapolated.
+        stats = use_case.execute(_bbox(77.49, 18.49, 77.51, 18.51))
+        core_slopes = reference[9:12, 9:12]
+        assert stats.slope_deg.min == pytest.approx(
+            float(np.nanmin(core_slopes))
+        )
+        assert stats.slope_deg.max == pytest.approx(
+            float(np.nanmax(core_slopes))
+        )
+        assert stats.slope_deg.mean == pytest.approx(
+            float(np.nanmean(core_slopes))
+        )
+
+    def test_single_cell_bbox_matches_large_window_slope(
+        self, bowl_repository: DemTerrainRepository
+    ) -> None:
+        # The same cell must report the same slope whether it is the sole
+        # cell of a tiny bbox or an interior cell of a large window.
+        use_case = AnalyzeArea(
+            bowl_repository, SlopeCalculator(), STEEP_MIN_DEG
+        )
+        full = bowl_repository.window_for(
+            _bbox(77.4, 18.4, 77.6, 18.6)
+        )
+        reference = SlopeCalculator().compute(full)
+        expected = float(reference[10, 10])
+
+        stats = use_case.execute(
+            _bbox(77.4998, 18.4998, 77.5002, 18.5002)
+        )
+        assert stats.slope_deg.min == pytest.approx(expected)
+        assert stats.slope_deg.max == pytest.approx(expected)
+        assert stats.slope_deg.mean == pytest.approx(expected)

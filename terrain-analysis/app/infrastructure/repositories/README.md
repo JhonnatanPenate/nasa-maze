@@ -7,10 +7,12 @@ Concrete `TerrainRepository` implementations.
 - `dem_terrain_repository.py` — `DemTerrainRepository`: implements the
   `TerrainRepository` port on top of a `RasterDatasource`. `elevation_at`
   reads the single cell containing the point (NaN → `NoCoverageError`);
-  `window_around`/`window_for` delegate to the datasource; `is_available`
-  maps any `ping()` failure to `False`. `DomainError` subclasses pass
-  through unchanged; every other exception is wrapped in
-  `UpstreamDatasourceError` (chained via `from`).
+  `window_around`/`window_for` delegate to the datasource;
+  `window_for(bbox, halo_cells)` returns the `DemWindow` part of
+  `window_for_with_halo`, which returns the full `HaloWindow` (window +
+  core slices); `is_available` maps any `ping()` failure to `False`.
+  `DomainError` subclasses pass through unchanged; every other exception
+  is wrapped in `UpstreamDatasourceError` (chained via `from`).
 
 ## Layer rules
 

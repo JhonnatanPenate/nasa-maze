@@ -12,6 +12,11 @@ Innermost layer: entities, value objects, and pure geospatial computation.
 - `dem_window.py` — `DemWindow(elevation, cell_size_x_m, cell_size_y_m)`;
   a 2-D float64 elevation array with metric cell sizes.
   Helpers: `is_all_nodata()`, `center_value()`.
+- `halo_window.py` — `HaloWindow(window, core_rows, core_cols)`; the
+  result of a halo read: `window` covers the requested bbox expanded by
+  up to `halo_cells` rows/columns on every side (clipped at the DEM
+  edge), and the `core_rows`/`core_cols` slices select the part a plain
+  read would return. `core()` returns that part as a `DemWindow`.
 - `slope_calculator.py` — `SlopeCalculator.compute(window)` → slope in
   degrees via Horn's method on the 3×3 neighbourhood (vectorized numpy);
   `compute_at_center(window)` → centre-cell slope as a float.
