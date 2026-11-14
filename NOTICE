@@ -1,0 +1,21 @@
+nasa-maze (Planetary Explorer)
+Copyright 2026 The nasa-maze team
+
+Proyecto creado para el NASA International Space Apps Challenge 2026,
+reto "Interplanetary Survival Guide: Martian Map".
+
+Este producto incluye trabajo de:
+- Javier Galdámez (@JavyGG04): scripts científicos (science/) y paquete de datos (data/gale/, docs/data/).
+- Armando Salgado (@Armando-J-Salgado): servicio MS4 Terrain Analysis (terrain-analysis/).
+- Alex Alas (@Alex-Alas): configuración de agentes de IA (AGENTS.md, .claude/, docs/ai/).
+- Jhonnatan Peñate (@JhonnatanPenate): repositorio, CI/CD e infraestructura.
+
+Este proyecto NO está avalado, patrocinado ni aprobado por la NASA. El nombre "NASA" se usa
+solo para identificar la competencia. No se usa el logotipo ni la insignia de la NASA.
+
+Los datos de data/gale/ derivan de datos públicos de NASA (Planetary Data System) y de agencias
+socias. Sus términos de uso y atribuciones están en DATA_SOURCES.md y no los cubre la licencia
+Apache 2.0 del código.
+
+Las skills de .claude/skills/ provienen de https://github.com/mattpocock/skills (MIT) y de otros
+autores; ver THIRD_PARTY_LICENSES.md.
