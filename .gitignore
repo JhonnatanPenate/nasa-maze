@@ -17,6 +17,7 @@ credentials*.json
 # Python
 __pycache__/
 .venv/
+*.egg-info/
 *.pyc
 
 # Node / front
