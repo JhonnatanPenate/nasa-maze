@@ -1,0 +1,7 @@
+# Build context is the repo root: send only what the image needs
+*
+!routing-engine/pyproject.toml
+!routing-engine/app
+!science
+!data/gale
+**/__pycache__

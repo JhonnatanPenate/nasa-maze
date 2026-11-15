@@ -27,3 +27,75 @@ jobs:
             (cd "$dir" && "/tmp/venv-$dir/bin/pytest" -q)
             echo "::endgroup::"
           done
+
+  # Builds every service image and checks that the container starts and answers its health endpoint
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - svc: location-service
+            context: location-service
+            port: 8001
+            health: /ready
+            mounts: >-
+              -v $PWD/location-service/data/seed:/app/data/seed:ro
+              -v $PWD/location-service/config:/app/config:ro
+          - svc: raster-service
+            context: raster-service
+            port: 8003
+            health: /health
+            mounts: -v $PWD/data:/data:ro
+          - svc: terrain-analysis
+            context: terrain-analysis
+            port: 8004
+            health: /health
+            mounts: -v $PWD/data:/data:ro
+          - svc: routing-engine
+            context: .
+            port: 8006
+            health: /health
+            mounts: -v $PWD/data/gale:/data/gale:ro
+    name: docker (${{ matrix.svc }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.svc }}/Dockerfile
+          tags: ${{ matrix.svc }}:ci
+          load: true
+          push: false
+          cache-from: type=gha,scope=${{ matrix.svc }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.svc }}
+      # The location catalog is git-ignored data: build the seed catalog the same way its README does
+      - if: matrix.svc == 'location-service'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - if: matrix.svc == 'location-service'
+        name: Build location seed catalog
+        run: |
+          pip install -q ./location-service
+          python -m location_service.ingest build \
+            --mission data/gale/processed/gale_puntos_quimica.xlsx \
+            --config location-service/config \
+            --out location-service/data/seed/location_catalog_seed.sqlite \
+            --report location-service/data/seed/ingest_report.json
+      - name: Smoke test
+        run: |
+          docker run -d --name svc -p ${{ matrix.port }}:${{ matrix.port }} ${{ matrix.mounts }} ${{ matrix.svc }}:ci
+          # A "degraded" health (e.g. data not found) is a failure, not a pass
+          for i in $(seq 1 45); do
+            if body=$(curl -fsS "http://localhost:${{ matrix.port }}${{ matrix.health }}"); then
+              echo "$body"
+              echo "$body" | grep -qE '"status": ?"(ok|ready)"' && { echo "healthy after ~$((i * 2)) s"; exit 0; }
+              break
+            fi
+            sleep 2
+          done
+          docker logs svc
+          exit 1
