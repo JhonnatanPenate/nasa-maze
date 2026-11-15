@@ -23,6 +23,9 @@ from app.infrastructure.datasources.unavailable_raster_datasource import (
 from app.infrastructure.repositories.dem_terrain_repository import (
     DemTerrainRepository,
 )
+from app.infrastructure.repositories.slope_grid_terrain_repository import (
+    SlopeGridTerrainRepository,
+)
 
 
 @lru_cache(maxsize=None)
@@ -44,9 +47,22 @@ def build_datasource(settings: Settings) -> RasterDatasource:
         return GeoTiffRasterDatasource(
             settings.dem_path, mapper, settings.max_window_cells
         )
+    if settings.datasource_kind == "rejilla":
+        if not settings.rejilla_path:
+            raise ValueError(
+                "Settings.rejilla_path (MS4_REJILLA_PATH) must point to a "
+                "multi-band slope GeoTIFF when datasource_kind='rejilla'"
+            )
+        return GeoTiffRasterDatasource(
+            settings.rejilla_path,
+            mapper,
+            settings.max_window_cells,
+            band=settings.rejilla_slope_band,
+        )
     raise ValueError(
-        f"Unsupported datasource_kind '{settings.datasource_kind}': 'http' is "
-        f"reserved for a future Raster Service (MS3) client"
+        f"Unsupported datasource_kind '{settings.datasource_kind}': expected "
+        f"'synthetic', 'geotiff' or 'rejilla'; 'http' is reserved for a "
+        f"future Raster Service (MS3) client"
     )
 
 
@@ -67,7 +83,10 @@ def get_raster_datasource() -> RasterDatasource:
 
 def get_terrain_repository(
     datasource: RasterDatasource = Depends(get_raster_datasource),
+    settings: Settings = Depends(get_settings),
 ) -> TerrainRepository:
+    if settings.datasource_kind == "rejilla":
+        return SlopeGridTerrainRepository(datasource)
     return DemTerrainRepository(datasource)
 
 

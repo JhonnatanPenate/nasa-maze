@@ -4,6 +4,7 @@ from app.core.domain.bounding_box import BoundingBox
 from app.core.domain.dem_window import DemWindow
 from app.core.domain.geo_point import GeoPoint
 from app.core.domain.halo_window import HaloWindow
+from app.core.domain.slope_window import SlopeWindow
 
 
 class TerrainRepository(ABC):
@@ -41,3 +42,21 @@ class TerrainRepository(ABC):
     @abstractmethod
     def is_available(self) -> bool:
         """Return True when the underlying datasource is reachable."""
+
+    def provides_slope(self) -> bool:
+        """True when the backing data source delivers slope directly
+        (grid mode) instead of elevation; use cases then call the slope_*
+        methods and report elevation as None."""
+        return False
+
+    def slope_window_around(
+        self, point: GeoPoint, radius_cells: int = 0
+    ) -> SlopeWindow:
+        """Slope window centred on the cell containing point; out-of-extent
+        cells are NaN."""
+        raise NotImplementedError
+
+    def slope_window_for(self, bbox: BoundingBox) -> SlopeWindow:
+        """Slope window covering bbox. Raises NoCoverageError when bbox does
+        not intersect the extent."""
+        raise NotImplementedError

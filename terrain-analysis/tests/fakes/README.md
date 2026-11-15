@@ -10,6 +10,12 @@ Reusable test doubles implementing `core/ports` contracts.
   reports `ping() == False`. Used by repository tests
   (`UpstreamDatasourceError` mapping, `is_available() == False`) and by
   API tests that need the HTTP 502 path or `/health` `degraded`.
+- `fake_slope_terrain_repository.py` — `FakeSlopeTerrainRepository`: a
+  `TerrainRepository` stub for grid mode. `provides_slope()` is True and
+  `slope_window_around`/`slope_window_for` serve windows from a small
+  in-memory slope array over a fixed extent (out-of-extent cells read as
+  NaN, non-intersecting bboxes raise `NoCoverageError`). DEM methods
+  raise `NotImplementedError`.
 
 ## Rules
 

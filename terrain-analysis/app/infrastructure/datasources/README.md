@@ -36,11 +36,12 @@ Concrete `RasterDatasource` implementations behind the data-access port.
   (bad `datasource_kind`, missing `dem_path`). `ping()` returns `False`
   (`/health` → `degraded`); reads raise `UpstreamDatasourceError` → 502.
 - `geotiff_datasource.py` — `GeoTiffRasterDatasource`: rasterio-backed
-  reader over a north-up geographic (lon/lat degrees) single-band GeoTIFF
-  (`Settings.dem_path`). Each open validates: ≥1 band, geographic CRS (if a
-  CRS is present), non-rotated transform, north-up (`e < 0`); violations
-  raise `UpstreamDatasourceError`. `ping()` returns `False` instead of
-  raising.
+  reader over a north-up geographic (lon/lat degrees) GeoTIFF
+  (`Settings.dem_path`; `band` selects the band read, e.g.
+  `Settings.rejilla_slope_band` for the rejilla slope grid). Each open
+  validates: the band is within `1..count`, geographic CRS (if a CRS is
+  present), non-rotated transform, north-up (`e < 0`); violations raise
+  `UpstreamDatasourceError`. `ping()` returns `False` instead of raising.
 
 ## Behaviour notes
 

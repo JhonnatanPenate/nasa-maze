@@ -20,6 +20,6 @@ class ValueStatsResponse(BaseModel):
 
 
 class AreaResponse(BaseModel):
-    elevation_m: ValueStatsResponse
+    elevation_m: ValueStatsResponse | None
     slope_deg: ValueStatsResponse
     steep_fraction: float

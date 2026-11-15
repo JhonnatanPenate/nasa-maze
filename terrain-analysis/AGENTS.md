@@ -2,13 +2,13 @@
 
 ## MS4 Terrain Analysis Service (`terrain-analysis/`)
 
-- Execution plan: `docs/terrain_analysis/IMPLEMENTATION_PLANMS4_1.md` (source of truth; update §8 WP status as work proceeds).
+- Execution plan: `docs/terrain_analysis/IMPLEMENTATION_PLANMS4_1.md` (WPs WP0–WP7 done). Current direction: `docs/terrain_analysis/REALIGNMENT_PLANMS4_1.md` (R0–R5 implemented — realignment to the delivered `data/gale/` grid; update §8 status if work resumes).
 - Contract: `docs/SPEC_MS4_TERRAIN_ANALYSIS.md`.
 - Subagent profiles: `.devin/agents/tdd-developer.md` (model `swe`) for WPs, `.devin/agents/code-reviewer.md` (model `opus`) for review.
 
 ### Decisions (confirmed by user)
 - Python: use **3.12** for the venv (rasterio wheel safety on Windows): `py -3.12 -m venv .venv`.
-- Commits: one conventional commit per WP on `feature/terrain-analysis` after green tests + clean review. Do not push.
+- Commits: one conventional commit per WP on the current working branch (`fix/terrain-analysis-api`) after green tests + clean review. Do not push.
 
 ### Commands
 ```bash
@@ -17,4 +17,6 @@ py -3.12 -m venv .venv && source .venv/Scripts/activate
 pip install -e ".[dev]"
 pytest -v
 uvicorn app.main:app --port 8004
+# run against the delivered Gale grid (slope verbatim, elevation_m null):
+MS4_DATASOURCE_KIND=rejilla uvicorn app.main:app --port 8004
 ```

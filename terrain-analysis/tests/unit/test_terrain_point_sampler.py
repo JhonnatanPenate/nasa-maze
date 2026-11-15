@@ -20,13 +20,33 @@ from app.infrastructure.datasources.synthetic_dem_datasource import (
 from app.infrastructure.repositories.dem_terrain_repository import (
     DemTerrainRepository,
 )
+from app.core.domain.bounding_box import BoundingBox
+from app.core.domain.slope_window import SlopeWindow
 from tests.fakes.failing_raster_datasource import FailingRasterDatasource
+from tests.fakes.fake_slope_terrain_repository import (
+    FakeSlopeTerrainRepository,
+)
 
 # Small DEM: extent lon 77.4..77.6, lat 18.4..18.6, 21x21 cells,
 # elevation[r, c] = 500 + 2c - 3r, nodata cell (5, 5).
 CELL_DEG = 0.2 / 21.0
 NODATA_LAT = 18.6 - 5.5 * CELL_DEG
 NODATA_LON = 77.4 + 5.5 * CELL_DEG
+
+# Slope grid: extent lon 100..105, lat -10..-5, 5x5 cells of 1 degree.
+# Cell (r, c) centre is lat=-5.5-r, lon=100.5+c; (2, 2) is nodata.
+GRID_SLOPE = np.array(
+    [
+        [1.0, 2.0, 3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0, 9.0, 10.0],
+        [11.0, 12.0, np.nan, 14.0, 15.0],
+        [16.0, 17.0, 18.0, 19.0, 20.0],
+        [21.0, 22.0, 23.0, 24.0, 25.0],
+    ]
+)
+GRID_EXTENT = BoundingBox(
+    min_lon=100.0, min_lat=-10.0, max_lon=105.0, max_lat=-5.0
+)
 
 
 @pytest.fixture
@@ -68,6 +88,7 @@ class TestSampleHappyPath:
 
     def test_single_window_read_per_sample(self) -> None:
         repository = Mock(spec=TerrainRepository)
+        repository.provides_slope.return_value = False
         repository.window_around.return_value = DemWindow(
             elevation=np.full((3, 3), 100.0),
             cell_size_x_m=500.0,
@@ -113,6 +134,7 @@ class TestSampleFailures:
         # Only the centre cell holds data: the elevation is valid but the
         # slope is undefined (all 8 neighbours NaN).
         repository = Mock(spec=TerrainRepository)
+        repository.provides_slope.return_value = False
         repository.window_around.return_value = DemWindow(
             elevation=np.array(
                 [
@@ -139,3 +161,65 @@ class TestSampleFailures:
         )
         with pytest.raises(UpstreamDatasourceError):
             sampler.sample(GeoPoint(lat=18.5, lon=77.5))
+
+
+class TestSampleGridMode:
+    """Grid mode: slope comes pre-computed from the datasource, so the
+    sampler reads a slope window and reports elevation_m as None; the
+    SlopeCalculator must not be touched."""
+
+    @pytest.fixture
+    def slope_calculator(self) -> Mock:
+        return Mock(spec=SlopeCalculator)
+
+    @pytest.fixture
+    def grid_sampler(self, slope_calculator: Mock) -> TerrainPointSampler:
+        return TerrainPointSampler(
+            FakeSlopeTerrainRepository(GRID_SLOPE, GRID_EXTENT),
+            slope_calculator,
+        )
+
+    def test_returns_slope_from_window_and_null_elevation(
+        self, grid_sampler: TerrainPointSampler, slope_calculator: Mock
+    ) -> None:
+        point = GeoPoint(lat=-8.5, lon=103.5)  # cell (3, 3) -> 19.0 deg
+
+        sample = grid_sampler.sample(point)
+
+        assert isinstance(sample, TerrainPointSample)
+        assert sample.elevation_m is None
+        assert sample.slope_deg == pytest.approx(19.0)
+        slope_calculator.compute_at_center.assert_not_called()
+        slope_calculator.compute.assert_not_called()
+
+    def test_single_slope_window_read_with_radius_zero(self) -> None:
+        repository = Mock(spec=TerrainRepository)
+        repository.provides_slope.return_value = True
+        repository.slope_window_around.return_value = SlopeWindow(
+            slope_deg=np.array([[12.5]]),
+            cell_size_x_m=90.0,
+            cell_size_y_m=90.0,
+        )
+        sampler = TerrainPointSampler(repository, Mock(spec=SlopeCalculator))
+        point = GeoPoint(lat=-8.5, lon=103.5)
+
+        sample = sampler.sample(point)
+
+        repository.slope_window_around.assert_called_once_with(point, 0)
+        repository.window_around.assert_not_called()
+        assert sample.elevation_m is None
+        assert sample.slope_deg == pytest.approx(12.5)
+
+    def test_nodata_cell_raises_no_coverage(
+        self, grid_sampler: TerrainPointSampler
+    ) -> None:
+        with pytest.raises(
+            NoCoverageError, match="lat=-7.5, lon=102.5"
+        ):
+            grid_sampler.sample(GeoPoint(lat=-7.5, lon=102.5))
+
+    def test_point_outside_extent_raises_no_coverage(
+        self, grid_sampler: TerrainPointSampler
+    ) -> None:
+        with pytest.raises(NoCoverageError):
+            grid_sampler.sample(GeoPoint(lat=0.0, lon=103.5))

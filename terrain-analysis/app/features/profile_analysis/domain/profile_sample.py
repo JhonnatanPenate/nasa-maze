@@ -8,5 +8,5 @@ class ProfileSample:
     lat: float
     lon: float
     distance_m: float
-    elevation_m: float
+    elevation_m: float | None
     slope_deg: float

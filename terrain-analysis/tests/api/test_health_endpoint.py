@@ -2,7 +2,7 @@ import pytest
 
 from app.features.health.presentation.health_router import router
 
-EXPECTED_KEYS = {"status", "datasource"}
+EXPECTED_KEYS = {"status", "datasource", "datasource_kind"}
 
 
 @pytest.fixture
@@ -21,7 +21,11 @@ def test_health_ok(client) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert set(payload.keys()) == EXPECTED_KEYS
-    assert payload == {"status": "ok", "datasource": "ok"}
+    assert payload == {
+        "status": "ok",
+        "datasource": "ok",
+        "datasource_kind": "synthetic",
+    }
 
 
 def test_health_degraded_when_datasource_fails(failing_client) -> None:
@@ -30,4 +34,8 @@ def test_health_degraded_when_datasource_fails(failing_client) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert set(payload.keys()) == EXPECTED_KEYS
-    assert payload == {"status": "degraded", "datasource": "unavailable"}
+    assert payload == {
+        "status": "degraded",
+        "datasource": "unavailable",
+        "datasource_kind": "synthetic",
+    }
