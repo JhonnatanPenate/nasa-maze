@@ -1,0 +1,4 @@
+feature_id,feature_name,descriptor,body,center_lat,center_lon,center_lon_west,bbox_west,bbox_south,bbox_east,bbox_north,diameter_km,approval_status,name_origin
+20101,East Positive Mons,mons,Mars,20.0,250.5,,,,,,,Approved,
+20102,East Positive Crater,crater,Mars,-10.0,300.25,,,,,,,Approved,
+20103,East Positive Terra,terra,Mars,0.0,45.0,,,,,,,Approved,

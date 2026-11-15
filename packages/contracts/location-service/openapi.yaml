@@ -1,0 +1,806 @@
+openapi: 3.1.0
+info:
+  title: Planetary Explorer - Location Service (Mars)
+  version: 0.1.0
+  description: >-
+    Mars Location Service. Converts human references (names, ids, coordinates)
+    into validated planetary coordinates and returns context (nearby places and
+    containing regions). Offline at runtime. Source of truth for Core and other
+    services; implementation lives in location-service/.
+  contact:
+    name: Planetary Explorer team
+servers:
+  - url: http://localhost:8001
+    description: Local development
+tags:
+  - name: places
+  - name: resolve
+  - name: regions
+  - name: meta
+  - name: health
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Liveness probe (always 200 while the process is alive)
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /ready:
+    get:
+      tags: [health]
+      summary: Readiness probe (200 only after the catalog is loaded)
+      operationId: getReady
+      responses:
+        "200":
+          description: Catalog loaded and service ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "503":
+          description: Catalog not loaded
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+
+  /v1/places/search:
+    get:
+      tags: [places]
+      summary: Text search over place names and aliases
+      operationId: searchPlaces
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 100 }
+          description: Free-text query (names, aliases, descriptors)
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+        - name: kind
+          in: query
+          required: false
+          schema: { type: string, enum: [feature, poi, landing_site] }
+        - name: feature_type
+          in: query
+          required: false
+          schema: { type: string }
+        - name: source
+          in: query
+          required: false
+          schema: { type: string, enum: [iau_gazetteer, mission_msl, config] }
+        - name: near_lat
+          in: query
+          required: false
+          schema: { type: number, minimum: -90, maximum: 90 }
+        - name: near_lon
+          in: query
+          required: false
+          schema: { type: number }
+          description: >-
+            Tie-breaker longitude. Accepts [-180,180] or [0,360); normalized
+            to [0,360). Must be given together with near_lat.
+        - name: region
+          in: query
+          required: false
+          schema: { type: string }
+          description: Region id (e.g. aoi:gale-90m); only places inside it
+        - name: body
+          in: query
+          required: false
+          schema: { type: string, default: mars }
+      responses:
+        "200":
+          description: Search results (empty list when nothing matches)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+        "422":
+          $ref: "#/components/responses/Problem422"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/places/reverse:
+    get:
+      tags: [places]
+      summary: Reverse geocoding - nearest places and containing features
+      operationId: reverseGeocode
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: { type: number }
+        - name: lon
+          in: query
+          required: true
+          schema: { type: number }
+          description: Accepts [-180,180] or [0,360); normalized to [0,360)
+        - name: radius_m
+          in: query
+          required: false
+          schema: { type: number, minimum: 0, maximum: 500000, default: 5000 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 5 }
+        - name: kind
+          in: query
+          required: false
+          schema: { type: string, enum: [feature, poi, landing_site] }
+        - name: body
+          in: query
+          required: false
+          schema: { type: string, default: mars }
+      responses:
+        "200":
+          description: Nearest places, approximate containment, regions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReverseResponse"
+        "422":
+          $ref: "#/components/responses/Problem422"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/places:
+    get:
+      tags: [places]
+      summary: Filtered, paginated listing of places
+      operationId: listPlaces
+      parameters:
+        - name: kind
+          in: query
+          required: false
+          schema: { type: string, enum: [feature, poi, landing_site] }
+        - name: feature_type
+          in: query
+          required: false
+          schema: { type: string }
+        - name: source
+          in: query
+          required: false
+          schema: { type: string, enum: [iau_gazetteer, mission_msl, config] }
+        - name: tag
+          in: query
+          required: false
+          schema: { type: string }
+          description: Exact tag match (e.g. target_route:hematite)
+        - name: region
+          in: query
+          required: false
+          schema: { type: string }
+        - name: bbox_west
+          in: query
+          required: false
+          schema: { type: number }
+        - name: bbox_south
+          in: query
+          required: false
+          schema: { type: number }
+        - name: bbox_east
+          in: query
+          required: false
+          schema: { type: number }
+        - name: bbox_north
+          in: query
+          required: false
+          schema: { type: number }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+        - name: offset
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+        - name: body
+          in: query
+          required: false
+          schema: { type: string, default: mars }
+      responses:
+        "200":
+          description: Page of places
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaceListResponse"
+        "422":
+          $ref: "#/components/responses/Problem422"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/places/{place_id}:
+    get:
+      tags: [places]
+      summary: Place by stable identifier
+      operationId: getPlace
+      parameters:
+        - name: place_id
+          in: path
+          required: true
+          schema: { type: string }
+          description: e.g. mars:msl:glen-etive (URL-encode the colons)
+      responses:
+        "200":
+          description: The place
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaceResponse"
+        "404":
+          $ref: "#/components/responses/Problem404"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/resolve:
+    post:
+      tags: [resolve]
+      summary: >-
+        Resolve origin and destination endpoints (names, ids or coordinates)
+        into validated coordinates. Main contract for Core.
+      operationId: resolveEndpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResolveRequest"
+      responses:
+        "200":
+          description: >-
+            Business result. Always 200 for well-formed requests; inspect
+            status fields. 4xx only for malformed requests.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResolveResponse"
+        "422":
+          $ref: "#/components/responses/Problem422"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/regions:
+    get:
+      tags: [regions]
+      summary: Known regions / areas of interest
+      operationId: listRegions
+      responses:
+        "200":
+          description: Region list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegionsResponse"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/meta/catalog:
+    get:
+      tags: [meta]
+      summary: Catalog metadata - version, sources, counts
+      operationId: getCatalogMeta
+      responses:
+        "200":
+          description: Catalog metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogMetaResponse"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/meta/feature-types:
+    get:
+      tags: [meta]
+      summary: Feature types present in the catalog and their counts
+      operationId: getFeatureTypes
+      responses:
+        "200":
+          description: Feature type counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureTypesResponse"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+  /v1/admin/reload:
+    post:
+      tags: [meta]
+      summary: Reload the catalog from disk (internal use only)
+      operationId: reloadCatalog
+      responses:
+        "200":
+          description: Catalog reloaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReloadResponse"
+        "403":
+          description: Admin endpoints disabled (LOCATION_ADMIN_ENABLED=false)
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "503":
+          $ref: "#/components/responses/Problem503"
+
+components:
+  responses:
+    Problem422:
+      description: Invalid or out-of-range parameter
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Problem404:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Problem503:
+      description: Catalog unavailable
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, ready]
+
+    Problem:
+      type: object
+      required: [type, title, status, code, detail, request_id]
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://planetary-explorer.local/errors/out-of-range"
+        title:
+          type: string
+        status:
+          type: integer
+        code:
+          type: string
+          enum:
+            - INVALID_PARAMETER
+            - OUT_OF_RANGE
+            - UNSUPPORTED_BODY
+            - UNSUPPORTED_COORDINATE_SYSTEM
+            - NOT_FOUND
+            - CATALOG_UNAVAILABLE
+            - INTERNAL_ERROR
+        detail:
+          type: string
+        request_id:
+          type: string
+
+    CoordinateSystem:
+      type: object
+      description: >-
+        Canonical Mars coordinate convention. Present in every response that
+        contains coordinates.
+      required:
+        - body
+        - crs
+        - lat_type
+        - lon_convention
+        - radius_m
+      properties:
+        body: { type: string, enum: [mars] }
+        crs: { type: string, enum: ["IAU_2015:49900"] }
+        lat_type: { type: string, enum: [planetocentric] }
+        lon_convention: { type: string, enum: [east_positive_0_360] }
+        radius_m: { type: integer, enum: [3396190] }
+
+    Center:
+      type: object
+      required: [lat, lon]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lon: { type: number, minimum: 0, exclusiveMaximum: 360 }
+
+    Bbox:
+      type: object
+      required: [west, south, east, north]
+      properties:
+        west: { type: number }
+        south: { type: number, minimum: -90, maximum: 90 }
+        east: { type: number }
+        north: { type: number, minimum: -90, maximum: 90 }
+
+    Place:
+      type: object
+      required:
+        - id
+        - name
+        - body
+        - kind
+        - feature_type
+        - source
+        - center
+        - bbox
+        - diameter_km
+        - elevation_m
+        - approval_status
+        - aliases
+        - tags
+        - properties
+        - in_regions
+      properties:
+        id:
+          type: string
+          example: "mars:msl:glen-etive"
+        name: { type: string }
+        body: { type: string, enum: [mars] }
+        kind:
+          type: string
+          enum: [feature, poi, landing_site]
+        feature_type:
+          type: string
+          description: Gazetteer descriptor or mission_target / landing_site
+        source:
+          type: string
+          enum: [iau_gazetteer, mission_msl, config]
+        center:
+          $ref: "#/components/schemas/Center"
+        bbox:
+          oneOf:
+            - $ref: "#/components/schemas/Bbox"
+            - type: "null"
+        diameter_km:
+          type: [number, "null"]
+        elevation_m:
+          type: [number, "null"]
+          description: Informational only; Raster Service is authoritative
+        approval_status:
+          type: [string, "null"]
+        aliases:
+          type: array
+          items: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        properties:
+          type: object
+          additionalProperties: true
+          description: Extra non-null attributes (sol, mineral percentages...)
+        in_regions:
+          type: array
+          items: { type: string }
+          description: Regions whose bbox contains the place center
+
+    PlaceResponse:
+      type: object
+      required: [place, coordinate_system]
+      properties:
+        place:
+          $ref: "#/components/schemas/Place"
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystem"
+
+    MatchType:
+      type: string
+      enum: [exact_name, exact_alias, prefix, tokens, fuzzy]
+
+    SearchResultItem:
+      type: object
+      required: [score, match_type, place]
+      properties:
+        score: { type: number, minimum: 0, maximum: 1 }
+        match_type:
+          $ref: "#/components/schemas/MatchType"
+        place:
+          $ref: "#/components/schemas/Place"
+
+    SearchResponse:
+      type: object
+      required:
+        - query
+        - normalized_query
+        - total
+        - results
+        - catalog_version
+        - coordinate_system
+      properties:
+        query: { type: string }
+        normalized_query: { type: string }
+        total: { type: integer, minimum: 0 }
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResultItem"
+        catalog_version: { type: string }
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystem"
+
+    ReverseNearestItem:
+      type: object
+      required: [distance_m, place]
+      properties:
+        distance_m: { type: number, minimum: 0 }
+        place:
+          $ref: "#/components/schemas/Place"
+
+    ReverseContainingItem:
+      type: object
+      required: [place, containment]
+      properties:
+        place:
+          $ref: "#/components/schemas/Place"
+        containment:
+          type: string
+          enum: [approximate_circle]
+
+    ReverseResponse:
+      type: object
+      required:
+        - point
+        - nearest
+        - containing
+        - regions
+        - coordinate_system
+      properties:
+        point:
+          $ref: "#/components/schemas/Center"
+        nearest:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReverseNearestItem"
+        containing:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReverseContainingItem"
+        regions:
+          type: array
+          items: { type: string }
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystem"
+
+    PlaceListResponse:
+      type: object
+      required: [total, limit, offset, places]
+      properties:
+        total: { type: integer, minimum: 0 }
+        limit: { type: integer }
+        offset: { type: integer }
+        places:
+          type: array
+          items:
+            $ref: "#/components/schemas/Place"
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystem"
+
+    CoordinatesInput:
+      type: object
+      required: [lat, lon]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lon:
+          type: number
+          description: Accepts [-180,180] or [0,360); normalized to [0,360)
+
+    CoordinateSystemInput:
+      type: object
+      description: >-
+        Optional client-declared convention. If present it must match the
+        canonical Mars convention or the request fails with
+        UNSUPPORTED_COORDINATE_SYSTEM.
+      properties:
+        body: { type: string }
+        crs: { type: string }
+        lat_type: { type: string }
+        lon_convention: { type: string }
+        radius_m: { type: integer }
+
+    EndpointInput:
+      type: object
+      description: Provide exactly one of query, place_id or coordinates.
+      properties:
+        query: { type: string, minLength: 1, maxLength: 100 }
+        place_id: { type: string, minLength: 1 }
+        coordinates:
+          $ref: "#/components/schemas/CoordinatesInput"
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystemInput"
+
+    ResolveOptions:
+      type: object
+      properties:
+        ambiguity_gap:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.05
+        max_alternatives:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 3
+
+    ResolveRequest:
+      type: object
+      required: [origin, destination]
+      properties:
+        body: { type: string, default: mars }
+        origin:
+          $ref: "#/components/schemas/EndpointInput"
+        destination:
+          $ref: "#/components/schemas/EndpointInput"
+        options:
+          $ref: "#/components/schemas/ResolveOptions"
+
+    EndpointStatus:
+      type: string
+      enum: [resolved, ambiguous, not_found, invalid]
+
+    ResolveStatus:
+      type: string
+      enum: [resolved, partial, ambiguous, not_found, invalid]
+
+    Alternative:
+      type: object
+      required: [score, match_type, place]
+      properties:
+        score: { type: number }
+        match_type:
+          $ref: "#/components/schemas/MatchType"
+        place:
+          $ref: "#/components/schemas/Place"
+
+    EndpointResult:
+      type: object
+      required: [status, input, point, place, alternatives]
+      properties:
+        status:
+          $ref: "#/components/schemas/EndpointStatus"
+        input:
+          $ref: "#/components/schemas/EndpointInput"
+        point:
+          oneOf:
+            - $ref: "#/components/schemas/Center"
+            - type: "null"
+        place:
+          oneOf:
+            - $ref: "#/components/schemas/Place"
+            - type: "null"
+        nearest_place:
+          oneOf:
+            - $ref: "#/components/schemas/Place"
+            - type: "null"
+        alternatives:
+          type: array
+          items:
+            $ref: "#/components/schemas/Alternative"
+
+    WarningCode:
+      type: string
+      enum:
+        - OUTSIDE_KNOWN_AOI
+        - ENDPOINTS_IN_DIFFERENT_REGIONS
+        - SAME_POINT
+        - CO_LOCATED_PLACES
+        - LOW_CONFIDENCE_MATCH
+
+    ResolveResponse:
+      type: object
+      required:
+        - status
+        - origin
+        - destination
+        - straight_line_distance_m
+        - shared_regions
+        - warnings
+        - catalog_version
+        - coordinate_system
+      properties:
+        status:
+          $ref: "#/components/schemas/ResolveStatus"
+        origin:
+          $ref: "#/components/schemas/EndpointResult"
+        destination:
+          $ref: "#/components/schemas/EndpointResult"
+        straight_line_distance_m:
+          type: [number, "null"]
+        shared_regions:
+          type: array
+          items: { type: string }
+        warnings:
+          type: array
+          items:
+            $ref: "#/components/schemas/WarningCode"
+        catalog_version: { type: string }
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystem"
+
+    Region:
+      type: object
+      required: [id, name, kind, bbox, source, note]
+      properties:
+        id: { type: string, example: "aoi:gale-90m" }
+        name: { type: string }
+        kind: { type: string, enum: [aoi, other] }
+        bbox:
+          oneOf:
+            - $ref: "#/components/schemas/Bbox"
+            - type: "null"
+        source: { type: string }
+        note:
+          type: [string, "null"]
+
+    RegionsResponse:
+      type: object
+      required: [regions, coordinate_system]
+      properties:
+        regions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Region"
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystem"
+
+    CatalogMetaResponse:
+      type: object
+      required:
+        - catalog_version
+        - built_at
+        - schema_version
+        - sources
+        - counts
+        - coordinate_system
+      properties:
+        catalog_version: { type: string }
+        built_at: { type: string, format: date-time }
+        schema_version: { type: integer }
+        sources:
+          type: object
+          additionalProperties: { type: string }
+          description: source name -> sha256 of the source file
+        counts:
+          type: object
+          description: >-
+            Place/alias/region totals plus by_source, by_kind and
+            by_feature_type breakdowns.
+        coordinate_system:
+          $ref: "#/components/schemas/CoordinateSystem"
+
+    FeatureTypeCount:
+      type: object
+      required: [feature_type, count]
+      properties:
+        feature_type: { type: string }
+        count: { type: integer, minimum: 0 }
+
+    FeatureTypesResponse:
+      type: object
+      required: [feature_types]
+      properties:
+        feature_types:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeatureTypeCount"
+
+    ReloadResponse:
+      type: object
+      required: [status, catalog_version]
+      properties:
+        status: { type: string, enum: [reloaded] }
+        catalog_version: { type: string }
