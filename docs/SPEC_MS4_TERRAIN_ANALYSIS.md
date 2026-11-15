@@ -1,7 +1,9 @@
 # Spec: Terrain Analysis Service (MS4)
-**Version:** 0.2.0 | **Status:** Draft — realigned with `data_usar/` package | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
+**Version:** 0.2.1 | **Status:** Draft — realigned with `data/gale/` package | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
 
-> **v0.2 changes:** the delivered data package provides slope **pre-computed** (`pendiente_grados`, band 1 of `rejilla_ruta_90m.tif`) and no elevation band. MS4 keeps its API contract but gains a second mode: read slope directly from the delivered grid when no DEM is available. Mars radius fixed to 3396.19 km (IAU_2015:49900). See `docs/terrain_analysis/REALIGNMENT_PLANMS4_1.md`.
+> **v0.2 changes:** the delivered data package provides slope **pre-computed** (`pendiente_grados`, band 1 of `data/gale/processed/rejilla_ruta_90m.tif`) and no elevation band. MS4 keeps its API contract but gains a second mode: read slope directly from the delivered grid when no DEM is available. Mars radius fixed to 3396.19 km (IAU_2015:49900). See `docs/terrain_analysis/REALIGNMENT_PLANMS4_1.md`.
+>
+> **v0.2.1:** data package relocated to `data/gale/` (tabular data is `.xlsx`-only, no CSV — irrelevant to MS4, which only reads the GeoTIFF). Dataset path via `MS4_REJILLA_PATH`; default `data/gale/processed/rejilla_ruta_90m.tif`.
 
 ## 1. Service Identity
 
@@ -62,7 +64,7 @@ Base URL: `/terrain`
 
 ### Data dependencies (what the service needs)
 
-- **Grid mode (delivered):** `rejilla_ruta_90m.tif` band `pendiente_grados` (and optionally other bands for future enrichment), CRS `IAU_2015:49900`, bounds `[137.345, -4.740, 137.455, -4.580]`.
+- **Grid mode (delivered):** `data/gale/processed/rejilla_ruta_90m.tif` band `pendiente_grados` (and optionally other bands for future enrichment), CRS `IAU_2015:49900`, bounds `[137.345, -4.740, 137.455, -4.580]`.
 - **DEM mode (pending):** elevation DEM (GeoTIFF) exposed via Raster Service / datasource — requested from the data team; spec assumes it will arrive with the same CRS/extent family.
 - Configuration: slope thresholds (see §5), sampling limits, `planet_radius_km = 3396.19` (mandatory IAU_2015:49900).
 
