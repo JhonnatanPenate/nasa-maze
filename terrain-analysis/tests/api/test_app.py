@@ -33,7 +33,11 @@ class TestSmokeDefaultDatasource:
     def test_health(self, client: TestClient) -> None:
         response = client.get("/health")
         assert response.status_code == 200
-        assert response.json() == {"status": "ok", "datasource": "ok"}
+        assert response.json() == {
+            "status": "ok",
+            "datasource": "ok",
+            "datasource_kind": "synthetic",
+        }
 
     def test_point(self, client: TestClient) -> None:
         response = client.get(

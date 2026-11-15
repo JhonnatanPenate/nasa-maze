@@ -1,4 +1,5 @@
 import math
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
@@ -23,8 +24,26 @@ from app.infrastructure.repositories.dem_terrain_repository import (
 )
 from tests.conftest import TEST_DEM_EXTENT, TEST_NODATA
 from tests.fakes.failing_raster_datasource import FailingRasterDatasource
+from tests.fakes.fake_slope_terrain_repository import (
+    FakeSlopeTerrainRepository,
+)
 
 STEEP_MIN_DEG = Settings().slope_moderate_max_deg
+
+# Slope grid: extent lon 100..105, lat -10..-5, 5x5 cells of 1 degree.
+# Cell (r, c) centre is lat=-5.5-r, lon=100.5+c; (2, 2) is nodata.
+GRID_SLOPE = np.array(
+    [
+        [1.0, 2.0, 3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0, 9.0, 10.0],
+        [11.0, 12.0, np.nan, 14.0, 15.0],
+        [16.0, 17.0, 18.0, 19.0, 20.0],
+        [21.0, 22.0, 23.0, 24.0, 25.0],
+    ]
+)
+GRID_EXTENT = BoundingBox(
+    min_lon=100.0, min_lat=-10.0, max_lon=105.0, max_lat=-5.0
+)
 
 
 def _bbox(
@@ -206,6 +225,51 @@ class TestExpectedFailures:
         )
         with pytest.raises(UpstreamDatasourceError):
             failing_case.execute(_bbox(77.49, 18.49, 77.51, 18.51))
+
+
+class TestGridMode:
+    """Grid mode: slope stats come straight from the pre-computed slope
+    band, elevation_m is None and the SlopeCalculator is not used."""
+
+    def test_stats_from_slope_band(self) -> None:
+        slope_calculator = Mock(spec=SlopeCalculator)
+        use_case = AnalyzeArea(
+            FakeSlopeTerrainRepository(GRID_SLOPE, GRID_EXTENT),
+            slope_calculator,
+            15.0,
+        )
+
+        stats = use_case.execute(_bbox(100.0, -10.0, 105.0, -5.0))
+
+        assert stats.elevation_m is None
+        # 24 valid cells (13 deg at (2, 2) is nodata): min 1, max 25,
+        # mean (325 - 13) / 24.
+        assert stats.slope_deg.min == pytest.approx(1.0)
+        assert stats.slope_deg.max == pytest.approx(25.0)
+        assert stats.slope_deg.mean == pytest.approx(13.0)
+        # Cells with slope >= 15 deg: 15..25 -> 11 of 24.
+        assert stats.steep_fraction == pytest.approx(11.0 / 24.0)
+        slope_calculator.compute.assert_not_called()
+
+    def test_all_nodata_window_raises_no_coverage(self) -> None:
+        use_case = AnalyzeArea(
+            FakeSlopeTerrainRepository(
+                np.full((5, 5), np.nan), GRID_EXTENT
+            ),
+            SlopeCalculator(),
+            STEEP_MIN_DEG,
+        )
+        with pytest.raises(NoCoverageError):
+            use_case.execute(_bbox(100.0, -10.0, 105.0, -5.0))
+
+    def test_bbox_outside_extent_raises_no_coverage(self) -> None:
+        use_case = AnalyzeArea(
+            FakeSlopeTerrainRepository(GRID_SLOPE, GRID_EXTENT),
+            SlopeCalculator(),
+            STEEP_MIN_DEG,
+        )
+        with pytest.raises(NoCoverageError):
+            use_case.execute(_bbox(110.0, -10.0, 111.0, -5.0))
 
 
 def _bowl_datasource(
