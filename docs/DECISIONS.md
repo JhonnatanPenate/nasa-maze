@@ -27,3 +27,8 @@ decision, the status, and where it is implemented.
   R = 3,396,190 m); no Earth geodesy library is used.
 - Gazetteer-dependent golden cases 7–8 are `skipif`-guarded while
   `data/raw/mars/gazetteer/` is absent; seed-mode cases all pass.
+- Golden case 13 (Bradbury Landing → Glen Etive): the spec's "≈ 14–15 km"
+  appears to be an estimate; the haversine straight-line distance with
+  R = 3,396,190 m is 9,026 m (the delivered route metadata reports a 10.3 km
+  path). The test asserts the computed value (8–11 km) and case 23 verifies
+  the formula against an independent calculation.
