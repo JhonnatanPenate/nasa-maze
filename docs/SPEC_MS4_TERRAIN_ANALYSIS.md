@@ -99,6 +99,8 @@ Base URL: `/terrain`
 }
 ```
 
+> In grid mode `elevation_gain_m`, `elevation_loss_m`, and per-sample `elevation_m` are `null` (keys present); `slope_deg`, `max_slope_deg`, and distances are always populated.
+
 ### 4.3 Area response `200`
 
 ```json
@@ -108,6 +110,8 @@ Base URL: `/terrain`
   "steep_fraction": 0.12
 }
 ```
+
+> In grid mode `elevation_m` is `null` (key present); `slope_deg` and `steep_fraction` are always populated.
 
 ### 4.4 Error responses
 
@@ -128,7 +132,7 @@ Base URL: `/terrain`
 
 - Offline-capable once datasets are prepared (no external calls except Raster Service).
 - Point query p95 < 200 ms; profile of 100 samples < 2 s.
-- `GET /health` endpoint returning `{"status": "ok"}` and raster connectivity status.
+- `GET /health` endpoint returning `{"status": "ok"}`, raster connectivity status, and the configured `datasource_kind`.
 
 ## 7. Acceptance Criteria (2-day scope)
 

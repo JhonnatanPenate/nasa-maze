@@ -1,6 +1,6 @@
 # MS4 Terrain Analysis Service — Realignment Plan (v2)
 
-**Version:** 1.1.0 | **Status:** Proposed | **Date:** 2026-11-14
+**Version:** 1.1.0 | **Status:** Implemented | **Date:** 2026-11-14
 **Audience:** Manager (orchestrator) agent + team implementing MS4 against the delivered data package.
 **Supersedes/extends:** [`IMPLEMENTATION_PLANMS4_1.md`](IMPLEMENTATION_PLANMS4_1.md) (all WPs done) — this plan realigns the **finished** implementation to the real data delivered in `data/gale/`.
 **Contract of record:** [`docs/SPEC_MS4_TERRAIN_ANALYSIS.md`](../SPEC_MS4_TERRAIN_ANALYSIS.md) **v0.2.1**
@@ -69,7 +69,7 @@ Dependency: `R0 → R1 → R2/R3 (parallel) → R4 → R5`
 ## 6. Open requests to the data team
 
 1. **Source DEM** used to derive `pendiente_grados` (to restore `elevation_m` + Horn validation). If it won't arrive, grid mode stays the production mode and `elevation_m` remains `null` permanently — acceptable per spec v0.2.
-2. Confirm `rejilla_ruta_90m.tif` nodata value and exact grid registration (cell-center vs. corner origin) — **verifiable now** by inspecting the delivered file during R2.
+2. ~~Confirm `rejilla_ruta_90m.tif` nodata value and exact grid registration (cell-center vs. corner origin)~~ — **answered** by inspecting the delivered file during R2: nodata = `NaN` (no NaN cells actually present), `AREA_OR_POINT=Area` (corner registration), 72 cols × 105 rows, real bounds `[137.345, -4.739427, 137.454322, -4.58]`, resolution `0.0015183544°`.
 3. Optimizer scripts (`optimizador_rutas.py`, `crs_marte.py`, `modelos_inclinacion_por_suelo.R`) referenced by `docs/data/` handoff are **not in the repo** — needed by MS6, not MS4; track separately.
 4. `data_usar/` remains in the repo but is **superseded** — confirm it can be deleted/archived to avoid dual-source confusion.
 
@@ -83,9 +83,16 @@ Dependency: `R0 → R1 → R2/R3 (parallel) → R4 → R5`
 
 | WP | Status |
 |---|---|
-| R0 Config | pending |
-| R1 Domain | pending |
-| R2 RejillaDatasource | pending — **unblocked**: `data/gale/processed/rejilla_ruta_90m.tif` is in the repo |
-| R3 Null-elevation plumbing | pending |
-| R4 Integration test | pending — **unblocked**: real file available |
-| R5 Docs & review | pending |
+| R0 Config | done |
+| R1 Domain | done |
+| R2 RejillaDatasource | done |
+| R3 Null-elevation plumbing | done |
+| R4 Integration test | done — 392 tests pass; `tests/api/test_rejilla_integration.py` runs end-to-end against the real file (skipped if absent); slope values match band 1 exactly |
+| R5 Docs & review | done |
+
+## 9. Deviations recorded during execution
+
+- **No `rejilla_grid_datasource.py`** — band selection was added as a `band` parameter on the existing `GeoTiffRasterDatasource` instead of a dedicated datasource class.
+- **No `slope_window_mapper.py`** — the DemWindow→SlopeWindow conversion lives as an inline helper inside `SlopeGridTerrainRepository`.
+- **`rejilla_path` default is absolute** — anchored to the repo root in `settings.py` (`<repo root>/data/gale/processed/rejilla_ruta_90m.tif`), not the relative path in D7, so the service works when run from `terrain-analysis/`.
+- **`datasource_kind` in `HealthResponse`** is typed `Literal["synthetic", "geotiff", "rejilla", "http"]`, echoing the configured kind (not just observed availability).
