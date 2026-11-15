@@ -18,6 +18,9 @@ class GazetteerConfig:
     convention_lon: str = "auto"  # auto | east_0_360 | signed_180_180 | west_positive
     convention_lat: str = "planetocentric"
     approval_filter: str = "approved"  # approved | all
+    # raw approval-column values that count as "approved" (case-insensitive);
+    # e.g. the USGS shapefile uses "Adopted by IAU" instead of "Approved"
+    approved_values: tuple[str, ...] = ("approved",)
     type_word_translations: dict[str, str] = field(default_factory=dict)
 
 
@@ -57,6 +60,10 @@ def load_gazetteer_config(path: Path) -> GazetteerConfig:
         convention_lon=str(conv.get("lon", "auto")),
         convention_lat=str(conv.get("lat", "planetocentric")),
         approval_filter=str(filters.get("approval", "approved")),
+        approved_values=tuple(
+            str(v).strip().lower()
+            for v in (filters.get("approved_values") or ("approved",))
+        ),
         type_word_translations=translations,
     )
 

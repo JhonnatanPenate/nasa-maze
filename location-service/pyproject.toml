@@ -20,6 +20,7 @@ dependencies = [
 ingest = [
     "pandas>=3.1,<4.0",
     "openpyxl>=3.1,<4.0",
+    "pyshp>=3.1,<4.0",
 ]
 dev = [
     "pytest>=9.2,<10.0",
@@ -67,5 +68,5 @@ module = ["pandas.*", "openpyxl.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "yaml"
+module = ["yaml", "shapefile"]
 ignore_missing_imports = true

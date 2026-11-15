@@ -3,30 +3,38 @@
 # columns: map each canonical field to the ACTUAL column name in the
 # downloaded Gazetteer file (inspect the file first - names change between
 # releases). Leave a value as "" when the file has no such column.
+# MARS_nomenclature_center_pts.shp (USGS Gazetteer of Planetary Nomenclature,
+# point layer). Verified against the delivered file: DBF fields are
+# name, clean_name, approvaldt, origin, diameter, center_lon, center_lat,
+# type, code, approval, min_lon, max_lon, min_lat, max_lat, ethnicity,
+# continent, quad_name, quad_code, link. `code` is a ~29-value class code,
+# NOT a unique id -> id stays unmapped (slug-based ids are generated).
 columns:
   id: ""              # optional stable feature id -> mars:iau:<id>
-  name: ""
-  name_clean: ""      # optional: descriptor separated from the name
-  feature_type: ""
-  lat: ""
-  lon: ""             # longitude column (signed -180..180 or east 0..360)
-  lon_west: ""        # optional west-positive longitude column (wins over lon)
-  bbox_west: ""
-  bbox_south: ""
-  bbox_east: ""
-  bbox_north: ""
-  diameter_km: ""
-  approval_status: ""
-  origin: ""
+  name: name
+  name_clean: clean_name   # ASCII-folded name (accents/hyphens stripped)
+  feature_type: type       # e.g. "Crater, craters" -> normalized to "crater"
+  lat: center_lat
+  lon: center_lon          # east-positive 0..360 (6 records have lon=360 -> %360)
+  lon_west: ""             # optional west-positive longitude column (wins over lon)
+  bbox_west: min_lon
+  bbox_south: min_lat
+  bbox_east: max_lon
+  bbox_north: max_lat
+  diameter_km: diameter    # km; 0 means point feature -> stored as NULL
+  approval_status: approval  # all records are "Adopted by IAU"
+  origin: origin
 
 # Coordinate convention of the source file. "auto" detects the longitude
 # range; set explicitly when detection is ambiguous.
 convention:
-  lon: auto           # auto | east_0_360 | signed_180_180 | west_positive
+  lon: east_0_360    # auto | east_0_360 | signed_180_180 | west_positive
   lat: planetocentric # planetocentric | planetographic (planetographic aborts)
 
 filters:
   approval: approved  # keep only approved features (decision D3); "all" disables
+  # raw values in the approval column that count as approved
+  approved_values: ["approved", "adopted by iau"]
 
 # Small ES -> EN dictionary for Gazetteer type descriptors (section 7.2).
 # Keys are matched AFTER text normalization (accents already stripped).

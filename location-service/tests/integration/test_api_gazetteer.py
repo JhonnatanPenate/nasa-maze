@@ -58,7 +58,8 @@ def gazetteer_client(tmp_path_factory):
     )
     assert rc == 0, "gazetteer catalog build failed"
     settings = Settings(catalog_path=out, config_dir=CONFIG_DIR)
-    return TestClient(create_app(settings))
+    with TestClient(create_app(settings)) as client:
+        yield client
 
 
 class TestGazetteerGolden:

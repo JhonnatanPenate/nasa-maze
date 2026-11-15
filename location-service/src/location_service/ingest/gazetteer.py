@@ -138,7 +138,7 @@ def _read_geojson(path: Path) -> list[dict[str, Any]]:
 
 def _read_shapefile(path: Path) -> list[dict[str, Any]]:
     try:
-        import shapefile  # type: ignore[import-not-found]  # pyshp, optional ingest dep
+        import shapefile  # pyshp, optional ingest dep
     except ImportError as exc:  # pragma: no cover - depends on optional dep
         raise IngestError(
             "shapefile input requires pyshp: pip install 'location-service[ingest]'"
@@ -181,6 +181,22 @@ def _pick(row: dict[str, Any], column: str | None) -> Any:
     if column is None:
         return None
     return row.get(column)
+
+
+def _feature_type(value: Any) -> str:
+    """Normalize a Gazetteer type descriptor to its singular form.
+
+    USGS style is "Singular, plural" (e.g. "Crater, craters"); a few values
+    have no comma ("Albedo Feature"). Keep the lowercase singular part.
+    """
+    text = (_s(value) or "").split(",", 1)[0].strip().lower()
+    return text or "feature"
+
+
+def _diameter(value: Any) -> float | None:
+    """Diameter in km; 0/empty means a point feature with unknown extent."""
+    d = _f(value)
+    return d if d is not None and d > 0 else None
 
 
 def read_gazetteer(
@@ -233,6 +249,7 @@ def read_gazetteer(
     approval_col = _col(config, "approval_status")
     body_col = _col(config, "body")
     want_approved = config.approval_filter == "approved"
+    approved_values = {v.lower() for v in config.approved_values}
 
     places: list[Place] = []
     for index, row in enumerate(rows):
@@ -250,8 +267,12 @@ def read_gazetteer(
                     "approval filter is 'approved' but no approval_status column is mapped"
                 )
             status = (_s(_pick(row, approval_col)) or "").lower()
-            if status != "approved":
-                _discard(report, record, f"approval_status is '{status or 'empty'}', not approved")
+            if status not in approved_values:
+                _discard(
+                    report,
+                    record,
+                    f"approval_status is '{status or 'empty'}', not approved",
+                )
                 continue
 
         name = _s(_pick(row, name_col))
@@ -274,7 +295,7 @@ def read_gazetteer(
             _discard(report, name, f"invalid coordinates: {exc}")
             continue
 
-        feature_type = _s(_pick(row, _col(config, "feature_type"))) or "feature"
+        feature_type = _feature_type(_pick(row, _col(config, "feature_type")))
         explicit_id = _s(_pick(row, _col(config, "id")))
         base_id = (
             f"mars:iau:{explicit_id}"
@@ -288,8 +309,16 @@ def read_gazetteer(
         bs = _f(_pick(row, _col(config, "bbox_south")))
         be = _f(_pick(row, _col(config, "bbox_east")))
         bn = _f(_pick(row, _col(config, "bbox_north")))
-        if None not in (bw, bs, be, bn):
-            bbox = Bbox(west=bw, south=bs, east=be, north=bn)  # type: ignore[arg-type]
+        # longitudes normalize to [0, 360); east < west after mod means the
+        # bbox crosses the antimeridian (bbox_contains handles that).
+        # A >=360 deg span carries no information (e.g. 0..360) -> drop it.
+        if None not in (bw, bs, be, bn) and be - bw < 360.0:  # type: ignore[operator]
+            bbox = Bbox(
+                west=normalize_lon(bw),  # type: ignore[arg-type]
+                south=bs,  # type: ignore[arg-type]
+                east=normalize_lon(be),  # type: ignore[arg-type]
+                north=bn,  # type: ignore[arg-type]
+            )
 
         name_clean = _s(_pick(row, _col(config, "name_clean")))
         places.append(
@@ -304,7 +333,9 @@ def read_gazetteer(
                 name_clean=name_clean,
                 name_norm=normalize_text(name_clean or name),
                 bbox=bbox,
-                diameter_km=_f(_pick(row, _col(config, "diameter_km"))),
+                diameter_km=(
+                    _diameter(_pick(row, _col(config, "diameter_km")))
+                ),
                 approval_status=_s(_pick(row, approval_col)) if approval_col else None,
                 origin=_s(_pick(row, _col(config, "origin"))),
             )
