@@ -21,3 +21,4 @@ Ver [README.md](README.md): qué skills se instalaron y por qué.
 |---|---|---|---|---|---|
 | 2026-11-14 | Alex | Claude Code | Repo / docs | Configuró AGENTS.md, CLAUDE.md, skills en `.claude/skills` y estos docs | Pendiente (PR) |
 | 2026-11-14 | Alex | Claude Code | Repo / docs | Definió el buzón de issues `bobby`, `docs/ai/agentes.md` y la plantilla de issue | Pendiente (PR) |
+| 2026-11-15 | Jhonnatan | Claude Code | MS6 routing-engine | Extrajo POST /api/ruta del backend de Javier a `routing-engine/` (FastAPI, /health y /route), con validación de sol/AOI, lock global, tests, Dockerfile y AGENTS.md | Pendiente (PR) |
