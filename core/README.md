@@ -13,6 +13,7 @@ del raster y los modelos de suelo. No calcula ciencia. Plan: [`docs/core/IMPLEME
 | GET | `/api/capas/base` | FeatureCollection: puntos CheMin, traza Curiosity (en el AOI), origen Bradbury |
 | GET | `/api/capas/raster/{banda}?cmap=viridis\|gray` | PNG RGBA de una banda; bounds en header `X-Bounds` |
 | GET | `/api/modelos` | `modelos_por_suelo.json` |
+| GET | `/api/lugares/buscar?q=...&limit=10` | Proxy a MS1 (`/v1/places/search`). 503 si `CORE_MS1_URL` no está configurado o MS1 no responde; los 4xx de MS1 se reenvían |
 
 Bandas: `pendiente_grados`, `rugosidad_m`, `fraccion_oscura`, `inercia_termica_tiu`, `albedo`, `distancia_duna_m`.
 

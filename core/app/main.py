@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.routers import health, layers, models, routes
+from app.routers import health, layers, models, places, routes
 from app.settings import DataUnavailableError
 
 
@@ -20,7 +20,7 @@ def create_app() -> FastAPI:
     def _data_unavailable(_: Request, exc: DataUnavailableError):
         return JSONResponse({"detail": str(exc)}, status_code=502)
 
-    for r in (health, routes, layers, models):
+    for r in (health, routes, layers, models, places):
         app.include_router(r.router)
     return app
 

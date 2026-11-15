@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     ms1_url: str = ""
     route_timeout_s: float = 120.0
     health_timeout_s: float = 2.0
+    search_timeout_s: float = 5.0
     precalc_fallback: bool = True
     bradbury_lon: float = 137.4416
     bradbury_lat: float = -4.5895
