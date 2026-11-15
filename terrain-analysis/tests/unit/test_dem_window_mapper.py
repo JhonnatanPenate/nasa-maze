@@ -6,7 +6,7 @@ import pytest
 from app.core.errors.exceptions import DomainValidationError
 from app.infrastructure.datasources.dem_window_mapper import DemWindowMapper
 
-RADIUS_M = 3_389_500.0
+RADIUS_M = 3_396_190.0
 DEG_TO_M = math.pi / 180.0
 
 
