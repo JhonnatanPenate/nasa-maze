@@ -1,0 +1,24 @@
+columns:
+  id: feature_id
+  name: feature_name
+  feature_type: descriptor
+  lat: center_lat
+  lon: center_lon
+  lon_west: center_lon_west
+  bbox_west: bbox_west
+  bbox_south: bbox_south
+  bbox_east: bbox_east
+  bbox_north: bbox_north
+  diameter_km: diameter_km
+  approval_status: approval_status
+  origin: name_origin
+  body: body
+convention:
+  lon: auto
+  lat: planetocentric
+filters:
+  approval: approved
+type_word_translations:
+  crater: crater
+  monte: mons
+  valle: vallis

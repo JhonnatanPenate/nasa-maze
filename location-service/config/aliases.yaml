@@ -1,0 +1,12 @@
+# Curated aliases (layer C). Keys are either:
+#   - a place id: "mars:msl:bradbury-landing", "mars:iau:<feature-id>"
+#   - "name:<official name>": resolved to a Gazetteer place BY NAME during
+#     ingestion (never hard-code IAU ids here).
+aliases:
+  "mars:msl:bradbury-landing":
+    - "Curiosity landing site"
+    - "Sitio de aterrizaje de Curiosity"
+    - "Bradbury"
+  "name:Aeolis Mons":
+    - "Mount Sharp"
+    - "Monte Sharp"
