@@ -19,4 +19,8 @@ pytest -v
 uvicorn app.main:app --port 8004
 # run against the delivered Gale grid (slope verbatim, elevation_m null):
 MS4_DATASOURCE_KIND=rejilla uvicorn app.main:app --port 8004
+# run via the MS3 Raster Service (must be up on :8003):
+MS4_DATASOURCE_KIND=http MS4_RASTER_SERVICE_URL=http://localhost:8003 uvicorn app.main:app --port 8004
+# parity test vs a live MS3 (skipped when unreachable):
+MS4_RASTER_SERVICE_URL=http://localhost:8003 pytest tests/integration -v
 ```

@@ -134,6 +134,11 @@ All settings read from environment variables with the `MS4_` prefix
 | `MS4_DEM_PATH` | *(empty)* | GeoTIFF path, required when `datasource_kind=geotiff` |
 | `MS4_REJILLA_PATH` | `<repo root>/data/gale/processed/rejilla_ruta_90m.tif` | Slope grid GeoTIFF for `datasource_kind=rejilla`; default is absolute (anchored to repo root in `settings.py`) |
 | `MS4_REJILLA_SLOPE_BAND` | `1` | 1-based raster band carrying slope in degrees (`pendiente_grados`) |
+| `MS4_RASTER_SERVICE_URL` | `http://localhost:8003` | MS3 Raster Service base URL, used when `datasource_kind=http` |
+| `MS4_RASTER_DATASET` | `rejilla` | MS3 dataset name for `http` mode |
+| `MS4_RASTER_BAND` | `pendiente_grados` | MS3 band name read by `http` mode |
+| `MS4_RASTER_TIMEOUT_S` | `5.0` | HTTP timeout (seconds) for MS3 calls |
+| `MS4_RASTER_VALUES` | `slope` | `http` mode semantics: `slope` (grid mode, verbatim slope) \| `elevation` (DEM mode) |
 | `MS4_SLOPE_FLAT_MAX_DEG` | `5.0` | `flat`/`moderate` boundary |
 | `MS4_SLOPE_MODERATE_MAX_DEG` | `15.0` | `moderate`/`steep` boundary (=`steep_min_deg`) |
 | `MS4_SLOPE_STEEP_MAX_DEG` | `30.0` | `steep`/`hazardous` boundary |
@@ -151,7 +156,7 @@ Selected by `MS4_DATASOURCE_KIND` in `composition/dependencies.py`:
 | `synthetic` (default) | `SyntheticDemDatasource.default()` | DEM mode. Deterministic in-memory 1200×1200 DEM covering **lon 77–78, lat 18–19**; elevation is −2500 m plus layered sinusoidal hills and a planar tilt, with a **nodata hole at lon 77.90–77.95 / lat 18.90–18.95** so 404 paths are testable |
 | `geotiff` | `GeoTiffRasterDatasource` on `MS4_DEM_PATH` | DEM mode. The raster must be single-band, **geographic (lon/lat degrees), north-up**, non-rotated; other projections are rejected. Requires `rasterio`; if it cannot be installed, run with `MS4_DATASOURCE_KIND=synthetic` |
 | `rejilla` | `GeoTiffRasterDatasource(band=MS4_REJILLA_SLOPE_BAND)` on `MS4_REJILLA_PATH` + `SlopeGridTerrainRepository` | **Grid mode.** Slope is read verbatim from the `pendiente_grados` band — never recomputed (no Horn's). `elevation_m` is reported as `null` (keys stay present); profile `elevation_gain_m`/`elevation_loss_m` and area `elevation_m` are likewise `null` |
-| `http` | — | Reserved for a future Raster Service (MS3) client; selecting it raises a configuration error |
+| `http` | `HttpRasterDatasource` against `MS4_RASTER_SERVICE_URL` (`POST /raster/{MS4_RASTER_DATASET}/window`, `GET /health`) | Raster Service (MS3) client mode. Cell reads are served by MS3 with bit-for-bit parity to a local `GeoTiffRasterDatasource` read (proven by `tests/integration/test_ms3_parity.py`). `MS4_RASTER_VALUES=slope` wires `SlopeGridTerrainRepository` (grid mode); `elevation` wires `DemTerrainRepository`. Note: MS3 enforces its own window cap (1 000 000 cells, `MS3_MAX_WINDOW_CELLS`) which is stricter than `MS4_MAX_WINDOW_CELLS` (4 000 000); oversized windows surface as 400 either way |
 
 ### Run against the delivered Gale data
 
@@ -169,8 +174,20 @@ MS4_DATASOURCE_KIND=rejilla uvicorn app.main:app --port 8004
 curl "http://localhost:8004/terrain/point?lat=-4.5895&lon=137.4416"  # Bradbury Landing
 ```
 
-`GET /health` echoes `"datasource_kind": "rejilla"` so operators can tell
-grid mode from DEM mode.
+### Run via the MS3 Raster Service
+
+The same rejilla data can be served remotely by MS3 (port 8003) instead
+of read from the local file — identical responses, no rasterio reads in
+MS4:
+
+```bash
+MS4_DATASOURCE_KIND=http \
+MS4_RASTER_SERVICE_URL=http://localhost:8003 \
+  uvicorn app.main:app --port 8004
+```
+
+`GET /health` echoes `"datasource_kind": "rejilla"` (or `"http"`) so
+operators can tell grid mode from DEM mode.
 
 If datasource construction itself fails (e.g. `geotiff` without
 `MS4_DEM_PATH`), the service still boots: `get_raster_datasource` falls
