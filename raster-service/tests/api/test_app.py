@@ -1,5 +1,8 @@
 from fastapi.testclient import TestClient
 
+from app.composition.dependencies import get_repository
+from app.core.ports.raster_repository import RasterRepository
+from app.main import create_app
 from tests.conftest import TEST_DATASET
 
 # Smoke tests over the assembled create_app(): every registered route
@@ -74,6 +77,38 @@ def test_layer_route_registered(client: TestClient):
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/png"
+
+
+class _ExplodingRepository(RasterRepository):
+    """Repository whose calls raise non-service exceptions."""
+
+    def dataset_names(self):
+        return ["boom"]
+
+    def metadata(self, dataset):
+        raise RuntimeError("kaboom")
+
+    def read_cells(self, dataset, band, rows, cols):
+        raise RuntimeError("kaboom")
+
+    def is_readable(self, dataset):
+        return False
+
+
+def test_unexpected_error_is_500_internal_error():
+    app = create_app()
+    app.dependency_overrides[get_repository] = _ExplodingRepository
+    # ServerErrorMiddleware re-raises after sending the 500 response so
+    # the server still logs the traceback; disable client-side re-raise.
+    client = TestClient(app, raise_server_exceptions=False)
+
+    response = client.get(
+        "/raster/boom/point", params={"lat": -4.6, "lon": 137.4}
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "internal error"}
+    assert "kaboom" not in response.text
 
 
 def test_openapi_lists_all_seven_endpoints(client: TestClient):

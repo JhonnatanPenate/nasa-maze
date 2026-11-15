@@ -7,6 +7,7 @@ import pytest
 from app.core.config.dataset_config import DatasetConfig
 from app.core.errors.exceptions import (
     DatasetUnavailableError,
+    RasterValidationError,
     UnknownBandError,
     UnknownDatasetError,
 )
@@ -248,6 +249,32 @@ class TestErrorMapping:
         repo = _repo_for(GeoTiffRasterDatasource(path))
 
         with pytest.raises(DatasetUnavailableError, match="north-up"):
+            repo.metadata(TEST_DATASET)
+        assert repo.is_readable(TEST_DATASET) is False
+
+    def test_is_readable_false_when_ping_ok_but_metadata_fails(
+        self, dataset_config
+    ):
+        class PingOkButBroken(FailingRasterDatasource):
+            def ping(self):
+                return True
+
+        repo = _repo_for(PingOkButBroken(), dataset_config)
+
+        assert repo.is_readable(TEST_DATASET) is False
+
+    def test_is_readable_false_when_metadata_is_invalid(
+        self, dataset_config
+    ):
+        datasource = InMemoryRasterDatasource(
+            test_bands(),
+            TEST_EXTENT,
+            band_descriptions=("dup", "dup", "dup"),
+            nodata=TEST_NODATA,
+        )
+        repo = _repo_for(datasource, dataset_config)
+
+        with pytest.raises(RasterValidationError):
             repo.metadata(TEST_DATASET)
         assert repo.is_readable(TEST_DATASET) is False
 

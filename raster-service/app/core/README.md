@@ -11,12 +11,13 @@ files-on-disk drivers.
   `DistanceCalculator`, `PathSampler`, `PathSample`, `ColorRamp`.
 - `ports/` — ABCs consumed by use cases: `RasterRepository`,
   `RasterDatasource`, `ImageEncoder`, plus the `RawRasterMetadata` dataclass.
-- `errors/` — exception taxonomy (`RasterServiceError` family); FastAPI
-  handlers arrive in a later work package.
+- `errors/` — exception taxonomy (`RasterServiceError` family) plus the
+  FastAPI handlers that map it to HTTP statuses.
 
 ## Layer rules
 
 - `domain` may import stdlib + numpy only — never a web framework,
   DTO schema, raster driver or HTTP client.
 - `ports` may import `domain` but no infrastructure implementation.
-- `errors` is stdlib-only until `error_handlers.py` lands (WP3).
+- `errors/exceptions.py` is stdlib-only; `errors/error_handlers.py` is
+  the only fastapi import allowed in `core/`.

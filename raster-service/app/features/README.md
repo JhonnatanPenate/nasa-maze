@@ -12,9 +12,11 @@ Feature-first modules — one folder per REST endpoint. Each keeps its own
   paths) and `GET /raster/{dataset}/metadata`.
 - `point_query/` — `GET /raster/{dataset}/point`: nearest-cell band
   value(s) at a coordinate, verbatim, nodata → null.
-- `window_read/` — `POST /raster/{dataset}/window` (WP4).
-- `path_sampling/` — `POST /raster/{dataset}/sample` (WP5a).
-- `layer_render/` — `GET /raster/{dataset}/layer/{band}` PNG (WP5b).
+- `window_read/` — `POST /raster/{dataset}/window`: cell window by bbox
+  (+`halo_cells`) or point + `radius_cells`.
+- `path_sampling/` — `POST /raster/{dataset}/sample`: values along a
+  polyline.
+- `layer_render/` — `GET /raster/{dataset}/layer/{band}` PNG.
 
 ## Layer rules
 

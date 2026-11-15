@@ -1,3 +1,9 @@
+import numpy as np
+
+from app.core.domain.bounding_box import BoundingBox
+from app.infrastructure.datasources.in_memory_raster_datasource import (
+    InMemoryRasterDatasource,
+)
 from app.infrastructure.repositories.registry_raster_repository import (
     RegistryRasterRepository,
 )
@@ -7,6 +13,22 @@ from tests.fakes.failing_raster_datasource import FailingRasterDatasource
 # of 0.01 deg. Band i (1-based) holds (i-1)*100 + row*10 + col.
 # (-4.605, 137.405) -> cell (0, 0); (-4.615, 137.415) -> (1, 1) nodata on
 # band 1; (-4.685, 137.465) -> (8, 6) NaN on band 3.
+
+
+def _single_cell_client(make_client, value):
+    """Client over a 1x1 float32 grid holding `value` in band 'band_a'."""
+    datasource = InMemoryRasterDatasource(
+        np.array([[[value]]], dtype=np.float32),
+        BoundingBox(min_lon=0.0, min_lat=-1.0, max_lon=1.0, max_lat=0.0),
+        band_descriptions=("band_a",),
+    )
+    repository = RegistryRasterRepository(
+        datasources={"single": datasource},
+        configs={},
+        crs_label="IAU_2015:49900",
+        planet_radius_km=3396.19,
+    )
+    return make_client(repository=repository)
 
 
 class TestPoint:
@@ -34,6 +56,39 @@ class TestPoint:
 
         assert response.status_code == 200
         assert response.json()["values"] == {"roughness_m": 100.0}
+
+    def test_blank_band_param_returns_all_bands(self, client):
+        response = client.get(
+            "/raster/test/point",
+            params={"lat": -4.605, "lon": 137.405, "band": ""},
+        )
+
+        assert response.status_code == 200
+        assert set(response.json()["values"]) == {
+            "slope_deg",
+            "roughness_m",
+            "dark_fraction",
+        }
+
+    def test_infinite_cell_reports_null(self, make_client):
+        client = _single_cell_client(make_client, np.inf)
+
+        response = client.get(
+            "/raster/single/point", params={"lat": -0.5, "lon": 0.5}
+        )
+
+        assert response.status_code == 200
+        assert response.json()["values"] == {"band_a": None}
+
+    def test_float32_cell_comes_back_verbatim(self, make_client):
+        client = _single_cell_client(make_client, np.float32(0.1))
+
+        response = client.get(
+            "/raster/single/point", params={"lat": -0.5, "lon": 0.5}
+        )
+
+        assert response.status_code == 200
+        assert response.json()["values"]["band_a"] == 0.10000000149011612
 
     def test_numeric_nodata_cell_reports_null(self, client):
         response = client.get(

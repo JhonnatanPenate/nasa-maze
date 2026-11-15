@@ -71,9 +71,12 @@ class RegistryRasterRepository(RasterRepository):
         if datasource is None:
             return False
         try:
-            return bool(datasource.ping())
+            if not datasource.ping():
+                return False
+            self.metadata(dataset)
         except Exception:
             return False
+        return True
 
     def _datasource(self, dataset: str) -> RasterDatasource:
         datasource = self._datasources.get(dataset)

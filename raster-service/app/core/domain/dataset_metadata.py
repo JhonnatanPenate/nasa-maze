@@ -48,6 +48,13 @@ class DatasetMetadata:
             raise RasterValidationError(
                 "DatasetMetadata needs at least one band"
             )
+        names = [band.name for band in self.bands]
+        if len(set(names)) != len(names):
+            duplicates = sorted({n for n in names if names.count(n) > 1})
+            raise RasterValidationError(
+                f"DatasetMetadata band names must be unique, "
+                f"duplicates: {', '.join(duplicates)}"
+            )
 
     @property
     def res_lon_deg(self) -> float:

@@ -20,8 +20,9 @@ _STOPS: dict[str, tuple[tuple[int, int, int, int], ...]] = {
 class ColorRamp:
     """Maps a 2D float array plus a (min, max) range to a uint8 RGBA image.
 
-    Non-finite cells (NaN, +/-inf) become fully transparent pixels; a
-    constant range maps every finite cell to the mid-ramp colour.
+    Non-finite cells (NaN, +/-inf) are treated as nodata and become
+    fully transparent pixels; a constant range maps every finite cell to
+    the mid-ramp colour.
     """
 
     def __init__(self, name: str) -> None:
@@ -72,6 +73,7 @@ class ColorRamp:
         else:
             t = (arr - low) / span
         t = np.clip(t, 0.0, 1.0)
+        t = np.where(finite, t, 0.0)
 
         positions = np.linspace(0.0, 1.0, len(self._stops))
         rgba = np.empty(arr.shape + (4,), dtype=np.float64)

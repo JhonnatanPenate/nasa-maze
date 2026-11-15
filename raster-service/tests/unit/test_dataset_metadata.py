@@ -78,6 +78,14 @@ class TestValidation:
         with pytest.raises(RasterValidationError):
             make_metadata(bands=())
 
+    def test_duplicate_band_names_raise(self):
+        bands = (
+            BandInfo(index=1, name="dup", unit="m", nodata=None),
+            BandInfo(index=2, name="dup", unit="m", nodata=None),
+        )
+        with pytest.raises(RasterValidationError, match="dup"):
+            make_metadata(bands=bands)
+
     @pytest.mark.parametrize("bad_res", [0.0, -1.0, float("nan")])
     def test_invalid_resolution_raises(self, bad_res):
         with pytest.raises(RasterValidationError):

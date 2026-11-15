@@ -350,7 +350,7 @@ WP0 → WP1 → WP2 → WP3 ─┬─ WP4 (window) ─────────�
 | **WP6 App wiring** | register all routers; real-data integration test; service README | `app/main.py` (edit), `tests/integration/**`, `raster-service/README.md` | `uvicorn app.main:app --port 8003` serves all endpoints; `pytest -v` fully green; smoke §11.1 | `swe` | done |
 | **WP7 Docker** | image per §6.3 | `Dockerfile`, `.dockerignore`, README "Docker" section | `docker build -t ms3-raster raster-service` OK; container healthy with mounted data; smoke §11.2 | `swe` | done |
 | **WP8 MS4 integration** | F7 in `terrain-analysis/` | `terrain-analysis/app/infrastructure/datasources/http_raster_datasource.py`; edits: `terrain-analysis/app/core/config/settings.py`, `terrain-analysis/app/composition/dependencies.py`, `terrain-analysis/pyproject.toml` (httpx → runtime), `terrain-analysis/{README,AGENTS}.md`, `terrain-analysis/app/infrastructure/datasources/README.md`; tests: `terrain-analysis/tests/unit/test_http_raster_datasource.py`, `terrain-analysis/tests/integration/{README.md,test_ms3_parity.py}` | MS4 full suite still green (no regression); MockTransport tests green; parity test green against a running MS3; smoke §11.3 shows identical bodies | `sonnet` (cross-service, edits existing code) | done |
-| **WP9 Review & docs** | final gate | README completions, `raster-service/AGENTS.md`, fixes from review, this plan's status + deviations | DoD §10 fully checked | reviewer (`sonnet`) + `swe` for fixes | pending |
+| **WP9 Review & docs** | final gate | README completions, `raster-service/AGENTS.md`, fixes from review, this plan's status + deviations | DoD §10 fully checked | reviewer (`sonnet`) + `swe` for fixes | done |
 
 **Execution order:** WP0 → WP1 → WP2 → WP3 strictly sequential (foreground). WP3 delivers `error_handlers.py` and the `main.py` skeleton, which WP4/WP5 tests reuse (they mount their own router on a local `FastAPI()` + `register_exception_handlers`, so they never touch `main.py`). After WP3: **WP4 and WP5a in parallel background** (disjoint directories); WP5b after WP5a. WP6 → WP7 → WP8 → WP9 sequential (foreground).
 
@@ -448,16 +448,16 @@ Token hygiene: the reviewer sees only the WP diff; the manager passes paths, nev
 
 ## 10. Definition of Done (WP9 gate)
 
-- [ ] `pytest -v` green in `raster-service/`; every feature has ≥ 3 tests (happy/sad/edge) + contract tests for all 7 endpoints.
-- [ ] Payloads, headers and codes match SPEC v0.1.1 (400/404/422/503 covered by tests).
-- [ ] Repository suite passes with `InMemoryRasterDatasource` AND `GeoTiffRasterDatasource` (swap proof).
-- [ ] `grep -rE "fastapi|rasterio|pydantic|httpx" raster-service/app/core/domain raster-service/app/core/ports raster-service/app/features/*/application` → empty.
-- [ ] Every directory in §3.4 has a README; root README documents setup, env vars, endpoints, Docker.
-- [ ] Real-data integration test green (72 × 105, 6 bands, 1 `null` in band 3).
-- [ ] Docker image builds; container healthy with mounted `data/`; no data or secrets inside the image.
-- [ ] MS4: full suite green (no regression); `HttpRasterDatasource` unit tests green; parity test green; smoke §11.3 shows identical `/terrain/point` and `/terrain/area` bodies in `rejilla` vs `http` mode.
-- [ ] MS4 REST contract unchanged (only internal datasource/config/composition/docs touched).
-- [ ] English only; no Compose file; no comments beyond non-obvious math.
+- [x] `pytest -v` green in `raster-service/`; every feature has ≥ 3 tests (happy/sad/edge) + contract tests for all 7 endpoints.
+- [x] Payloads, headers and codes match SPEC v0.1.1 (400/404/422/503 covered by tests).
+- [x] Repository suite passes with `InMemoryRasterDatasource` AND `GeoTiffRasterDatasource` (swap proof).
+- [x] `grep -rE "fastapi|rasterio|pydantic|httpx" raster-service/app/core/domain raster-service/app/core/ports raster-service/app/features/*/application` → empty.
+- [x] Every directory in §3.4 has a README; root README documents setup, env vars, endpoints, Docker.
+- [x] Real-data integration test green (72 × 105, 6 bands, 1 `null` in band 3).
+- [x] Docker image builds; container healthy with mounted `data/`; no data or secrets inside the image.
+- [x] MS4: full suite green (no regression); `HttpRasterDatasource` unit tests green; parity test green; smoke §11.3 shows identical `/terrain/point` and `/terrain/area` bodies in `rejilla` vs `http` mode.
+- [x] MS4 REST contract unchanged (only internal datasource/config/composition/docs touched).
+- [x] English only; no Compose file; no comments beyond non-obvious math.
 
 ## 11. Verification Commands (manager runs at integration)
 
@@ -520,6 +520,15 @@ docker stop ms3 ms4-http ms4-local && docker network rm pe-net
 
 ---
 
-**Deviations recorded during execution:** _(manager appends here)_
+**Deviations recorded during execution:**
+
+1. **Subagent profiles:** `.devin/agents/ms3-*.md` were created in WP0 but profiles only load at session start, so this run used the existing `tdd-developer` (`swe`) with the MS3 rules referenced in each prompt, and `code-reviewer` (`opus`) for reviews. WP4 and WP8 also ran on `swe` (no `sonnet` profile available); their parity was proven by reviews + the live parity test. Next session can use the `ms3-*` profiles directly.
+2. **Reviews:** one review per WP for WP1–WP4/WP5a (joint) and WP8; WP5b (small) and WP7 (verbatim §6.3) were reviewed by the manager; WP6 + all accumulated minors were closed in WP9.
+3. **WP7** written by the manager directly (Dockerfile is verbatim §6.3), no subagent.
+4. **Config:** `DatasetConfig.default_colormap` added (fallback `viridis`); `Settings.datasets` defaults to `None` → filled with `rejilla`, so `MS3_DATASETS='{}'` really means zero datasets.
+5. **Domain additions:** `BandInfo.colormap` / `BandInfo.value_range` (render config merged by the repository, keeps the port frozen — replaced a `config()` method flagged in review); `DatasetMetadata.res_*_deg` are derived properties; `CellWindow.outer_bounds()` returns a plain tuple (padded point windows may exceed ±90/±180); `GridGeometry.unbounded_cell_at()` anchors bounds of out-of-extent point windows (MS4 leaves them undefined).
+6. **Behaviour beyond spec:** `/sample` reads one covering window per request (not one read per sample); `guarded_call` returns a generic 503 detail (no file paths); catch-all 500 `{"detail": "internal error"}`; all-NaN layer reports `X-Raster-Value-Range: 0.0,1.0`; `is_readable` is False for structurally invalid files (rotated / non-geographic).
+7. **MS4 (WP8):** upstream malformed payloads → 502 (not 400); MS3 `detail` forwarded with prefix `raster service: `; MS3 window cap (1 000 000) is lower than MS4's (4 000 000), documented in MS4 README.
+8. **Verification:** MS3 467 tests green (real-data included); MS4 421 + 15 parity (green live against MS3 in Docker and in uvicorn); smoke §11.1, §11.2 (container `healthy`) and §11.3 (identical `/terrain/point` and `/terrain/area`) OK.
 
 **Execution tracking:** the manager updates the §8 Status column (`pending → in_progress → done`) after each WP so this file stays the auditable source of truth.

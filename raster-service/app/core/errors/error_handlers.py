@@ -16,8 +16,9 @@ _STATUS_BY_ERROR: dict[type[RasterServiceError], int] = {
 
 
 def _status_for(error: RasterServiceError) -> int:
-    for error_type, status in _STATUS_BY_ERROR.items():
-        if isinstance(error, error_type):
+    for error_type in type(error).__mro__:
+        status = _STATUS_BY_ERROR.get(error_type)
+        if status is not None:
             return status
     return 500
 
@@ -30,5 +31,14 @@ async def _handle_raster_error(
     )
 
 
+async def _handle_unexpected_error(
+    request: Request, error: Exception
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=500, content={"detail": "internal error"}
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RasterServiceError, _handle_raster_error)
+    app.add_exception_handler(Exception, _handle_unexpected_error)

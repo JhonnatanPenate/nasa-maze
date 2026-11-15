@@ -20,10 +20,12 @@ class PointValues:
             raise RasterValidationError(
                 "PointValues needs a non-empty band->value mapping"
             )
+        converted = {}
         for name, value in self.values.items():
             if not isinstance(name, str) or not name:
                 raise RasterValidationError(
                     f"PointValues band names must be non-empty strings, "
                     f"got {name!r}"
                 )
-            self.values[name] = float(value)
+            converted[name] = float(value)
+        object.__setattr__(self, "values", converted)

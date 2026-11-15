@@ -26,5 +26,5 @@ def query_point(
     repository: RasterRepository = Depends(get_repository),
 ) -> PointResponse:
     point = GeoPoint(lat=lat, lon=lon)
-    result = QueryPoint(repository).execute(dataset, point, band)
+    result = QueryPoint(repository).execute(dataset, point, band or None)
     return PointMapper.to_response(result)

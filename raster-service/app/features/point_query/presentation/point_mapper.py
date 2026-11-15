@@ -15,7 +15,7 @@ class PointMapper:
             lat=result.point.lat,
             lon=result.point.lon,
             values={
-                name: (None if math.isnan(value) else value)
+                name: (None if not math.isfinite(value) else float(value))
                 for name, value in result.values.items()
             },
         )
