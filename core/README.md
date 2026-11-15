@@ -32,6 +32,12 @@ python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"   # Linux/macOS: .
 CORE_MS6_URL=http://localhost:8006 .venv/Scripts/uvicorn app.main:app --port 8000   # sin MS6: omitir la variable
 # http://localhost:8000/docs
 
+# e2e contra un MS6 real (se salta si no defines la variable): levanta MS6 en :8006 y
+CORE_E2E_MS6_URL=http://localhost:8006 .venv/Scripts/python -m pytest tests/api/test_e2e_ms6.py
+
+# Stack completo (desde la raíz del repo; ver cabecera de docker-compose.yml para el catálogo de MS1)
+docker compose up --build
+
 # Docker (desde core/)
 docker build -t core . && docker run --rm -p 8000:8000 -v "$(pwd)/../data:/data:ro" core
 ```

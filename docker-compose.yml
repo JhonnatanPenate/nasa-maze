@@ -1,0 +1,45 @@
+# Stack completo de Planetary Explorer. Desde la raíz del repo:
+#   docker compose up --build            # Core en http://localhost:8000/docs
+#
+# location-service necesita su catálogo semilla (ignorado por git). Generarlo una vez:
+#   pip install ./location-service
+#   python -m location_service.ingest build --mission data/gale/processed/gale_puntos_quimica.xlsx \
+#     --config location-service/config --out location-service/data/seed/location_catalog_seed.sqlite \
+#     --report location-service/data/seed/ingest_report.json
+# Sin ese catálogo, location-service queda unhealthy pero el Core sigue funcionando (degraded != down).
+services:
+  core:
+    build: ./core
+    ports: ["8000:8000"]
+    environment:
+      CORE_DATA_DIR: /data/gale
+      CORE_MS6_URL: http://routing-engine:8006
+      CORE_MS4_URL: http://terrain-analysis:8004
+      CORE_MS1_URL: http://location-service:8001
+    volumes:
+      - ./data:/data:ro
+
+  routing-engine:
+    build:
+      context: .
+      dockerfile: routing-engine/Dockerfile
+    ports: ["8006:8006"]
+
+  terrain-analysis:
+    build: ./terrain-analysis
+    ports: ["8004:8004"]
+    volumes:
+      - ./data:/data:ro
+
+  raster-service:
+    build: ./raster-service
+    ports: ["8003:8003"]
+    volumes:
+      - ./data:/data:ro
+
+  location-service:
+    build: ./location-service
+    ports: ["8001:8001"]
+    volumes:
+      - ./location-service/data/seed:/app/data/seed:ro
+      - ./location-service/config:/app/config:ro
