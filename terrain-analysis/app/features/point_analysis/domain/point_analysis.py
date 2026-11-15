@@ -9,6 +9,6 @@ class PointAnalysis:
 
     lat: float
     lon: float
-    elevation_m: float
+    elevation_m: float | None
     slope_deg: float
     terrain_class: TerrainClass

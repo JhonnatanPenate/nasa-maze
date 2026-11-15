@@ -23,13 +23,32 @@ from app.infrastructure.datasources.synthetic_dem_datasource import (
 from app.infrastructure.repositories.dem_terrain_repository import (
     DemTerrainRepository,
 )
+from app.core.domain.bounding_box import BoundingBox
 from tests.fakes.failing_raster_datasource import FailingRasterDatasource
+from tests.fakes.fake_slope_terrain_repository import (
+    FakeSlopeTerrainRepository,
+)
 
 # Small DEM: extent lon 77.4..77.6, lat 18.4..18.6, 21x21 cells,
 # elevation[r, c] = 500 + 2c - 3r, nodata cell (5, 5).
 CELL_DEG = 0.2 / 21.0
 NODATA_LAT = 18.6 - 5.5 * CELL_DEG
 NODATA_LON = 77.4 + 5.5 * CELL_DEG
+
+# Slope grid: extent lon 100..105, lat -10..-5, 5x5 cells of 1 degree.
+# Cell (r, c) centre is lat=-5.5-r, lon=100.5+c; (2, 2) is nodata.
+GRID_SLOPE = np.array(
+    [
+        [1.0, 2.0, 3.0, 4.0, 5.0],
+        [6.0, 7.0, 8.0, 9.0, 10.0],
+        [11.0, 12.0, np.nan, 14.0, 15.0],
+        [16.0, 17.0, 18.0, 19.0, 20.0],
+        [21.0, 22.0, 23.0, 24.0, 25.0],
+    ]
+)
+GRID_EXTENT = BoundingBox(
+    min_lon=100.0, min_lat=-10.0, max_lon=105.0, max_lat=-5.0
+)
 
 
 @pytest.fixture
@@ -148,6 +167,7 @@ class TestExecuteFailures:
 class TestRepositoryUsage:
     def test_single_window_read_with_radius_one(self) -> None:
         repository = Mock(spec=TerrainRepository)
+        repository.provides_slope.return_value = False
         repository.window_around.return_value = DemWindow(
             elevation=np.full((3, 3), 100.0),
             cell_size_x_m=500.0,
@@ -165,3 +185,43 @@ class TestRepositoryUsage:
         assert result.elevation_m == pytest.approx(100.0)
         assert result.slope_deg == pytest.approx(0.0)
         assert result.terrain_class is TerrainClass.FLAT
+
+
+class TestGridMode:
+    @pytest.fixture
+    def slope_calculator(self) -> Mock:
+        return Mock(spec=SlopeCalculator)
+
+    @pytest.fixture
+    def grid_use_case(self, slope_calculator: Mock) -> AnalyzePoint:
+        return AnalyzePoint(
+            TerrainPointSampler(
+                FakeSlopeTerrainRepository(GRID_SLOPE, GRID_EXTENT),
+                slope_calculator,
+            ),
+            TerrainClassifier(),
+        )
+
+    def test_returns_null_elevation_slope_and_class(
+        self, grid_use_case: AnalyzePoint, slope_calculator: Mock
+    ) -> None:
+        # Cell (3, 3) holds 19 deg -> steep class (15 <= slope < 30).
+        result = grid_use_case.execute(GeoPoint(lat=-8.5, lon=103.5))
+
+        assert result.elevation_m is None
+        assert result.slope_deg == pytest.approx(19.0)
+        assert result.terrain_class is TerrainClass.STEEP
+        slope_calculator.compute_at_center.assert_not_called()
+        slope_calculator.compute.assert_not_called()
+
+    def test_nodata_cell_raises_no_coverage(
+        self, grid_use_case: AnalyzePoint
+    ) -> None:
+        with pytest.raises(NoCoverageError):
+            grid_use_case.execute(GeoPoint(lat=-7.5, lon=102.5))
+
+    def test_point_outside_extent_raises_no_coverage(
+        self, grid_use_case: AnalyzePoint
+    ) -> None:
+        with pytest.raises(NoCoverageError):
+            grid_use_case.execute(GeoPoint(lat=0.0, lon=103.5))

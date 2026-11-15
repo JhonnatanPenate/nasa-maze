@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -37,7 +38,11 @@ from app.infrastructure.datasources.unavailable_raster_datasource import (
 from app.infrastructure.repositories.dem_terrain_repository import (
     DemTerrainRepository,
 )
-from tests.fixtures.make_test_dem import write_test_dem
+from app.infrastructure.repositories.slope_grid_terrain_repository import (
+    SlopeGridTerrainRepository,
+)
+from tests.conftest import TEST_DEM_EXTENT
+from tests.fixtures.make_test_dem import write_test_dem, write_test_grid
 
 
 @pytest.fixture(autouse=True)
@@ -71,6 +76,28 @@ class TestBuildDatasource:
                 Settings(datasource_kind="geotiff", dem_path="")
             )
 
+    def test_rejilla_kind(self, tmp_path) -> None:
+        slope = np.full((4, 4), 3.0, dtype=np.float32)
+        path = tmp_path / "rejilla.tif"
+        write_test_grid(
+            path, [slope, slope + 100.0], TEST_DEM_EXTENT, nodata=np.nan
+        )
+        ds = build_datasource(
+            Settings(
+                datasource_kind="rejilla",
+                rejilla_path=str(path),
+                rejilla_slope_band=1,
+            )
+        )
+        assert isinstance(ds, GeoTiffRasterDatasource)
+        assert ds.ping() is True
+
+    def test_rejilla_empty_path_raises(self) -> None:
+        with pytest.raises(ValueError, match="rejilla_path"):
+            build_datasource(
+                Settings(datasource_kind="rejilla", rejilla_path="")
+            )
+
     def test_http_kind_reserved_raises(self) -> None:
         with pytest.raises(ValueError, match="http"):
             build_datasource(Settings(datasource_kind="http"))
@@ -84,9 +111,18 @@ class TestProviders:
         assert get_raster_datasource() is get_raster_datasource()
 
     def test_terrain_repository(self) -> None:
-        repo = get_terrain_repository(get_raster_datasource())
+        repo = get_terrain_repository(get_raster_datasource(), get_settings())
         assert isinstance(repo, DemTerrainRepository)
         assert repo.is_available() is True
+
+    def test_terrain_repository_rejilla(
+        self, synthetic_datasource
+    ) -> None:
+        repo = get_terrain_repository(
+            synthetic_datasource, Settings(datasource_kind="rejilla")
+        )
+        assert isinstance(repo, SlopeGridTerrainRepository)
+        assert repo.provides_slope() is True
 
     def test_slope_calculator(self) -> None:
         assert isinstance(get_slope_calculator(), SlopeCalculator)
@@ -106,7 +142,7 @@ class TestProviders:
 
     def test_terrain_point_sampler(self) -> None:
         sampler = get_terrain_point_sampler(
-            get_terrain_repository(get_raster_datasource()),
+            get_terrain_repository(get_raster_datasource(), get_settings()),
             get_slope_calculator(),
         )
         assert isinstance(sampler, TerrainPointSampler)
@@ -142,7 +178,7 @@ class TestProviders:
         assert isinstance(datasource, UnavailableRasterDatasource)
         assert datasource.ping() is False
 
-        repository = get_terrain_repository(datasource)
+        repository = get_terrain_repository(datasource, get_settings())
         assert repository.is_available() is False
         with pytest.raises(UpstreamDatasourceError):
             repository.window_for(

@@ -19,14 +19,14 @@ class ProfileSampleSchema(BaseModel):
     lat: float
     lon: float
     distance_m: float
-    elevation_m: float
+    elevation_m: float | None
     slope_deg: float
 
 
 class ProfileResponse(BaseModel):
     sample_count: int
     total_distance_m: float
-    elevation_gain_m: float
-    elevation_loss_m: float
+    elevation_gain_m: float | None
+    elevation_loss_m: float | None
     max_slope_deg: float
     samples: list[ProfileSampleSchema]

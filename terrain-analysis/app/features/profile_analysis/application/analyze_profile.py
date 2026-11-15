@@ -58,14 +58,18 @@ class AnalyzeProfile:
                 )
             )
 
-        gain_m = 0.0
-        loss_m = 0.0
-        for previous, current in zip(samples, samples[1:]):
-            delta = current.elevation_m - previous.elevation_m
-            if delta > 0.0:
-                gain_m += delta
-            else:
-                loss_m -= delta
+        if any(sample.elevation_m is None for sample in samples):
+            gain_m = None
+            loss_m = None
+        else:
+            gain_m = 0.0
+            loss_m = 0.0
+            for previous, current in zip(samples, samples[1:]):
+                delta = current.elevation_m - previous.elevation_m
+                if delta > 0.0:
+                    gain_m += delta
+                else:
+                    loss_m -= delta
 
         return ElevationProfile(
             samples=tuple(samples),

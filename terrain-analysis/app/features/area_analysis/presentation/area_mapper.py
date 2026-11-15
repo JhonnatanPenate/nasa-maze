@@ -21,10 +21,14 @@ class AreaMapper:
     @staticmethod
     def to_response(stats: AreaStats) -> AreaResponse:
         return AreaResponse(
-            elevation_m=ValueStatsResponse(
-                min=stats.elevation_m.min,
-                max=stats.elevation_m.max,
-                mean=stats.elevation_m.mean,
+            elevation_m=(
+                ValueStatsResponse(
+                    min=stats.elevation_m.min,
+                    max=stats.elevation_m.max,
+                    mean=stats.elevation_m.mean,
+                )
+                if stats.elevation_m is not None
+                else None
             ),
             slope_deg=ValueStatsResponse(
                 min=stats.slope_deg.min,

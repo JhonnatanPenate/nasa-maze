@@ -6,7 +6,7 @@ from app.core.domain.distance_calculator import DistanceCalculator
 from app.core.domain.geo_point import GeoPoint
 from app.core.errors.exceptions import DomainValidationError
 
-MARS_RADIUS_M = 3_389_500.0
+MARS_RADIUS_M = 3_396_190.0
 
 
 class TestDistance:

@@ -2,11 +2,14 @@
 
 FastAPI microservice that converts Digital Elevation Model (DEM) data into
 navigation-relevant products for the Planetary Explorer system (MVP: Mars):
-elevation, slope in degrees (Horn's method), and terrain classification
+elevation, slope in degrees (Horn's method — or read verbatim from the
+delivered grid in `rejilla` mode), and terrain classification
 (`flat` | `moderate` | `steep` | `hazardous`).
 
 Contract of record: `docs/SPEC_MS4_TERRAIN_ANALYSIS.md`.
-Implementation plan: `docs/terrain_analysis/IMPLEMENTATION_PLANMS4_1.md`.
+Implementation plan: `docs/terrain_analysis/IMPLEMENTATION_PLANMS4_1.md`
+(realigned to the delivered data by
+`docs/terrain_analysis/REALIGNMENT_PLANMS4_1.md`).
 
 ## Architecture
 
@@ -36,8 +39,8 @@ terrain-analysis/
 │   │   ├── profile_analysis/    # POST /terrain/profile
 │   │   └── area_analysis/       # POST /terrain/area
 │   ├── infrastructure/
-│   │   ├── datasources/         # synthetic / geotiff / unavailable datasource
-│   │   └── repositories/        # DemTerrainRepository
+│   │   ├── datasources/         # synthetic / geotiff (DEM or rejilla band) / unavailable
+│   │   └── repositories/        # DemTerrainRepository / SlopeGridTerrainRepository
 │   └── composition/             # DI providers wired with FastAPI Depends
 └── tests/                       # unit/, api/ contract tests, fixtures/, fakes/
 ```
@@ -59,6 +62,20 @@ Python 3.12 is required for rasterio wheel availability on Windows.
 uvicorn app.main:app --port 8004
 ```
 
+## Docker
+
+The image defaults to grid mode (`MS4_DATASOURCE_KIND=rejilla`) and expects the
+repo's `data/` directory mounted at `/data` (data is never baked into the image).
+
+```bash
+cd terrain-analysis
+docker build -t ms4-terrain-analysis .
+docker run --rm -p 8004:8004 -v "$(pwd)/../data:/data:ro" ms4-terrain-analysis
+curl "http://localhost:8004/health"
+```
+
+Override any `MS4_*` variable with `-e`, e.g. `-e MS4_DATASOURCE_KIND=synthetic`.
+
 ## Test
 
 ```bash
@@ -69,7 +86,7 @@ pytest -v
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/health` | Liveness + datasource connectivity |
+| GET | `/health` | Liveness + datasource connectivity + configured `datasource_kind` |
 | GET | `/terrain/point?lat=&lon=&body=` | Elevation, slope, terrain class at a coordinate |
 | POST | `/terrain/profile` | Sampled elevation/slope profile along a polyline |
 | POST | `/terrain/area` | Aggregate elevation/slope stats over a bounding box |
@@ -112,9 +129,11 @@ All settings read from environment variables with the `MS4_` prefix
 | Variable | Default | Purpose |
 |---|---|---|
 | `MS4_BODY` | `mars` | Celestial body label (echo only) |
-| `MS4_PLANET_RADIUS_KM` | `3389.5` | Body radius for haversine distance and degrees→metres conversion |
-| `MS4_DATASOURCE_KIND` | `synthetic` | Datasource: `synthetic` \| `geotiff` (`http` reserved) |
+| `MS4_PLANET_RADIUS_KM` | `3396.19` | Body radius for haversine distance and degrees→metres conversion (IAU_2015:49900 Mars sphere) |
+| `MS4_DATASOURCE_KIND` | `synthetic` | Datasource: `synthetic` \| `geotiff` \| `rejilla` (`http` reserved) |
 | `MS4_DEM_PATH` | *(empty)* | GeoTIFF path, required when `datasource_kind=geotiff` |
+| `MS4_REJILLA_PATH` | `<repo root>/data/gale/processed/rejilla_ruta_90m.tif` | Slope grid GeoTIFF for `datasource_kind=rejilla`; default is absolute (anchored to repo root in `settings.py`) |
+| `MS4_REJILLA_SLOPE_BAND` | `1` | 1-based raster band carrying slope in degrees (`pendiente_grados`) |
 | `MS4_SLOPE_FLAT_MAX_DEG` | `5.0` | `flat`/`moderate` boundary |
 | `MS4_SLOPE_MODERATE_MAX_DEG` | `15.0` | `moderate`/`steep` boundary (=`steep_min_deg`) |
 | `MS4_SLOPE_STEEP_MAX_DEG` | `30.0` | `steep`/`hazardous` boundary |
@@ -127,18 +146,31 @@ All settings read from environment variables with the `MS4_` prefix
 
 Selected by `MS4_DATASOURCE_KIND` in `composition/dependencies.py`:
 
-- **`synthetic` (default)** — `SyntheticDemDatasource.default()`: a
-  deterministic in-memory 1200×1200 DEM covering **lon 77–78, lat 18–19**.
-  Elevation is −2500 m plus layered sinusoidal hills and a planar tilt,
-  with a **nodata hole at lon 77.90–77.95 / lat 18.90–18.95** so 404 paths
-  are testable.
-- **`geotiff`** — `GeoTiffRasterDatasource` reads `MS4_DEM_PATH` via
-  rasterio. The DEM must be a single-band, **geographic (lon/lat degrees),
-  north-up**, non-rotated raster; other projections are rejected.
-  `rasterio` is required for this datasource; if it cannot be installed,
-  run with `MS4_DATASOURCE_KIND=synthetic`.
-- **`http`** — reserved for a future Raster Service (MS3) client;
-  selecting it raises a configuration error.
+| Kind | Source | Mode / notes |
+|---|---|---|
+| `synthetic` (default) | `SyntheticDemDatasource.default()` | DEM mode. Deterministic in-memory 1200×1200 DEM covering **lon 77–78, lat 18–19**; elevation is −2500 m plus layered sinusoidal hills and a planar tilt, with a **nodata hole at lon 77.90–77.95 / lat 18.90–18.95** so 404 paths are testable |
+| `geotiff` | `GeoTiffRasterDatasource` on `MS4_DEM_PATH` | DEM mode. The raster must be single-band, **geographic (lon/lat degrees), north-up**, non-rotated; other projections are rejected. Requires `rasterio`; if it cannot be installed, run with `MS4_DATASOURCE_KIND=synthetic` |
+| `rejilla` | `GeoTiffRasterDatasource(band=MS4_REJILLA_SLOPE_BAND)` on `MS4_REJILLA_PATH` + `SlopeGridTerrainRepository` | **Grid mode.** Slope is read verbatim from the `pendiente_grados` band — never recomputed (no Horn's). `elevation_m` is reported as `null` (keys stay present); profile `elevation_gain_m`/`elevation_loss_m` and area `elevation_m` are likewise `null` |
+| `http` | — | Reserved for a future Raster Service (MS3) client; selecting it raises a configuration error |
+
+### Run against the delivered Gale data
+
+The data team delivered `rejilla_ruta_90m.tif` — a 6-band routing cost
+grid of the Gale crater corridor (`docs/data/HANDOFF_SOFTWARE.md`,
+packaged under `data/gale/processed/`; data is local, never committed).
+Band 1, `pendiente_grados`, carries slope in degrees; there is no
+elevation band. Bounds `[137.345, -4.739427, 137.454322, -4.58]`,
+72×105 cells.
+
+```bash
+cd terrain-analysis
+MS4_DATASOURCE_KIND=rejilla uvicorn app.main:app --port 8004
+
+curl "http://localhost:8004/terrain/point?lat=-4.5895&lon=137.4416"  # Bradbury Landing
+```
+
+`GET /health` echoes `"datasource_kind": "rejilla"` so operators can tell
+grid mode from DEM mode.
 
 If datasource construction itself fails (e.g. `geotiff` without
 `MS4_DEM_PATH`), the service still boots: `get_raster_datasource` falls

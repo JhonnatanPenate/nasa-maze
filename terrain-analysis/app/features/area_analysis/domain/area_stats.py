@@ -15,17 +15,23 @@ class AreaStats:
     bound of the `steep` class).
     """
 
-    elevation_m: ValueStats
+    elevation_m: ValueStats | None
     slope_deg: ValueStats
     steep_fraction: float
 
     def __post_init__(self) -> None:
-        for name in ("elevation_m", "slope_deg"):
-            if not isinstance(getattr(self, name), ValueStats):
-                raise DomainValidationError(
-                    f"AreaStats field {name} must be a ValueStats, "
-                    f"got {getattr(self, name)!r}"
-                )
+        if self.elevation_m is not None and not isinstance(
+            self.elevation_m, ValueStats
+        ):
+            raise DomainValidationError(
+                f"AreaStats field elevation_m must be a ValueStats or None, "
+                f"got {self.elevation_m!r}"
+            )
+        if not isinstance(self.slope_deg, ValueStats):
+            raise DomainValidationError(
+                f"AreaStats field slope_deg must be a ValueStats, "
+                f"got {self.slope_deg!r}"
+            )
         try:
             fraction = float(self.steep_fraction)
         except (TypeError, ValueError) as exc:
