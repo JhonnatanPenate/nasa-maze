@@ -40,23 +40,23 @@ jobs:
             port: 8001
             health: /ready
             mounts: >-
-              -v ${{ github.workspace }}/location-service/data/seed:/app/data/seed:ro
-              -v ${{ github.workspace }}/location-service/config:/app/config:ro
+              -v $PWD/location-service/data/seed:/app/data/seed:ro
+              -v $PWD/location-service/config:/app/config:ro
           - svc: raster-service
             context: raster-service
             port: 8003
             health: /health
-            mounts: -v ${{ github.workspace }}/data:/data:ro
+            mounts: -v $PWD/data:/data:ro
           - svc: terrain-analysis
             context: terrain-analysis
             port: 8004
             health: /health
-            mounts: -v ${{ github.workspace }}/data:/data:ro
+            mounts: -v $PWD/data:/data:ro
           - svc: routing-engine
             context: .
             port: 8006
             health: /health
-            mounts: -v ${{ github.workspace }}/data/gale:/data/gale:ro
+            mounts: -v $PWD/data/gale:/data/gale:ro
     name: docker (${{ matrix.svc }})
     steps:
       - uses: actions/checkout@v4
@@ -88,9 +88,12 @@ jobs:
       - name: Smoke test
         run: |
           docker run -d --name svc -p ${{ matrix.port }}:${{ matrix.port }} ${{ matrix.mounts }} ${{ matrix.svc }}:ci
+          # A "degraded" health (e.g. data not found) is a failure, not a pass
           for i in $(seq 1 45); do
-            if curl -fsS "http://localhost:${{ matrix.port }}${{ matrix.health }}"; then
-              echo; echo "healthy after ~$((i * 2)) s"; exit 0
+            if body=$(curl -fsS "http://localhost:${{ matrix.port }}${{ matrix.health }}"); then
+              echo "$body"
+              echo "$body" | grep -qE '"status": ?"(ok|ready)"' && { echo "healthy after ~$((i * 2)) s"; exit 0; }
+              break
             fi
             sleep 2
           done
