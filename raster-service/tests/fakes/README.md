@@ -1,3 +1,9 @@
 # fakes
 
-TODO: purpose, contents, key classes, layer rules (see docs/raster_service/IMPLEMENTATION_PLANMS3_1.md §3).
+Hand-written test doubles implementing core ports.
+
+## Contents
+
+- `failing_raster_datasource.py` — `FailingRasterDatasource`: every call
+  raises `OSError`, `ping()` False; used for the repository 503 mapping
+  and API failure-path tests.

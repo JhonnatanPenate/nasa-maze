@@ -38,3 +38,41 @@ class TestBandInfo:
     def test_infinite_nodata_raises(self):
         with pytest.raises(RasterValidationError):
             BandInfo(index=1, name="b", unit="m", nodata=float("inf"))
+
+    def test_render_fields_default_to_unset(self):
+        band = BandInfo(index=1, name="b", unit="m", nodata=None)
+
+        assert band.colormap == ""
+        assert band.value_range is None
+
+    def test_render_fields_are_stored(self):
+        band = BandInfo(
+            index=1,
+            name="b",
+            unit="m",
+            nodata=None,
+            colormap="slope",
+            value_range=(0.0, 35.0),
+        )
+
+        assert band.colormap == "slope"
+        assert band.value_range == (0.0, 35.0)
+
+    @pytest.mark.parametrize("bad_colormap", [None, 3, True])
+    def test_invalid_colormap_raises(self, bad_colormap):
+        with pytest.raises(RasterValidationError):
+            BandInfo(
+                index=1, name="b", unit="m", nodata=None,
+                colormap=bad_colormap,
+            )
+
+    @pytest.mark.parametrize(
+        "bad_range",
+        [(35.0, 0.0), (0.0, float("nan")), (1.0,), "wide", 35.0],
+    )
+    def test_invalid_value_range_raises(self, bad_range):
+        with pytest.raises(RasterValidationError):
+            BandInfo(
+                index=1, name="b", unit="m", nodata=None,
+                value_range=bad_range,
+            )
