@@ -62,6 +62,20 @@ Python 3.12 is required for rasterio wheel availability on Windows.
 uvicorn app.main:app --port 8004
 ```
 
+## Docker
+
+The image defaults to grid mode (`MS4_DATASOURCE_KIND=rejilla`) and expects the
+repo's `data/` directory mounted at `/data` (data is never baked into the image).
+
+```bash
+cd terrain-analysis
+docker build -t ms4-terrain-analysis .
+docker run --rm -p 8004:8004 -v "$(pwd)/../data:/data:ro" ms4-terrain-analysis
+curl "http://localhost:8004/health"
+```
+
+Override any `MS4_*` variable with `-e`, e.g. `-e MS4_DATASOURCE_KIND=synthetic`.
+
 ## Test
 
 ```bash
