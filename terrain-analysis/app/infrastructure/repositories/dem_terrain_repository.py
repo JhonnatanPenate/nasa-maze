@@ -1,20 +1,13 @@
 import math
-from collections.abc import Callable
-from typing import TypeVar
 
 from app.core.domain.bounding_box import BoundingBox
 from app.core.domain.dem_window import DemWindow
 from app.core.domain.geo_point import GeoPoint
 from app.core.domain.halo_window import HaloWindow
-from app.core.errors.exceptions import (
-    DomainError,
-    NoCoverageError,
-    UpstreamDatasourceError,
-)
+from app.core.errors.exceptions import NoCoverageError
 from app.core.ports.raster_datasource import RasterDatasource
 from app.core.ports.terrain_repository import TerrainRepository
-
-T = TypeVar("T")
+from app.infrastructure.repositories.guarded_call import guarded_call
 
 
 class DemTerrainRepository(TerrainRepository):
@@ -30,7 +23,7 @@ class DemTerrainRepository(TerrainRepository):
         self._datasource = datasource
 
     def elevation_at(self, point: GeoPoint) -> float:
-        window = self._guarded(
+        window = guarded_call(
             lambda: self._datasource.read_window_around(point, 0)
         )
         value = window.center_value()
@@ -43,7 +36,7 @@ class DemTerrainRepository(TerrainRepository):
     def window_around(
         self, point: GeoPoint, radius_cells: int = 1
     ) -> DemWindow:
-        return self._guarded(
+        return guarded_call(
             lambda: self._datasource.read_window_around(point, radius_cells)
         )
 
@@ -53,7 +46,7 @@ class DemTerrainRepository(TerrainRepository):
     def window_for_with_halo(
         self, bbox: BoundingBox, halo_cells: int
     ) -> HaloWindow:
-        return self._guarded(
+        return guarded_call(
             lambda: self._datasource.read_window_with_halo(bbox, halo_cells)
         )
 
@@ -62,14 +55,3 @@ class DemTerrainRepository(TerrainRepository):
             return bool(self._datasource.ping())
         except Exception:
             return False
-
-    @staticmethod
-    def _guarded(call: Callable[[], T]) -> T:
-        try:
-            return call()
-        except DomainError:
-            raise
-        except Exception as exc:
-            raise UpstreamDatasourceError(
-                f"Raster datasource request failed: {exc}"
-            ) from exc

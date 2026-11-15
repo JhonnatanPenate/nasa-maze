@@ -14,11 +14,12 @@ from app.infrastructure.datasources.grid_geometry import GridGeometry
 class GeoTiffRasterDatasource(GridBackedRasterDatasource):
     """RasterDatasource reading windows from a GeoTIFF via rasterio.
 
-    Requires a single-band DEM in a geographic lon/lat (degrees), north-up,
-    non-rotated CRS — validated on each open. The dataset is opened lazily
-    per call and reads use rasterio windows, so point queries never load
-    the whole raster. Opening/reading errors propagate; the repository
-    wraps them as UpstreamDatasourceError.
+    Requires a geographic lon/lat (degrees), north-up, non-rotated CRS —
+    validated on each open. `band` selects the raster band read (1-based);
+    for the rejilla slope grid it is `Settings.rejilla_slope_band`. The
+    dataset is opened lazily per call and reads use rasterio windows, so
+    point queries never load the whole raster. Opening/reading errors
+    propagate; the repository wraps them as UpstreamDatasourceError.
     """
 
     def __init__(
@@ -26,9 +27,11 @@ class GeoTiffRasterDatasource(GridBackedRasterDatasource):
         path: str,
         mapper: DemWindowMapper,
         max_window_cells: int,
+        band: int = 1,
     ) -> None:
         super().__init__(mapper, max_window_cells)
         self._path = str(path)
+        self._band = band
 
     def _geometry(self) -> GridGeometry:
         with rasterio.open(self._path) as ds:
@@ -47,7 +50,7 @@ class GeoTiffRasterDatasource(GridBackedRasterDatasource):
     ) -> tuple[np.ndarray, float | None]:
         with rasterio.open(self._path) as ds:
             raw = ds.read(
-                1,
+                self._band,
                 window=Window(
                     col_slice.start,
                     row_slice.start,
@@ -66,9 +69,10 @@ class GeoTiffRasterDatasource(GridBackedRasterDatasource):
             return False
 
     def _validate(self, ds) -> None:
-        if ds.count < 1:
+        if not 1 <= self._band <= ds.count:
             raise UpstreamDatasourceError(
-                f"{self._path}: raster has no bands"
+                f"{self._path}: band {self._band} out of range "
+                f"(raster has {ds.count} band(s))"
             )
         if ds.crs is not None and not ds.crs.is_geographic:
             raise UpstreamDatasourceError(
