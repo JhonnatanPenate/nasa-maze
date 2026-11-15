@@ -18,6 +18,11 @@ class Settings(BaseSettings):
         _REPO_ROOT / "data" / "gale" / "processed" / "rejilla_ruta_90m.tif"
     )
     rejilla_slope_band: int = 1
+    raster_service_url: str = "http://localhost:8003"
+    raster_dataset: str = "rejilla"
+    raster_band: str = "pendiente_grados"
+    raster_timeout_s: float = 5.0
+    raster_values: Literal["slope", "elevation"] = "slope"
     slope_flat_max_deg: float = 5.0
     slope_moderate_max_deg: float = 15.0
     slope_steep_max_deg: float = 30.0

@@ -1,0 +1,13 @@
+# Mission points of interest (layer C supplement to the MSL spreadsheet).
+landing_sites:
+  - slug: bradbury-landing
+    name: Bradbury Landing
+    lat: -4.5895
+    lon: 137.4417
+    note: "Origin of the 3 MVP routes. Confirm the official value (decision D1)."
+
+# Route destination tags applied to mission POIs by exact name.
+tags:
+  target_route:hematite: [Oudam]
+  target_route:smectite: [Glen Etive]
+  target_route:tridymite: [Buckskin]
