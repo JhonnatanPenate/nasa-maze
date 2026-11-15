@@ -1,0 +1,19 @@
+feature_id,feature_name,descriptor,body,center_lat,center_lon,center_lon_west,bbox_west,bbox_south,bbox_east,bbox_north,diameter_km,approval_status,name_origin
+10452,Olympus Mons,mons,Mars,18.65,-133.8,,226.0,6.0,249.0,32.0,624.0,Approved,Greek: heaven
+10555,Aeolis Mons,mons,Mars,-4.589,137.441,,,,,,,Approved,
+10777,Gale,crater,Mars,-5.4,137.8,,137.3,-5.9,138.3,-4.9,154.0,Approved,
+10888,Tyrrhena Terra,terra,Mars,-12.3,-67.2,,-68.0,-12.8,-66.5,-11.8,1200.0,Approved,
+10999,Hellas Planitia,planitia,Mars,-42.4,70.5,,69.0,-43.0,72.0,-41.8,2300.0,Approved,
+11001,Argyre Planitia,planitia,Mars,-49.9,-40.8,,-41.5,-50.4,-40.1,-49.4,1800.0,Approved,
+11002,Valles Marineris,chasma,Mars,-10.0,-61.0,,,,,,,Approved,
+11003,Tharsis Montes,mons,Mars,-2.0,-109.0,,,,,,,Approved,
+11004,North Polar Layered Deposits,planum,Mars,86.0,150.0,,,,,,,Approved,
+11005,West Feature Alpha,crater,Mars,10.0,,32.8,,,,,50.0,Approved,
+11006,West Feature Beta,crater,Mars,-20.0,,200.0,,,,,80.0,Approved,
+11007,West Feature Gamma,vallis,Mars,5.0,,0.0,,,,,30.0,Approved,
+11008,Bad Coordinates,crater,Mars,999.0,100.0,,,,,,,Approved,
+11009,No Coords,crater,Mars,,,,,,,,,Provisional,discarded
+11010,Provisional Feature,crater,Mars,3.0,45.0,,,,,,,Provisional,not approved
+11011,Lunar Feature,crater,Moon,0.0,0.0,,,,,,,Approved,
+11012,Another Crater,crater,Mars,-30.0,-110.0,,,,,,,Approved,
+11013,,crater,Mars,1.0,2.0,,,,,,,Approved,

@@ -1,0 +1,8 @@
+# Known regions / areas of interest (indicative bboxes only).
+# Actual data coverage is determined by the Raster Service.
+regions:
+  - id: "aoi:gale-90m"
+    name: "Gale - route area (90 m grid)"
+    kind: aoi
+    bbox: { west: 137.345, south: -4.739427, east: 137.454322, north: -4.58 }
+    note: "Indicative only. Actual data coverage is determined by the Raster Service."

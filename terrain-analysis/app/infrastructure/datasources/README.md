@@ -42,6 +42,19 @@ Concrete `RasterDatasource` implementations behind the data-access port.
   validates: the band is within `1..count`, geographic CRS (if a CRS is
   present), non-rotated transform, north-up (`e < 0`); violations raise
   `UpstreamDatasourceError`. `ping()` returns `False` instead of raising.
+- `http_raster_datasource.py` — `HttpRasterDatasource`: client for the
+  MS3 Raster Service (`Settings.datasource_kind="http"`). Maps
+  `read_window` / `read_window_with_halo` / `read_window_around` onto
+  `POST /raster/{dataset}/window` (`bbox`, `bbox`+`halo_cells`, or
+  `point`+`radius_cells`) and `ping()` onto `GET /health` (True only when
+  `status == "ok"` and the configured dataset is readable). Response
+  `cells` (`null` = nodata → NaN), `resolution_deg` and `center_lat` feed
+  `DemWindowMapper` unchanged, so results are bit-for-bit identical to a
+  local grid read; `HaloWindow` core slices come from the payload `core`.
+  Status mapping: 400 → `DomainValidationError`, 404 → `NoCoverageError`,
+  any other non-200 / timeout / connection failure →
+  `UpstreamDatasourceError`. The injected `httpx.Client` carries
+  `base_url`/`timeout`, so tests use `httpx.MockTransport`.
 
 ## Behaviour notes
 
@@ -53,12 +66,14 @@ Concrete `RasterDatasource` implementations behind the data-access port.
 - `cell_size_x_m` uses a single `cos(mean_lat)` for the whole window, so
   cell sizes are slightly approximate for tall windows spanning many
   degrees of latitude — acceptable at MVP extents.
+- In `http` mode the window cap is enforced remotely by MS3
+  (1 000 000 cells), which is stricter than `Settings.max_window_cells`
+  (4 000 000); both surface as `DomainValidationError` → 400.
 - Polar handling is out of MVP scope: `cos(lat)` is floored at `1e-6`
   merely to keep cell sizes finite.
 
 ## Layer rules
 
-May import `core/ports`, `core/domain`, `core/config`, rasterio, and numpy.
-Must NOT import FastAPI. Raw datasource types must not leak past
-`dem_window_mapper` into the domain. Reserved: `HttpRasterDatasource` for a
-future Raster Service (MS3) client.
+May import `core/ports`, `core/domain`, `core/config`, rasterio, httpx and
+numpy. Must NOT import FastAPI. Raw datasource types must not leak past
+`dem_window_mapper` into the domain.

@@ -1,0 +1,19 @@
+# Location Service - standalone compose snippet (README section 10).
+# Merge into the root docker-compose.yml when the full stack lands, or run:
+#   docker compose -f location-service/docker-compose.yml up location-service
+services:
+  location-service:
+    build: ./location-service
+    ports: ["8001:8001"]
+    environment:
+      LOCATION_CATALOG_PATH: /app/data/processed/mars/location/location_catalog.sqlite
+      LOCATION_CONFIG_DIR: /app/config
+      LOG_LEVEL: INFO
+    volumes:
+      - ./data/processed/mars/location:/app/data/processed/mars/location:ro
+      - ./location-service/data/seed:/app/data/seed:ro
+      - ./location-service/config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8001/ready')"]
+      interval: 10s
+      retries: 5

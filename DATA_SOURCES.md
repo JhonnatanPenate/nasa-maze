@@ -19,6 +19,7 @@ Los **términos de uso de los datos son independientes de la licencia del códig
 | 8 | APXS / ChemCam (óxidos) | NASA PDS (APXS: CSA; ChemCam: LANL/CNES) | Calibración (`gale_matriz_calibracion.xlsx`) si se incluyeron | PDS; citar data sets | ⚠ confirmar si se usó |
 | 9 | Traza y waypoints de Curiosity | NASA/JPL (MSL) | `raw/pe_msl_vectores.json` | Citar fuente exacta (PDS Geosciences / MMGIS) | ⚠ confirmar origen |
 | 10 | Incidentes de movilidad de Curiosity | Publicaciones NASA/JPL | Etiquetas de riesgo en calibración | Citar notas/artículos usados | ⚠ confirmar referencias |
+| 11 | Gazetteer de nomenclatura de Marte (`data/gale/raw/gazzeter/MARS_nomenclature_center_pts.shp`) | International Astronomical Union (IAU) y U.S. Geological Survey (USGS) | Nombres y ubicaciones de accidentes geográficos marcianos | Dominio público. Atribución: IAU/USGS. Fuente: [USGS Gazetteer of Planetary Nomenclature](https://planetarynames.wr.usgs.gov/Page/MARS/target); metadatos del archivo indican publicación 2012-10-02 | — |
 
 ## Datos derivados por el equipo
 

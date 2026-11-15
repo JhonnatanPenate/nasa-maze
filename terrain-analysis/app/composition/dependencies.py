@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+import httpx
 from fastapi import Depends
 
 from app.core.application.terrain_point_sampler import TerrainPointSampler
@@ -13,6 +14,9 @@ from app.core.ports.terrain_repository import TerrainRepository
 from app.infrastructure.datasources.dem_window_mapper import DemWindowMapper
 from app.infrastructure.datasources.geotiff_datasource import (
     GeoTiffRasterDatasource,
+)
+from app.infrastructure.datasources.http_raster_datasource import (
+    HttpRasterDatasource,
 )
 from app.infrastructure.datasources.synthetic_dem_datasource import (
     SyntheticDemDatasource,
@@ -59,10 +63,20 @@ def build_datasource(settings: Settings) -> RasterDatasource:
             settings.max_window_cells,
             band=settings.rejilla_slope_band,
         )
+    if settings.datasource_kind == "http":
+        client = httpx.Client(
+            base_url=settings.raster_service_url,
+            timeout=settings.raster_timeout_s,
+        )
+        return HttpRasterDatasource(
+            client,
+            mapper,
+            dataset=settings.raster_dataset,
+            band=settings.raster_band,
+        )
     raise ValueError(
         f"Unsupported datasource_kind '{settings.datasource_kind}': expected "
-        f"'synthetic', 'geotiff' or 'rejilla'; 'http' is reserved for a "
-        f"future Raster Service (MS3) client"
+        f"'synthetic', 'geotiff', 'rejilla' or 'http'"
     )
 
 
@@ -85,7 +99,10 @@ def get_terrain_repository(
     datasource: RasterDatasource = Depends(get_raster_datasource),
     settings: Settings = Depends(get_settings),
 ) -> TerrainRepository:
-    if settings.datasource_kind == "rejilla":
+    if settings.datasource_kind == "rejilla" or (
+        settings.datasource_kind == "http"
+        and settings.raster_values == "slope"
+    ):
         return SlopeGridTerrainRepository(datasource)
     return DemTerrainRepository(datasource)
 
