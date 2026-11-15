@@ -9,8 +9,8 @@ class ElevationProfile:
 
     samples: tuple[ProfileSample, ...]
     total_distance_m: float
-    elevation_gain_m: float
-    elevation_loss_m: float
+    elevation_gain_m: float | None
+    elevation_loss_m: float | None
     max_slope_deg: float
 
     @property
