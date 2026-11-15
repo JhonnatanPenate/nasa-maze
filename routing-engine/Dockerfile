@@ -1,5 +1,5 @@
-# Build desde la raíz del repo: docker build -f routing-engine/Dockerfile -t ms6 .
-# Run: docker run -p 8006:8006 -v "$PWD/data/gale:/data/gale:ro" ms6
+# Build from the repo root: docker build -f routing-engine/Dockerfile -t ms6 .
+# Run: docker run -p 8006:8006 ms6   (Gale data is baked in; mount -v <dir>:/data/gale:ro to override)
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -11,6 +11,7 @@ WORKDIR /app
 COPY routing-engine/pyproject.toml ./
 COPY routing-engine/app ./app
 COPY science ./science
+COPY data/gale /data/gale
 # libexpat1: required by the GDAL bundled in the rasterio wheel, missing from slim
 RUN apt-get update && apt-get install -y --no-install-recommends libexpat1 \
     && rm -rf /var/lib/apt/lists/* \
