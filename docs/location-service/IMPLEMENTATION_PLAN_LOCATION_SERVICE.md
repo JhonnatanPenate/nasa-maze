@@ -142,7 +142,7 @@ Input rules:
 | `elevation_m` | REAL NULL | Informational only (available for POIs). Raster provides authoritative elevation |
 | `approval_status` | TEXT NULL | Gazetteer status |
 | `origin` | TEXT NULL | Name origin, if available |
-| `tags_json` | TEXT | List, e.g. `["ruta_objetivo:esmectitas"]` |
+| `tags_json` | TEXT | List, e.g. `["target_route:smectite"]` |
 | `properties_json` | TEXT | Extra attributes (sol, mineral percentages, etc.); include only non-null values |
 
 Auxiliary tables: `aliases(place_id, alias, alias_norm)`, `regions(id, name, kind, bbox…, source, note)`, `catalog_meta(key, value)` (schema version, build date, sha256 of each source, counts, verified convention).
@@ -152,8 +152,8 @@ Auxiliary tables: `aliases(place_id, alias, alias_norm)`, `regions(id, name, kin
 **`location-service/config/aliases.yaml`** (extensible):
 ```yaml
 aliases:
-  "mars:iau:<Aeolis Mons feature ID>": ["Mount Sharp", "Monte Sharp"]
-  "mars:msl:bradbury-landing": ["Curiosity landing site", "Sitio de aterrizaje de Curiosity", "Bradbury"]
+  "mars:iau:<Aeolis Mons feature ID>": ["Mount Sharp"]
+  "mars:msl:bradbury-landing": ["Curiosity landing site", "Bradbury"]
 ```
 > Resolve IAU IDs **by name** during ingestion (`resolve_by_name: "Aeolis Mons"`); do not hard-code them.
 
@@ -166,9 +166,9 @@ landing_sites:
     lon: 137.4417
     note: "Origin of the 3 MVP routes. Confirm the official value (decision D1)."
 tags:
-  ruta_objetivo:hematita:   [Oudam]
-  ruta_objetivo:esmectitas: [Glen Etive]
-  ruta_objetivo:tridimita:  [Buckskin]
+  target_route:hematite: [Oudam]
+  target_route:smectite: [Glen Etive]
+  target_route:tridymite: [Buckskin]
 ```
 
 **`location-service/config/regions.yaml`**
@@ -323,7 +323,7 @@ Source of truth: `packages/contracts/location-service/openapi.yaml` (generated a
   "elevation_m": -4133,
   "approval_status": null,
   "aliases": [],
-  "tags": ["ruta_objetivo:esmectitas"],
+  "tags": ["target_route:smectite"],
   "properties": { "sol": 2492, "esmectitas_pct": 34.0 },
   "in_regions": ["aoi:gale-90m"]
 }
@@ -511,7 +511,7 @@ Document all variables in `.env.example`.
 - `id` is unique.
 - All mission POIs are inside the `aoi:gale-90m` bbox.
 - Bradbury Landing is present.
-- Every `ruta_objetivo:*` destination exists (Oudam, Glen Etive, Buckskin).
+- Every `target_route:*` destination exists (Oudam, Glen Etive, Buckskin).
 - Verify longitude convention (a known feature's center, e.g. Olympus Mons, should be around `lat ≈ +18.65`, `lon ≈ 226.2`; tolerance ±1° — **failure indicates a convention/sign error**).
 
 *(Note: the example `lat=-18.5&lon=226.2` in the project data document is illustrative; Olympus Mons is in the northern hemisphere. Do not use it as a fixture.)*
@@ -540,7 +540,7 @@ Document all variables in `.env.example`.
 | 18 | `lon=-222.6` | Normalized to `137.4` |
 | 19 | `body=moon` | 422 `UNSUPPORTED_BODY` |
 | 20 | `places/mars:msl:no-existe` | 404 `NOT_FOUND` |
-| 21 | `places?tag=ruta_objetivo:hematita` | Oudam only |
+| 21 | `places?tag=target_route:hematite` | Oudam only |
 | 22 | All 21 POIs | All inside `aoi:gale-90m` |
 | 23 | Bradbury→Glen Etive haversine distance | Matches an independent calculation (R = 3,396,190 m) with error < 0.1% |
 | 24 | Contract | All responses validate against `openapi.yaml` |

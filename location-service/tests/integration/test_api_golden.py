@@ -248,7 +248,7 @@ class TestErrorsAndMisc:
         assert r.json()["code"] == "NOT_FOUND"
 
     def test_case21_tag_filter(self, client):
-        r = client.get("/v1/places", params={"tag": "ruta_objetivo:hematita"})
+        r = client.get("/v1/places", params={"tag": "target_route:hematite"})
         assert r.status_code == 200
         body = r.json()
         assert body["total"] == 1
@@ -282,7 +282,7 @@ class TestErrorsAndMisc:
         assert r.status_code == 200
         place = r.json()["place"]
         assert place["name"] == "Glen Etive"
-        assert place["tags"] == ["ruta_objetivo:esmectitas"]
+        assert place["tags"] == ["target_route:smectite"]
         assert GALE_AOI in place["in_regions"]
         assert place["properties"]["sol"] == 2492
 

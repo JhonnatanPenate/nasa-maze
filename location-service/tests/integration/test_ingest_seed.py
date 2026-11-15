@@ -53,10 +53,10 @@ def test_seed_build(tmp_path):
     assert n_places == 22  # 21 POIs + Bradbury Landing
     assert n_poi == 21
     assert n_site == 1
-    assert n_alias == 3  # 3 Bradbury aliases
+    assert n_alias == 2  # 2 Bradbury aliases
     assert n_region == 1
     assert brad[0] == -4.5895 and brad[1] == 137.4417
-    assert "ruta_objetivo:esmectitas" in glen[2]
+    assert "target_route:smectite" in glen[2]
 
     report = json.loads(report_path.read_text())
     # exactly two pairs of duplicate coordinates (John Klein/Cumberland,

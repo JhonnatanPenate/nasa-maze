@@ -8,6 +8,6 @@ landing_sites:
 
 # Route destination tags applied to mission POIs by exact name.
 tags:
-  ruta_objetivo:hematita: [Oudam]
-  ruta_objetivo:esmectitas: [Glen Etive]
-  ruta_objetivo:tridimita: [Buckskin]
+  target_route:hematite: [Oudam]
+  target_route:smectite: [Glen Etive]
+  target_route:tridymite: [Buckskin]

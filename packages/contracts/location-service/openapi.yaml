@@ -175,7 +175,7 @@ paths:
           in: query
           required: false
           schema: { type: string }
-          description: Exact tag match (e.g. ruta_objetivo:hematita)
+          description: Exact tag match (e.g. target_route:hematite)
         - name: region
           in: query
           required: false
