@@ -8,4 +8,4 @@ class HealthResponse(BaseModel):
 
     status: Literal["ok", "degraded"]
     datasource: Literal["ok", "unavailable"]
-    datasource_kind: str
+    datasource_kind: Literal["synthetic", "geotiff", "rejilla", "http"]
