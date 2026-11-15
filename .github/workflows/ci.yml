@@ -56,7 +56,8 @@ jobs:
             context: .
             port: 8006
             health: /health
-            mounts: -v $PWD/data/gale:/data/gale:ro
+            # Gale data is baked into the image; a default route proves it
+            route: true
     name: docker (${{ matrix.svc }})
     steps:
       - uses: actions/checkout@v4
@@ -89,11 +90,16 @@ jobs:
         run: |
           docker run -d --name svc -p ${{ matrix.port }}:${{ matrix.port }} ${{ matrix.mounts }} ${{ matrix.svc }}:ci
           # A "degraded" health (e.g. data not found) is a failure, not a pass
-          for i in $(seq 1 45); do
+          for i in $(seq 1 60); do
             if body=$(curl -fsS "http://localhost:${{ matrix.port }}${{ matrix.health }}"); then
               echo "$body"
-              echo "$body" | grep -qE '"status": ?"(ok|ready)"' && { echo "healthy after ~$((i * 2)) s"; exit 0; }
-              break
+              echo "$body" | grep -qE '"status": ?"(ok|ready)"' || break
+              echo "healthy after ~$((i * 2)) s"
+              if [ "${{ matrix.route }}" = "true" ]; then
+                curl -fsS -m 60 -o route.json -X POST "http://localhost:${{ matrix.port }}/route" -H 'Content-Type: application/json' -d '{}' || { docker logs svc; exit 1; }
+                head -c 300 route.json; echo
+              fi
+              exit 0
             fi
             sleep 2
           done
