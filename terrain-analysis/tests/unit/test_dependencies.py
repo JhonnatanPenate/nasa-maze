@@ -29,6 +29,9 @@ from app.features.point_analysis.presentation.point_router import (
 from app.infrastructure.datasources.geotiff_datasource import (
     GeoTiffRasterDatasource,
 )
+from app.infrastructure.datasources.http_raster_datasource import (
+    HttpRasterDatasource,
+)
 from app.infrastructure.datasources.synthetic_dem_datasource import (
     SyntheticDemDatasource,
 )
@@ -98,9 +101,16 @@ class TestBuildDatasource:
                 Settings(datasource_kind="rejilla", rejilla_path="")
             )
 
-    def test_http_kind_reserved_raises(self) -> None:
-        with pytest.raises(ValueError, match="http"):
-            build_datasource(Settings(datasource_kind="http"))
+    def test_http_kind(self) -> None:
+        ds = build_datasource(
+            Settings(
+                datasource_kind="http",
+                raster_service_url="http://ms3.test",
+                raster_dataset="rejilla",
+                raster_band="pendiente_grados",
+            )
+        )
+        assert isinstance(ds, HttpRasterDatasource)
 
 
 class TestProviders:
@@ -123,6 +133,25 @@ class TestProviders:
         )
         assert isinstance(repo, SlopeGridTerrainRepository)
         assert repo.provides_slope() is True
+
+    def test_terrain_repository_http_slope(
+        self, synthetic_datasource
+    ) -> None:
+        repo = get_terrain_repository(
+            synthetic_datasource,
+            Settings(datasource_kind="http", raster_values="slope"),
+        )
+        assert isinstance(repo, SlopeGridTerrainRepository)
+        assert repo.provides_slope() is True
+
+    def test_terrain_repository_http_elevation(
+        self, synthetic_datasource
+    ) -> None:
+        repo = get_terrain_repository(
+            synthetic_datasource,
+            Settings(datasource_kind="http", raster_values="elevation"),
+        )
+        assert isinstance(repo, DemTerrainRepository)
 
     def test_slope_calculator(self) -> None:
         assert isinstance(get_slope_calculator(), SlopeCalculator)
