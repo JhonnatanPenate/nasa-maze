@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from app import main
 from app.main import app
 
 client = TestClient(app)
@@ -33,3 +34,16 @@ def test_ruta_hematita_desde_bradbury():
     assert {f["properties"]["capa"] for f in body["geojson"]["features"]} == {
         "ruta_optima", "contrafactual", "objetivo", "origen"}
     assert body["tramos"][-1]["dosis_acumulada_uGy"] == body["resumen"]["dosis_rad_acum_uGy"]
+
+
+def test_misma_ruta_usa_cache(monkeypatch):
+    llamadas = []
+    original = main.opt.calcular_ruta_optima
+    monkeypatch.setattr(main.opt, "calcular_ruta_optima", lambda *a: llamadas.append(a) or original(*a))
+    main.compute_route.cache_clear()
+    body = {**BRADBURY, "material": "tridimita"}
+    primera = client.post("/route", json=body)
+    segunda = client.post("/route", json=body)
+    assert primera.status_code == segunda.status_code == 200
+    assert primera.json() == segunda.json()
+    assert len(llamadas) == 1

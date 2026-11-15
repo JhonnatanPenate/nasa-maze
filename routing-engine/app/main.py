@@ -1,7 +1,7 @@
-"""MS6 Routing Engine: ruta de costo mínimo hacia un mineral objetivo en Gale.
+"""MS6 Routing Engine: lowest-cost route to a mineral target in Gale Crater.
 
-Extraído de planetary-explorer-fase2-3/backend/main.py (Javier Galdámez), solo POST /api/ruta.
-El optimizador vive en science/optimizador_rutas.py y se importa tal cual.
+Extracted from planetary-explorer-fase2-3/backend/main.py (Javier Galdámez), only POST /api/ruta.
+The optimizer lives in science/optimizador_rutas.py and is imported unchanged.
 """
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import os
 import sys
 import threading
 from contextlib import asynccontextmanager
+from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
@@ -32,7 +33,7 @@ COLUMNAS_TRAMOS = [
 ]
 
 _env_cache: dict[int, opt.MapaMision] = {}
-# ponytail: lock global; pasar vmax como parámetro si escala
+# ponytail: global lock; pass vmax as a parameter if this needs to scale
 _lock = threading.Lock()
 
 
@@ -44,7 +45,9 @@ def get_env(sol: int) -> opt.MapaMision:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    get_env(1360)  # precarga el sol por defecto; el resto bajo demanda
+    # Pre-warm the demo's reference routes (Bradbury, sol 1360, 09:00 LMST) so the first click is instant
+    for material in ("hematita", "esmectitas", "tridimita"):
+        compute_route(137.4416, -4.5895, material, 1360, 9.0, 1000.0)
     yield
 
 
@@ -59,12 +62,13 @@ app.add_middleware(
 
 
 class RutaRequest(BaseModel):
-    lon: float = Field(137.4416, description="Longitud origen")
-    lat: float = Field(-4.5895, description="Latitud origen")
-    material: Literal["hematita", "esmectitas", "tridimita", "sulfatos"] = "hematita"
-    sol: int = Field(1360, description="Sol de referencia RAD/REMS")
-    hora: float = Field(9.0, ge=0, lt=24, description="Hora LMST de salida")
-    vmax: float = Field(1000.0, gt=0, description="Velocidad nominal m/h")
+    lon: float = Field(137.4416, description="Origin longitude (deg, IAU_2015:49900)")
+    lat: float = Field(-4.5895, description="Origin latitude (deg, IAU_2015:49900)")
+    material: Literal["hematita", "esmectitas", "tridimita", "sulfatos"] = Field(
+        "hematita", description="Target mineral: hematite, smectites, tridymite or sulfates")
+    sol: int = Field(1360, description="RAD/REMS reference sol: 1360, 2140, 3290 or 4710")
+    hora: float = Field(9.0, ge=0, lt=24, description="Departure time, local mean solar time (LMST hours)")
+    vmax: float = Field(1000.0, gt=0, description="Nominal walking speed (m/h)")
 
 
 @app.get("/health")
@@ -75,19 +79,25 @@ def health():
 @app.post("/route")
 def route(req: RutaRequest):
     if req.sol not in SOLS:
-        raise HTTPException(400, f"sol debe ser uno de {list(SOLS)}")
+        raise HTTPException(400, f"sol must be one of {list(SOLS)}")
     if not (AOI[0] <= req.lon <= AOI[2] and AOI[1] <= req.lat <= AOI[3]):
-        raise HTTPException(400, f"origen fuera del AOI de Gale {list(AOI)}")
+        raise HTTPException(400, f"origin is outside the Gale AOI {list(AOI)}")
+    return compute_route(req.lon, req.lat, req.material, req.sol, req.hora, req.vmax)
 
+
+# ponytail: per-process cache; every Cloud Run instance warms its own. Inputs and data are static,
+# so the same request always yields the same route. Errors (HTTPException) are not cached.
+@lru_cache(maxsize=64)
+def compute_route(lon: float, lat: float, material: str, sol: int, hora: float, vmax: float) -> dict:
     with _lock:
-        # La A* lee el global canónico VELOCIDAD_MAXIMA_M_H (no un alias suelto).
-        opt.VELOCIDAD_MAXIMA_M_H = opt.V_MAX_M_H = float(req.vmax)
-        env = get_env(req.sol)
+        # The A* reads the canonical global VELOCIDAD_MAXIMA_M_H (not a loose alias).
+        opt.VELOCIDAD_MAXIMA_M_H = opt.V_MAX_M_H = float(vmax)
+        env = get_env(sol)
         if not env.control_calidad.get("cobertura_ok", True):
-            raise HTTPException(422, "Control de calidad fallido: cobertura de celdas < 90%")
-        res = opt.calcular_ruta_optima(env, req.lon, req.lat, req.material, req.hora)
+            raise HTTPException(422, "Map quality check failed: valid cell coverage < 90%")
+        res = opt.calcular_ruta_optima(env, lon, lat, material, hora)
     if res is None:
-        raise HTTPException(404, "Sin ruta factible entre origen y objetivo mineral")
+        raise HTTPException(404, "No feasible route between origin and mineral target")
 
     ruta = res["ruta"]
     features = [
@@ -118,11 +128,11 @@ def route(req: RutaRequest):
         {
             "type": "Feature",
             "geometry": {"type": "Point", "coordinates": [float(res["objetivo"].lon), float(res["objetivo"].lat)]},
-            "properties": {"capa": "objetivo", "nombre": res["objetivo"].nombre, "material": req.material},
+            "properties": {"capa": "objetivo", "nombre": res["objetivo"].nombre, "material": material},
         },
         {
             "type": "Feature",
-            "geometry": {"type": "Point", "coordinates": [req.lon, req.lat]},
+            "geometry": {"type": "Point", "coordinates": [lon, lat]},
             "properties": {"capa": "origen", "nombre": "origen"},
         },
     ]
@@ -136,7 +146,7 @@ def route(req: RutaRequest):
         "costo_objetivo": float(r["costo_objetivo"]),
         "nodos_expandidos": int(r["nodos_expandidos"]),
         "objetivo": r["objetivo_mineral"],
-        "material": req.material,
+        "material": material,
         "comparativa_bagnold": {
             "celdas_duna_ruta_optima": int(bag["celdas_arena_ruta_optima"]),
             "celdas_duna_contrafactual": int(bag["ruta_modelo_global"]["celdas_arena"]),
