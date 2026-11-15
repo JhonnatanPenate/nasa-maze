@@ -1,9 +1,11 @@
 # MS4 Terrain Analysis Service — Realignment Plan (v2)
 
-**Version:** 1.0.0 | **Status:** Proposed | **Date:** 2026-11-14
+**Version:** 1.1.0 | **Status:** Proposed | **Date:** 2026-11-14
 **Audience:** Manager (orchestrator) agent + team implementing MS4 against the delivered data package.
-**Supersedes/extends:** [`IMPLEMENTATION_PLANMS4_1.md`](IMPLEMENTATION_PLANMS4_1.md) (all WPs done) — this plan realigns the **finished** implementation to the real data delivered in `data_usar/`.
-**Contract of record:** [`docs/SPEC_MS4_TERRAIN_ANALYSIS.md`](../SPEC_MS4_TERRAIN_ANALYSIS.md) **v0.2.0**
+**Supersedes/extends:** [`IMPLEMENTATION_PLANMS4_1.md`](IMPLEMENTATION_PLANMS4_1.md) (all WPs done) — this plan realigns the **finished** implementation to the real data delivered in `data/gale/`.
+**Contract of record:** [`docs/SPEC_MS4_TERRAIN_ANALYSIS.md`](../SPEC_MS4_TERRAIN_ANALYSIS.md) **v0.2.1**
+
+> **v1.1 update:** the data package landed at `data/gale/{processed,raw}/` (supersedes `data_usar/`). The raster `data/gale/processed/rejilla_ruta_90m.tif` **is now present in the repo** — R2/R4 are unblocked and can test against the real file. Tabular data is `.xlsx`-only (no CSV) — does not affect MS4 (raster-only consumer). Canonical science names changed to `optimizador_rutas.py` / `crs_marte.py`, but optimizer scripts are **not yet in the repo** — irrelevant to MS4, tracked for MS6.
 
 ---
 
@@ -11,10 +13,10 @@
 
 The original plan assumed a DEM (elevation GeoTIFF) as the terrain data source and that MS4 would compute slope via Horn's method. The data team instead delivered:
 
-- `processed/rejilla_ruta_90m.tif` — a **routing cost grid**, 72×105 cells, 6 bands, with slope **already computed** in band 1 (`pendiente_grados`) and **no elevation band**.
-- CRS `IAU_2015:49900` (Mars sphere, R = 3 396 190 m) — different from MS4's current default `planet_radius_km = 3389.5`.
+- `data/gale/processed/rejilla_ruta_90m.tif` — a **routing cost grid**, 72×105 cells, 6 bands, with slope **already computed** in band 1 (`pendiente_grados`) and **no elevation band**.
+- CRS `IAU_2015:49900` (Mars sphere, R = 3 396 190 m; 59 274.69 m/degree) — different from MS4's current default `planet_radius_km = 3389.5`.
 - A bounded AOI (Gale crater): bounds `[137.345, -4.740, 137.455, -4.580]`, origin Bradbury Landing `(137.4416, -4.5895)`.
-- The team warned the **file organization may change** — paths must stay configurable.
+- The team **already reorganized once** (`data_usar/` → `data/gale/`) — paths must stay configurable via env vars.
 
 The architecture anticipated exactly this: the `RasterDatasource` port + swappable datasources mean the realignment is confined to infrastructure + config + mappers. **Domain logic, use cases, and API contracts stay untouched** (with one documented exception: `elevation_m` becomes nullable).
 
@@ -40,7 +42,7 @@ The architecture anticipated exactly this: the `RasterDatasource` port + swappab
 | D4 | `elevation_m` absent | Emit `null` in API responses (spec v0.2); never fabricate 0 | Honest contract; UI/Core can show "n/a" |
 | D5 | Terrain classification | Unchanged — classify on the band's slope values with the same thresholds | Thresholds configurable already |
 | D6 | DEM mode retained? | Yes. `synthetic` + `geotiff` datasources stay as-is for tests and future DEM delivery | Zero regression; swap test already proves pattern |
-| D7 | New datasource kind name | `rejilla` | `MS4_DATASOURCE_KIND=rejilla`, `MS4_REJILLA_PATH=<path to rejilla_ruta_90m.tif>` |
+| D7 | New datasource kind name | `rejilla` | `MS4_DATASOURCE_KIND=rejilla`, `MS4_REJILLA_PATH=data/gale/processed/rejilla_ruta_90m.tif` (default; overridable since layout may move again) |
 
 ## 4. Work packages (realignment)
 
@@ -52,7 +54,7 @@ Dependency: `R0 → R1 → R2/R3 (parallel) → R4 → R5`
 | **R1 Domain** | `SlopeWindow` domain object (+ `slope_at`, `window_for` additions on `TerrainRepository` port if needed); `elevation_m` optional in `PointAnalysis`/`ProfileSample` | `core/domain/slope_window.py`, feature domain entities | unit tests green; zero rasterio imports in domain |
 | **R2 RejillaDatasource** | rasterio reader for `rejilla_ruta_90m.tif` band 1 (parametrizable band), nodata handling, mapper → `SlopeWindow` | `infrastructure/datasources/rejilla_grid_datasource.py`, `slope_window_mapper.py`, `composition/dependencies.py` | swap test: same repository behavior vs synthetic; 404 on out-of-extent; 502 on unreadable file |
 | **R3 Null-elevation plumbing** | use cases + presentation schemas tolerate `elevation_m=None`; health reports active datasource kind | `features/*/application`, `*_schemas.py`, `health_router.py` | contract tests updated; `elevation_m: null` asserted |
-| **R4 Integration test w/ real file** | end-to-end `GET /terrain/point` + `POST /terrain/profile` against the real `rejilla_ruta_90m.tif` (path via env; skip test if file absent) | `tests/api/test_rejilla_integration.py`, `conftest.py` | slope values match band 1 at known cells; bounds Bradbury → valid response |
+| **R4 Integration test w/ real file** | end-to-end `GET /terrain/point` + `POST /terrain/profile` against the real `data/gale/processed/rejilla_ruta_90m.tif` (path via env; skip test if file absent) | `tests/api/test_rejilla_integration.py`, `conftest.py` | slope values match band 1 at known cells; bounds Bradbury → valid response |
 | **R5 Docs & review** | update `terrain-analysis/README.md` (datasource kinds, env vars), this plan's status, code review pass | README, AGENTS.md | clean review; one conventional commit per WP on `feature/terrain-analysis` |
 
 ## 5. Test matrix additions
@@ -67,8 +69,9 @@ Dependency: `R0 → R1 → R2/R3 (parallel) → R4 → R5`
 ## 6. Open requests to the data team
 
 1. **Source DEM** used to derive `pendiente_grados` (to restore `elevation_m` + Horn validation). If it won't arrive, grid mode stays the production mode and `elevation_m` remains `null` permanently — acceptable per spec v0.2.
-2. Confirm `rejilla_ruta_90m.tif` nodata value and exact grid registration (cell-center vs. corner origin) once the file is delivered.
-3. Notify new directory layout before reorganizing `data_usar/` so env vars can be updated in one place.
+2. Confirm `rejilla_ruta_90m.tif` nodata value and exact grid registration (cell-center vs. corner origin) — **verifiable now** by inspecting the delivered file during R2.
+3. Optimizer scripts (`optimizador_rutas.py`, `crs_marte.py`, `modelos_inclinacion_por_suelo.R`) referenced by `docs/data/` handoff are **not in the repo** — needed by MS6, not MS4; track separately.
+4. `data_usar/` remains in the repo but is **superseded** — confirm it can be deleted/archived to avoid dual-source confusion.
 
 ## 7. What does NOT change
 
@@ -82,7 +85,7 @@ Dependency: `R0 → R1 → R2/R3 (parallel) → R4 → R5`
 |---|---|
 | R0 Config | pending |
 | R1 Domain | pending |
-| R2 RejillaDatasource | pending — blocked until `rejilla_ruta_90m.tif` is delivered (can build against generated fixture meanwhile) |
+| R2 RejillaDatasource | pending — **unblocked**: `data/gale/processed/rejilla_ruta_90m.tif` is in the repo |
 | R3 Null-elevation plumbing | pending |
-| R4 Integration test | pending — blocked on real file |
+| R4 Integration test | pending — **unblocked**: real file available |
 | R5 Docs & review | pending |

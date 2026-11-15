@@ -1,9 +1,11 @@
 # Planetary Explorer
 ### Propuesta de proyecto y arquitectura de software
 
-**Versión:** 2.0 | **Fecha:** 2026-11-14 | **Estado:** Alineada con el paquete de datos `data_usar/` (ver `data_usar/HANDOFF_SOFTWARE.md`)
+**Versión:** 2.1 | **Fecha:** 2026-11-14 | **Estado:** Alineada con el paquete de datos `data/gale/` (handoff actual: `docs/data/HANDOFF_SOFTWARE.md` + `docs/data/SETUP_EQUIPO_SOFTWARE.md`)
 
-> **Cambio clave en v2:** el equipo de datos entregó un motor científico ya calibrado (`data_usar/scripts/motor_rutas_adaptativo.py`), un raster multibanda de transitabilidad (`rejilla_ruta_90m.tif`, 6 bandas sobre el cráter Gale) y perfiles ambientales por hora (RAD/REMS). Los microservicios pasan de "construir la ciencia" a **envolver la ciencia existente en APIs** y añadir análisis ad-hoc que las rutas precalculadas no cubren.
+> **Cambio clave en v2:** el equipo de datos entregó un **optimizador de rutas calibrado** (`optimizador_rutas.py`, minimiza una función objetivo de costo de misión), un raster multibanda de transitabilidad (`rejilla_ruta_90m.tif`, 6 bandas sobre el cráter Gale) y perfiles ambientales por hora (RAD/REMS). Los microservicios pasan de "construir la ciencia" a **envolver la ciencia existente en APIs** y añadir análisis ad-hoc que las rutas precalculadas no cubren.
+>
+> **v2.1:** la data aterrizó en `data/gale/{processed,raw}/`. **Todas las tablas son Excel (`.xlsx`) — no hay CSV** (leer con `openpyxl`/`pandas`). Nombres canónicos nuevos: `MapaMision`, `calcular_ruta_optima`, `minimizar_costo_ruta`, `tabla_tramos_ruta` (los antiguos `motor_rutas_adaptativo.py`/`marte_crs.py` quedan como wrappers). `data_usar/` queda **obsoleto**.
 
 ## 1. Descripción del proyecto
 
@@ -32,23 +34,25 @@ El proyecto se desarrollará utilizando una arquitectura de microservicios dentr
 
 La arquitectura estará compuesta por seis microservicios y un componente central denominado **Core**, encargado de coordinar su comunicación.
 
-| Componente | Responsabilidad | Fuente de datos principal (`data_usar/`) |
+| Componente | Responsabilidad | Fuente de datos principal (`data/gale/`) |
 |---|---|---|
-| **1. Location Service** | Buscar ubicaciones planetarias y convertir nombres en coordenadas. | `processed/gale_puntos_quimica.csv` (21 puntos CheMin), `raw/pe_msl_vectores.json` (waypoints Curiosity), Bradbury Landing como origen fijo. |
-| **2. Data Management Service** | Registrar, versionar y validar los datasets entregados por el equipo de datos (en el MVP los datos ya están locales; no hay descarga externa). | Todo `data_usar/`; catálogo SQLite opcional. |
-| **3. Raster Service** | Administrar el acceso a archivos geoespaciales y proporcionar consultas sobre sus valores y bandas. | `processed/rejilla_ruta_90m.tif` (6 bandas; ver §4), `processed/_rejilla_suelo_tilt.npy`. |
+| **1. Location Service** | Buscar ubicaciones planetarias y convertir nombres en coordenadas. | `processed/gale_puntos_quimica.xlsx` (21 puntos CheMin), `raw/pe_msl_vectores.json` (waypoints Curiosity), Bradbury Landing como origen fijo. |
+| **2. Data Management Service** | Registrar, versionar y validar los datasets entregados por el equipo de datos (en el MVP los datos ya están locales; no hay descarga externa). | Todo `data/`; catálogo SQLite opcional. |
+| **3. Raster Service** | Administrar el acceso a archivos geoespaciales y proporcionar consultas sobre sus valores y bandas. | `processed/rejilla_ruta_90m.tif` (6 bandas; ver §4). |
 | **4. Terrain Analysis Service** | Analizar elevación, pendientes y características físicas del terreno (punto, perfil, área). | Banda 1 `pendiente_grados` del GeoTIFF + DEM de elevación *pendiente de entrega* (ver plan de realineación). |
-| **5. Risk Assessment Service** | Evaluar riesgos ambientales y geográficos (pendiente, rugosidad, dunas, térmico, radiación) sobre un tramo o punto. | Bandas del GeoTIFF + `raw/ambiental/rad_dosis_observaciones.csv` + `raw/ambiental/rems_resumen_horario.csv`. |
-| **6. Routing Engine** | Calcular y optimizar rutas; **envuelve el motor A* existente** (`calcular_ruta`, `a_estrella`, `tramos`) sin reescribir la física. | `scripts/motor_rutas_adaptativo.py` + `processed/modelos_por_suelo.json` + rejilla + RAD/REMS. |
-| **Core** | Recibir solicitudes, coordinar los microservicios e integrar sus resultados para entregarlos al usuario. | Orquesta todo lo anterior; entrega GeoJSON + tramos + KPIs al frontend. |
+| **5. Risk Assessment Service** | Evaluar riesgos ambientales y geográficos (pendiente, rugosidad, dunas, térmico, radiación) sobre un tramo o punto. | Bandas del GeoTIFF + `raw/ambiental/rad_dosis_observaciones.xlsx` + `raw/ambiental/rems_resumen_horario.xlsx`. |
+| **6. Routing Engine** | Calcular y optimizar rutas; **envuelve el optimizador existente** (`MapaMision`, `calcular_ruta_optima`, `tabla_tramos_ruta`) sin reescribir la función objetivo. | `optimizador_rutas.py` (canónico; pendiente de incluirse en el repo) + `processed/modelos_por_suelo.json` + rejilla + RAD/REMS. |
+| **Core** | Recibir solicitudes, coordinar los microservicios e integrar sus resultados para entregarlos al usuario. | Orquesta todo lo anterior; entrega GeoJSON + tramos + KPIs al frontend (formato de respuesta: `docs/data/EJEMPLO_API_RESPUESTA.json`). |
 
 Cada microservicio tendrá independencia lógica y podrá desarrollarse, ejecutarse y probarse individualmente. La comunicación entre ellos se realizará principalmente mediante APIs REST.
 
-**Regla de oro (v2):** el motor científico en `data_usar/scripts/` se **importa, no se reescribe**. Si la organización de archivos del paquete de datos cambia, solo se actualiza la capa de acceso a datos (datasource/config) de cada servicio — nunca el dominio ni los contratos de API.
+**Regla de oro (v2):** el optimizador científico se **importa, no se reescribe**. Si la organización de archivos del paquete de datos cambia, solo se actualiza la capa de acceso a datos (datasource/config) de cada servicio — nunca el dominio ni los contratos de API. **Las rutas a datasets se resuelven por configuración** (variables de entorno), nunca hardcodeadas — la reorganización ya ocurrió una vez (`data_usar/` → `data/gale/`) y puede repetir.
 
 ## 4. Gestión y disponibilidad de los datos
 
-**Fuente de verdad del MVP:** el paquete `data_usar/` entregado por el equipo de datos (cfr. `data_usar/HANDOFF_SOFTWARE.md`). Datos originales provienen de fuentes oficiales (NASA/USGS: MSL/Curiosity, RAD, REMS, CheMin) ya procesados y calibrados.
+**Fuente de verdad del MVP:** el paquete `data/gale/` entregado por el equipo de datos (cfr. `docs/data/HANDOFF_SOFTWARE.md` y `docs/data/SETUP_EQUIPO_SOFTWARE.md`). Datos originales provienen de fuentes oficiales (NASA/USGS: MSL/Curiosity, RAD, REMS, CheMin) ya procesados y calibrados.
+
+**Formato tabular:** **Excel únicamente** (`.xlsx`/`xlsm`; leer con `pandas.read_excel`/`openpyxl`). El paquete **no incluye CSV**. Servicios que consumen tablas (MS1, MS5, MS6, Core) deben añadir `openpyxl` a sus dependencias.
 
 **CRS obligatorio:** `IAU_2015:49900` (esfera marciana, R = 3 396 190 m; 59 274.69 m/grado). No usar EPSG:4326/3857 para distancias. Todos los servicios deben usar `planet_radius_km = 3396.19`.
 
@@ -67,9 +71,11 @@ Cada microservicio tendrá independencia lógica y podrá desarrollarse, ejecuta
 
 > ⚠️ El raster **no incluye banda de elevación**. La pendiente ya viene calculada por el equipo de datos; el DEM fuente está pendiente de entrega. MS4 debe poder operar leyendo la banda de pendiente directamente (ver `docs/terrain_analysis/REALIGNMENT_PLANMS4_1.md`).
 
-**Rutas precalculadas** (hematita→Oudam, esmectitas→Glen Etive, tridimita→Buckskin) disponibles como `.geojson` + `_tramos.csv` + `_resumen.json` — útiles para demo offline y como fixtures de referencia.
+**Rutas precalculadas** (hematita→Oudam, esmectitas→Glen Etive, tridimita→Buckskin) disponibles como `ruta_*.geojson` + `ruta_*_tramos.xlsx` + `ruta_*_resumen.json` bajo `data/gale/processed/` — útiles para demo offline y como fixtures de referencia. Sus columnas de tramos (17) incluyen `tipo_suelo`, `modelo_usado`, `dosis_acumulada_uGy`, `temp_suelo_K`, horas LMST inicio/fin.
 
-Los datos se organizan en almacenamiento local compartido. El Raster Service es el punto de acceso común a la información geoespacial, evitando que cada microservicio duplique archivos. **Las rutas a los datasets se resuelven por configuración** (variables de entorno), nunca hardcodeadas, porque la organización de carpetas del paquete puede cambiar.
+**Función objetivo del optimizador** (referencia para MS5/MS6): `min g = Σ c_ij`, con `c_ij = tiempo·(1+incertidumbre) + espera_nocturna + cambio_de_suelo + radiación + estrés_térmico + (1−interés_mineral)·distancia`. Pesos canónicos en `optimizador_rutas.py` (`PESO_*`, `PENALIZACION_CAMBIO_SUELO`).
+
+Los datos se organizan en almacenamiento local compartido. El Raster Service es el punto de acceso común a la información geoespacial, evitando que cada microservicio duplique archivos.
 
 Los servicios de análisis podrán generar nuevas capas derivadas, que también quedarán disponibles localmente. La consulta, el análisis y el cálculo de rutas funcionan **sin conexión** una vez presente el paquete de datos.
 

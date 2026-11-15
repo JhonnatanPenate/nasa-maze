@@ -1,7 +1,9 @@
 # Spec: Risk Assessment Service (MS5)
-**Version:** 0.2.0 | **Status:** Draft — realigned with `data_usar/` package | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
+**Version:** 0.2.1 | **Status:** Draft — realigned with `data/gale/` package | **Date:** 2026-11-14 | **Effort target:** 2 days (spec-driven development)
 
 > **v0.2 changes:** the delivered package provides real environmental layers — `rejilla_ruta_90m.tif` bands (`rugosidad_m`, `fraccion_oscura`, `inercia_termica_tiu`, `albedo`, `distancia_duna_m`) plus hourly RAD dose and REMS thermal profiles per sol. The factor catalog expands beyond `slope/temperature/radiation`, and requests may carry `sol`/`hora` to select the environmental profile.
+>
+> **v0.2.1:** data relocated to `data/gale/`; environmental tables are **`.xlsx` only** (no CSV) — requires `openpyxl`/`pandas.read_excel`.
 
 ## 1. Service Identity
 
@@ -50,8 +52,8 @@ Base URL: `/risk`
 | `slope` | MS4 `/terrain/profile` | Slope in degrees |
 | `roughness` | GeoTIFF band `rugosidad_m` | Surface roughness |
 | `dunes` | GeoTIFF bands `distancia_duna_m`, `fraccion_oscura` | Proximity to Bagnold dunes / dark sand fraction |
-| `temperature` | `raw/ambiental/rems_resumen_horario.csv` (+ band `inercia_termica_tiu` for terrain coupling) | Hourly ground/air temp |
-| `radiation` | `raw/ambiental/rad_dosis_observaciones.csv` | Hourly dose rate μGy/h; segment dose = rate × traversal time when MS6 provides it |
+| `temperature` | `data/gale/raw/ambiental/rems_resumen_horario.xlsx` (+ band `inercia_termica_tiu` for terrain coupling) | Hourly ground/air temp |
+| `radiation` | `data/gale/raw/ambiental/rad_dosis_observaciones.xlsx` | Hourly dose rate μGy/h; segment dose = rate × traversal time when MS6 provides it |
 
 ### 3.2 `GET /risk/point?lat=..&lon=..` — Risk at a single point
 
@@ -60,8 +62,8 @@ Base URL: `/risk`
 ### Data dependencies (what the service needs)
 
 - Slope values per sampled point — obtained by calling MS4 `/terrain/profile`.
-- Terrain bands (`rugosidad_m`, `fraccion_oscura`, `inercia_termica_tiu`, `albedo`, `distancia_duna_m`) via the raster datasource (MS3 or local file behind a swappable datasource, same pattern as MS4).
-- Environmental CSVs (`rad_dosis_observaciones.csv`, `rems_resumen_horario.csv`) — loaded as hourly profiles keyed by sol/hora.
+- Terrain bands (`rugosidad_m`, `fraccion_oscura`, `inercia_termica_tiu`, `albedo`, `distancia_duna_m`) of `data/gale/processed/rejilla_ruta_90m.tif`, via the raster datasource (MS3 or local file behind a swappable datasource, same pattern as MS4).
+- Environmental Excels (`data/gale/raw/ambiental/rad_dosis_observaciones.xlsx`, `rems_resumen_horario.xlsx`) — loaded as hourly profiles keyed by sol/hora via `pandas.read_excel`/`openpyxl`.
 - All layers **optional**: if a layer is missing, that factor is skipped with `available: false`.
 - Configuration: risk weights and thresholds per factor (see §5); dataset paths via env vars (paths may change when the data team reorganizes).
 
