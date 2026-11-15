@@ -74,6 +74,17 @@ class GridGeometry:
         col = min(max(col, 0), self._cols - 1)
         return row, col
 
+    def unbounded_cell_at(self, point: GeoPoint) -> tuple[int, int]:
+        """(row, col) of the cell containing point as if the grid were
+        unbounded: same floored index math as cell_at, but never returns
+        None and never clamps, so out-of-extent and max-edge points keep
+        their out-of-range index. Used to anchor the all-NaN window of
+        a point outside the extent."""
+        e = self._extent
+        row = int(math.floor((e.max_lat - point.lat) / self._res_lat_deg))
+        col = int(math.floor((point.lon - e.min_lon) / self._res_lon_deg))
+        return row, col
+
     def cell_bounds_for_bbox(
         self, bbox: BoundingBox
     ) -> tuple[int, int, int, int]:

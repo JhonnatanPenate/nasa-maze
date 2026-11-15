@@ -66,6 +66,36 @@ class TestCellAt:
         assert grid.cell_at(GeoPoint(lat=18.5, lon=76.9)) is None
 
 
+class TestUnboundedCellAt:
+    def test_matches_cell_at_inside_extent(self, grid: GridGeometry) -> None:
+        point = GeoPoint(lat=18.95, lon=77.05)
+        assert grid.unbounded_cell_at(point) == grid.cell_at(point) == (0, 0)
+        point = GeoPoint(lat=18.05, lon=77.95)
+        assert grid.unbounded_cell_at(point) == grid.cell_at(point) == (9, 9)
+
+    def test_min_lat_edge_is_also_out_of_range(
+        self, grid: GridGeometry
+    ) -> None:
+        # Rows are measured from the north edge: a point on the
+        # southern boundary floors to `rows`, which cell_at clamps in.
+        point = GeoPoint(lat=18.0, lon=77.0)
+        assert grid.cell_at(point) == (9, 0)
+        assert grid.unbounded_cell_at(point) == (10, 0)
+
+    def test_max_edge_is_not_clamped(self, grid: GridGeometry) -> None:
+        point = GeoPoint(lat=19.0, lon=78.0)
+        assert grid.cell_at(point) == (0, 9)  # clamped inside
+        assert grid.unbounded_cell_at(point) == (0, 10)  # raw index
+
+    def test_outside_extent_keeps_out_of_range_index(
+        self, grid: GridGeometry
+    ) -> None:
+        assert grid.cell_at(GeoPoint(lat=19.1, lon=77.5)) is None
+        assert grid.unbounded_cell_at(GeoPoint(lat=19.1, lon=77.5)) == (-2, 5)
+        assert grid.cell_at(GeoPoint(lat=18.5, lon=76.9)) is None
+        assert grid.unbounded_cell_at(GeoPoint(lat=18.5, lon=76.9)) == (5, -1)
+
+
 class TestWindowForBbox:
     def test_cells_with_centres_inside(self, grid: GridGeometry) -> None:
         # Cell centres inside: lon 77.15/77.25/77.35, lat 18.15/18.25/18.35.
