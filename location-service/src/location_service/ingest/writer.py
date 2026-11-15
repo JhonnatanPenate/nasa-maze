@@ -65,9 +65,25 @@ CREATE TABLE catalog_meta (
 """
 
 _PLACE_COLUMNS = (
-    "id", "body", "name", "name_clean", "name_norm", "kind", "feature_type",
-    "source", "lat", "lon", "bbox_west", "bbox_south", "bbox_east", "bbox_north",
-    "diameter_km", "elevation_m", "approval_status", "origin", "tags_json",
+    "id",
+    "body",
+    "name",
+    "name_clean",
+    "name_norm",
+    "kind",
+    "feature_type",
+    "source",
+    "lat",
+    "lon",
+    "bbox_west",
+    "bbox_south",
+    "bbox_east",
+    "bbox_north",
+    "diameter_km",
+    "elevation_m",
+    "approval_status",
+    "origin",
+    "tags_json",
     "properties_json",
 )
 

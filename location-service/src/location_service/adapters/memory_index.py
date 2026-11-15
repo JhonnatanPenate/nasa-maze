@@ -26,9 +26,7 @@ class MemoryIndex:
         self._data = data
         self._places: dict[str, Place] = {p.id: p for p in data.places}
         self._alias_norms: dict[str, tuple[str, ...]] = {
-            p.id: tuple(
-                dict.fromkeys(n for n in (normalize_text(a) for a in p.aliases) if n)
-            )
+            p.id: tuple(dict.fromkeys(n for n in (normalize_text(a) for a in p.aliases) if n))
             for p in data.places
         }
         self._fuzzy_min_ratio = fuzzy_min_ratio
@@ -116,18 +114,14 @@ class MemoryIndex:
                 continue
             if tag is not None and tag not in p.tags:
                 continue
-            if region_bbox is not None and not region_bbox.contains(
-                p.center.lat, p.center.lon
-            ):
+            if region_bbox is not None and not region_bbox.contains(p.center.lat, p.center.lon):
                 continue
             out.append(p)
         return out
 
     # -- use-case support -----------------------------------------------------
 
-    def rank(
-        self, query: str, *, near: tuple[float, float] | None = None
-    ) -> list[ScoredPlace]:
+    def rank(self, query: str, *, near: tuple[float, float] | None = None) -> list[ScoredPlace]:
         """Score ALL places for a query (no filters, no limit)."""
         items = [self._rankable(p, near) for p in self._data.places]
         return rank_query(
@@ -167,27 +161,16 @@ class MemoryIndex:
     ) -> list[tuple[float, Place]]:
         target = places if places is not None else self._data.places
         return sorted(
-            (
-                (haversine_m(lat, lon, p.center.lat, p.center.lon), p)
-                for p in target
-            ),
+            ((haversine_m(lat, lon, p.center.lat, p.center.lon), p) for p in target),
             key=lambda t: (t[0], t[1].id),
         )
 
     def nearest_within(
         self, lat: float, lon: float, radius_m: float, *, exclude_id: str | None = None
     ) -> list[tuple[float, Place]]:
-        return [
-            (d, p)
-            for d, p in self.distances(lat, lon)
-            if d <= radius_m and p.id != exclude_id
-        ]
+        return [(d, p) for d, p in self.distances(lat, lon) if d <= radius_m and p.id != exclude_id]
 
     def co_located(
         self, lat: float, lon: float, *, exclude_id: str | None = None, within_m: float = 10.0
     ) -> list[Place]:
-        return [
-            p
-            for d, p in self.nearest_within(lat, lon, within_m, exclude_id=exclude_id)
-        ]
-
+        return [p for d, p in self.nearest_within(lat, lon, within_m, exclude_id=exclude_id)]

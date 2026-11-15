@@ -123,11 +123,7 @@ def read_mission_points(
                 source="mission_msl",
                 center=Coordinate(lat=lat, lon=lon),
                 name_norm=normalize_text(nombre),
-                elevation_m=(
-                    None
-                    if pd.isna(row["elevacion_m"])
-                    else float(row["elevacion_m"])
-                ),
+                elevation_m=(None if pd.isna(row["elevacion_m"]) else float(row["elevacion_m"])),
                 tags=tuple(name_to_tags.get(nombre, ())),
                 properties=properties,
             )

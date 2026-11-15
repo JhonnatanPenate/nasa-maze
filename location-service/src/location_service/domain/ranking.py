@@ -112,9 +112,7 @@ def _text_match(
         return MatchResult(_BASE_SCORE[MatchType.EXACT_NAME], MatchType.EXACT_NAME)
 
     words = target_norm.split()
-    if target_norm.startswith(query_norm) or any(
-        w.startswith(query_norm) for w in words
-    ):
+    if target_norm.startswith(query_norm) or any(w.startswith(query_norm) for w in words):
         return MatchResult(_BASE_SCORE[MatchType.PREFIX], MatchType.PREFIX)
 
     query_tokens = set(query_norm.split())

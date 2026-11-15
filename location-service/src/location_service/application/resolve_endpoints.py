@@ -95,8 +95,7 @@ def _check_coordinate_system(declared: Mapping[str, object] | None) -> None:
     for key, expected in canonical.items():
         if key in declared and declared[key] != expected:
             raise UnsupportedCoordinateSystemError(
-                f"coordinate_system.{key}={declared[key]!r} differs from canonical "
-                f"{expected!r}"
+                f"coordinate_system.{key}={declared[key]!r} differs from canonical {expected!r}"
             )
 
 
@@ -177,9 +176,7 @@ def _resolve_place_id(index: CatalogIndex, place_id: str) -> EndpointResolution:
     )
 
 
-def _resolve_coordinates(
-    index: CatalogIndex, coordinates: CoordinatesInput
-) -> EndpointResolution:
+def _resolve_coordinates(index: CatalogIndex, coordinates: CoordinatesInput) -> EndpointResolution:
     try:
         lat, lon = validate_lat_lon(coordinates.lat, coordinates.lon)
     except ValueError as exc:
@@ -255,11 +252,15 @@ def resolve(
 ) -> ResolveOutcome:
     check_body(body)
     origin_r = resolve_endpoint(
-        index, origin, ambiguity_gap=options.ambiguity_gap,
+        index,
+        origin,
+        ambiguity_gap=options.ambiguity_gap,
         max_alternatives=options.max_alternatives,
     )
     destination_r = resolve_endpoint(
-        index, destination, ambiguity_gap=options.ambiguity_gap,
+        index,
+        destination,
+        ambiguity_gap=options.ambiguity_gap,
         max_alternatives=options.max_alternatives,
     )
 
@@ -269,15 +270,9 @@ def resolve(
         if code not in warnings:
             warnings.append(code)
 
-    if (
-        origin_r.point is not None
-        and not origin_r.regions
-    ):
+    if origin_r.point is not None and not origin_r.regions:
         warn("OUTSIDE_KNOWN_AOI")
-    if (
-        destination_r.point is not None
-        and not destination_r.regions
-    ):
+    if destination_r.point is not None and not destination_r.regions:
         warn("OUTSIDE_KNOWN_AOI")
 
     distance_m: float | None = None
@@ -286,8 +281,10 @@ def resolve(
     if both_resolved:
         assert origin_r.point is not None and destination_r.point is not None
         distance_m = haversine_m(
-            origin_r.point.lat, origin_r.point.lon,
-            destination_r.point.lat, destination_r.point.lon,
+            origin_r.point.lat,
+            origin_r.point.lon,
+            destination_r.point.lat,
+            destination_r.point.lon,
         )
         o_regs, d_regs = set(origin_r.regions), set(destination_r.regions)
         if o_regs and d_regs and o_regs.isdisjoint(d_regs):

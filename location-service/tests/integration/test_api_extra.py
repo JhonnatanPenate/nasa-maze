@@ -69,9 +69,7 @@ class TestSearchFilters:
         assert r.json()["results"] == []
 
     def test_source_filter(self, client):
-        r = client.get(
-            "/v1/places/search", params={"q": "landing", "source": "iau_gazetteer"}
-        )
+        r = client.get("/v1/places/search", params={"q": "landing", "source": "iau_gazetteer"})
         assert r.json()["results"] == []
 
     def test_near_pair_required(self, client):
@@ -89,9 +87,7 @@ class TestSearchFilters:
         assert r.json()["results"][0]["place"]["id"] == "mars:msl:big-sky"
 
     def test_region_filter_search(self, client):
-        r = client.get(
-            "/v1/places/search", params={"q": "etive", "region": GALE_AOI}
-        )
+        r = client.get("/v1/places/search", params={"q": "etive", "region": GALE_AOI})
         assert r.json()["results"][0]["place"]["id"] == "mars:msl:glen-etive"
 
 

@@ -216,9 +216,7 @@ def read_gazetteer(
         )
 
     if config.convention_lat == "planetographic":
-        raise IngestError(
-            "planetographic latitude is not supported in the MVP (section 3.2)"
-        )
+        raise IngestError("planetographic latitude is not supported in the MVP (section 3.2)")
     if config.convention_lat != "planetocentric":
         raise IngestError(f"unknown convention.lat: {config.convention_lat!r}")
 

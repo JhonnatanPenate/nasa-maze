@@ -51,9 +51,7 @@ def load_gazetteer_config(path: Path) -> GazetteerConfig:
     data = _load_yaml(path)
     conv = data.get("convention") or {}
     filters = data.get("filters") or {}
-    translations = {
-        str(k): str(v) for k, v in (data.get("type_word_translations") or {}).items()
-    }
+    translations = {str(k): str(v) for k, v in (data.get("type_word_translations") or {}).items()}
     return GazetteerConfig(
         columns={str(k): str(v) for k, v in (data.get("columns") or {}).items()},
         convention_lon=str(conv.get("lon", "auto")),
@@ -67,8 +65,7 @@ def load_mission_config(path: Path) -> MissionConfig:
     data = _load_yaml(path)
     landing = tuple(data.get("landing_sites") or ())
     tags = {
-        str(tag): tuple(str(n) for n in names)
-        for tag, names in (data.get("tags") or {}).items()
+        str(tag): tuple(str(n) for n in names) for tag, names in (data.get("tags") or {}).items()
     }
     return MissionConfig(landing_sites=landing, tags=tags)
 
@@ -148,9 +145,7 @@ def apply_aliases(
     for norm_name, values in aliases.by_name.items():
         ids = by_norm.get(norm_name, [])
         if not ids:
-            report.setdefault("warnings", []).append(
-                f"alias target name not found: {norm_name}"
-            )
+            report.setdefault("warnings", []).append(f"alias target name not found: {norm_name}")
             continue
         for pid in ids:
             result[pid] = tuple(dict.fromkeys((*result.get(pid, ()), *values)))

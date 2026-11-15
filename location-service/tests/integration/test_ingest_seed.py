@@ -1,4 +1,5 @@
 """Integration test: seed-mode catalog build (T2.2 acceptance)."""
+
 from __future__ import annotations
 
 import json
@@ -36,12 +37,8 @@ def test_seed_build(tmp_path):
     conn = sqlite3.connect(out)
     try:
         n_places = conn.execute("SELECT COUNT(*) FROM places").fetchone()[0]
-        n_poi = conn.execute(
-            "SELECT COUNT(*) FROM places WHERE kind='poi'"
-        ).fetchone()[0]
-        n_site = conn.execute(
-            "SELECT COUNT(*) FROM places WHERE kind='landing_site'"
-        ).fetchone()[0]
+        n_poi = conn.execute("SELECT COUNT(*) FROM places WHERE kind='poi'").fetchone()[0]
+        n_site = conn.execute("SELECT COUNT(*) FROM places WHERE kind='landing_site'").fetchone()[0]
         n_alias = conn.execute("SELECT COUNT(*) FROM aliases").fetchone()[0]
         n_region = conn.execute("SELECT COUNT(*) FROM regions").fetchone()[0]
         brad = conn.execute(

@@ -34,9 +34,7 @@ class TestSearchGolden:
         assert top["place"]["center"]["lon"] == pytest.approx(137.3835)
         assert body["coordinate_system"]["radius_m"] == 3396190
 
-    @pytest.mark.parametrize(
-        "q", ["glen   etive", "GLEN-ETIVE", "Glén Etive"]
-    )
+    @pytest.mark.parametrize("q", ["glen   etive", "GLEN-ETIVE", "Glén Etive"])
     def test_case2_normalization_variants(self, client, q):
         r = _search(client, q=q)
         assert r.status_code == 200
@@ -94,9 +92,7 @@ class TestReverseGolden:
     """Cases 10-12."""
 
     def test_case10_buckskin(self, client):
-        r = client.get(
-            "/v1/places/reverse", params={"lat": -4.668, "lon": 137.3703}
-        )
+        r = client.get("/v1/places/reverse", params={"lat": -4.668, "lon": 137.3703})
         assert r.status_code == 200
         body = r.json()
         assert body["nearest"][0]["place"]["id"] == "mars:msl:buckskin"
@@ -104,9 +100,7 @@ class TestReverseGolden:
         assert GALE_AOI in body["regions"]
 
     def test_case11_coincident_john_klein_cumberland(self, client):
-        r = client.get(
-            "/v1/places/reverse", params={"lat": -4.5895, "lon": 137.4491}
-        )
+        r = client.get("/v1/places/reverse", params={"lat": -4.5895, "lon": 137.4491})
         assert r.status_code == 200
         nearest = r.json()["nearest"]
         ids = {n["place"]["id"] for n in nearest}
@@ -116,9 +110,7 @@ class TestReverseGolden:
         assert d_jk == pytest.approx(d_cu)
 
     def test_case12_big_sky_greenhorn(self, client):
-        r = client.get(
-            "/v1/places/reverse", params={"lat": -4.6731, "lon": 137.3686}
-        )
+        r = client.get("/v1/places/reverse", params={"lat": -4.6731, "lon": 137.3686})
         assert r.status_code == 200
         ids = {n["place"]["id"] for n in r.json()["nearest"]}
         assert {"mars:msl:big-sky", "mars:msl:greenhorn"} <= ids
@@ -155,9 +147,7 @@ class TestResolveGolden:
         )
         assert r.status_code == 200
         got = r.json()["straight_line_distance_m"]
-        lat1, lon1, lat2, lon2 = map(
-            math.radians, (-4.5895, 137.4417, -4.7303, 137.3835)
-        )
+        lat1, lon1, lat2, lon2 = map(math.radians, (-4.5895, 137.4417, -4.7303, 137.3835))
         h = (
             math.sin((lat2 - lat1) / 2) ** 2
             + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2

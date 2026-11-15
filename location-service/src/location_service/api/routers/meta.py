@@ -75,9 +75,7 @@ def feature_types(catalog: CatalogIndex = Depends(get_catalog)) -> FeatureTypesR
 def reload_catalog(request: Request) -> ReloadResponse:
     settings: Settings = request.app.state.settings
     if not settings.admin_enabled:
-        raise InvalidParameterError(
-            "admin reload is disabled (LOCATION_ADMIN_ENABLED=false)"
-        )
+        raise InvalidParameterError("admin reload is disabled (LOCATION_ADMIN_ENABLED=false)")
     path = Path(settings.catalog_path)
     if not path.exists():
         path = Path(settings.seed_catalog_path)

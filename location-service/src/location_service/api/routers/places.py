@@ -45,9 +45,7 @@ def _check_kind(kind: str | None) -> None:
 
 def _check_source(source: str | None) -> None:
     if source is not None and source not in _SOURCES:
-        raise InvalidParameterError(
-            f"source must be one of {sorted(_SOURCES)}; got {source!r}"
-        )
+        raise InvalidParameterError(f"source must be one of {sorted(_SOURCES)}; got {source!r}")
 
 
 def _near(near_lat: float | None, near_lon: float | None) -> tuple[float, float] | None:
@@ -123,9 +121,7 @@ def reverse(
         vlat, vlon = validate_lat_lon(lat, lon)
     except ValueError as exc:
         raise OutOfRangeError(str(exc)) from exc
-    outcome = reverse_lookup(
-        catalog, vlat, vlon, radius_m=radius_m, limit=limit, kind=kind
-    )
+    outcome = reverse_lookup(catalog, vlat, vlon, radius_m=radius_m, limit=limit, kind=kind)
     nearest = [
         ReverseNearestItem(
             distance_m=round(d, 3),

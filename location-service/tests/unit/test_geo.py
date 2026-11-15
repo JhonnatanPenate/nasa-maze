@@ -1,4 +1,5 @@
 """Unit tests for domain.geo (Mars coordinate rules)."""
+
 import math
 
 import pytest

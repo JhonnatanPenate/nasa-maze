@@ -36,9 +36,7 @@ class CatalogIndex(CatalogRepository, Protocol):
         region: str | None = None,
     ) -> list[Place]: ...
 
-    def rank(
-        self, query: str, *, near: tuple[float, float] | None = None
-    ) -> list[ScoredPlace]: ...
+    def rank(self, query: str, *, near: tuple[float, float] | None = None) -> list[ScoredPlace]: ...
 
     def search(
         self,

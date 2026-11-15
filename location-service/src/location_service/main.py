@@ -30,10 +30,7 @@ def _type_translations(config_dir: Path) -> dict[str, str]:
     path = Path(config_dir) / "gazetteer_columns.yaml"
     try:
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        return {
-            str(k): str(v)
-            for k, v in (data.get("type_word_translations") or {}).items()
-        }
+        return {str(k): str(v) for k, v in (data.get("type_word_translations") or {}).items()}
     except Exception:
         return {}
 
@@ -43,9 +40,7 @@ def _load_index(settings: Settings) -> MemoryIndex | None:
     if not path.exists():
         seed = Path(settings.seed_catalog_path)
         if seed.exists():
-            logger.warning(
-                "catalog %s not found; falling back to seed catalog %s", path, seed
-            )
+            logger.warning("catalog %s not found; falling back to seed catalog %s", path, seed)
             path = seed
         elif settings.catalog_required:
             raise SystemExit(

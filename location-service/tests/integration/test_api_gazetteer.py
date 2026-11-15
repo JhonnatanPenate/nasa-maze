@@ -21,11 +21,15 @@ GAZETTEER_DIR = REPO_ROOT / "data" / "raw" / "mars" / "gazetteer"
 MISSION_XLSX = REPO_ROOT / "data" / "gale" / "processed" / "gale_puntos_quimica.xlsx"
 CONFIG_DIR = Path(__file__).parent.parent.parent / "config"
 
-_GAZETTEER_FILES = sorted(
-    p
-    for p in GAZETTEER_DIR.glob("*")
-    if p.is_file() and p.suffix.lower() in {".csv", ".tsv", ".json", ".geojson", ".shp"}
-) if GAZETTEER_DIR.is_dir() else []
+_GAZETTEER_FILES = (
+    sorted(
+        p
+        for p in GAZETTEER_DIR.glob("*")
+        if p.is_file() and p.suffix.lower() in {".csv", ".tsv", ".json", ".geojson", ".shp"}
+    )
+    if GAZETTEER_DIR.is_dir()
+    else []
+)
 
 pytestmark = pytest.mark.skipif(
     not _GAZETTEER_FILES,

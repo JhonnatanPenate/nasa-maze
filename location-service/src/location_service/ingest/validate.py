@@ -50,12 +50,8 @@ def validate_catalog(
     aoi = next((r for r in regions if r.id == "aoi:gale-90m"), None)
     if aoi is not None and aoi.bbox is not None:
         for p in places:
-            if p.source == "mission_msl" and not aoi.bbox.contains(
-                p.center.lat, p.center.lon
-            ):
-                errors.append(
-                    f"mission place {p.id} ({p.name}) is outside aoi:gale-90m"
-                )
+            if p.source == "mission_msl" and not aoi.bbox.contains(p.center.lat, p.center.lon):
+                errors.append(f"mission place {p.id} ({p.name}) is outside aoi:gale-90m")
     else:
         report.setdefault("warnings", []).append(
             "region aoi:gale-90m not configured; POI containment check skipped"

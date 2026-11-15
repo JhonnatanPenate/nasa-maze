@@ -44,11 +44,7 @@ def _name_collisions(places: list[Place]) -> list[dict[str, Any]]:
     by_norm: dict[str, list[str]] = {}
     for p in places:
         by_norm.setdefault(p.name_norm, []).append(p.id)
-    return [
-        {"name_norm": norm, "place_ids": ids}
-        for norm, ids in by_norm.items()
-        if len(ids) > 1
-    ]
+    return [{"name_norm": norm, "place_ids": ids} for norm, ids in by_norm.items() if len(ids) > 1]
 
 
 def _duplicate_coordinates(places: list[Place]) -> list[dict[str, Any]]:
@@ -70,8 +66,10 @@ def build_catalog(args: argparse.Namespace) -> int:
         return 2
     config = load_config_dir(config_dir)
 
-    out = Path(args.out) if args.out else (
-        _DEFAULT_OUT_GAZETTEER if args.gazetteer else _DEFAULT_OUT_SEED
+    out = (
+        Path(args.out)
+        if args.out
+        else (_DEFAULT_OUT_GAZETTEER if args.gazetteer else _DEFAULT_OUT_SEED)
     )
     report_path = Path(args.report) if args.report else out.parent / "ingest_report.json"
 
@@ -91,9 +89,7 @@ def build_catalog(args: argparse.Namespace) -> int:
 
     if args.gazetteer:
         gaz_path = Path(args.gazetteer)
-        gaz_places, lon_convention = read_gazetteer(
-            gaz_path, config.gazetteer, report, seen_ids
-        )
+        gaz_places, lon_convention = read_gazetteer(gaz_path, config.gazetteer, report, seen_ids)
         places.extend(gaz_places)
         report["sources"]["iau_gazetteer"] = _source_record(gaz_path, len(gaz_places))
     else:
@@ -103,13 +99,9 @@ def build_catalog(args: argparse.Namespace) -> int:
 
     if args.mission:
         mission_path = Path(args.mission)
-        mission_places = read_mission_points(
-            mission_path, config.mission, report, seen_ids
-        )
+        mission_places = read_mission_points(mission_path, config.mission, report, seen_ids)
         places.extend(mission_places)
-        report["sources"]["mission_msl"] = _source_record(
-            mission_path, len(mission_places)
-        )
+        report["sources"]["mission_msl"] = _source_record(mission_path, len(mission_places))
     else:
         report["warnings"].append("no --mission file; only config places built")
 

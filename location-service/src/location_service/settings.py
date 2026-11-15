@@ -11,9 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="LOCATION_", extra="ignore")
 
-    catalog_path: Path = Path(
-        "/app/data/processed/mars/location/location_catalog.sqlite"
-    )
+    catalog_path: Path = Path("/app/data/processed/mars/location/location_catalog.sqlite")
     seed_catalog_path: Path = Path("/app/data/seed/location_catalog_seed.sqlite")
     config_dir: Path = Path("/app/config")
     default_body: str = "mars"

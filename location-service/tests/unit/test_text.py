@@ -1,4 +1,5 @@
 """Unit tests for domain.text normalization (section 7.1)."""
+
 import pytest
 
 from location_service.domain.text import normalize_text, tokenize

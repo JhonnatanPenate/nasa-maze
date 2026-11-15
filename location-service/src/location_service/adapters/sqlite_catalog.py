@@ -97,9 +97,7 @@ def load_catalog(path: Path) -> CatalogData:
             )
             for r in conn.execute("SELECT * FROM regions ORDER BY id")
         )
-        meta = {
-            r["key"]: r["value"] for r in conn.execute("SELECT key, value FROM catalog_meta")
-        }
+        meta = {r["key"]: r["value"] for r in conn.execute("SELECT key, value FROM catalog_meta")}
     finally:
         conn.close()
     return CatalogData(places=places, regions=regions, meta=meta)

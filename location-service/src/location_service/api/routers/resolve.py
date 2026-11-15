@@ -68,9 +68,7 @@ def _endpoint_out(res: EndpointResolution, catalog: CatalogIndex) -> EndpointRes
     return EndpointResultOut(
         status=res.status,
         input=_to_input_out(res.input),
-        point=(
-            Center(lat=res.point.lat, lon=res.point.lon) if res.point is not None else None
-        ),
+        point=(Center(lat=res.point.lat, lon=res.point.lon) if res.point is not None else None),
         place=(
             place_out(res.place, regions_of_place(catalog, res.place))
             if res.place is not None

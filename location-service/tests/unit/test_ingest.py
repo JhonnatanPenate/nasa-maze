@@ -1,4 +1,5 @@
 """Unit tests for the ingestion pipeline (Phase 2)."""
+
 from __future__ import annotations
 
 import json
@@ -123,9 +124,7 @@ class TestGazetteerMini:
         cfg_path.write_text(yaml.safe_dump(data))
         cfg = load_gazetteer_config(cfg_path)
         report = _report()
-        places, convention = read_gazetteer(
-            FIXTURES / "mini-gazetteer.csv", cfg, report, set()
-        )
+        places, convention = read_gazetteer(FIXTURES / "mini-gazetteer.csv", cfg, report, set())
         assert convention == "west_positive"
         by_name = {p.name: p for p in places}
         # Olympus lon -133.8 west-positive -> (360 - (-133.8)) % 360 = 133.8 east

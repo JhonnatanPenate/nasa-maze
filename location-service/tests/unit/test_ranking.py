@@ -1,4 +1,5 @@
 """Unit tests for domain.ranking (sections 7.3-7.4) with a mini catalog."""
+
 import pytest
 
 from location_service.domain.models import Bbox, Coordinate, Place
@@ -183,19 +184,31 @@ class TestAdjustments:
 
 class TestOrdering:
     def test_order_score_source_diameter_name(self):
-        a = make_place("a", "Alpha", source="iau_gazetteer", kind="feature",
-                       feature_type="crater", diameter_km=10.0)
+        a = make_place(
+            "a",
+            "Alpha",
+            source="iau_gazetteer",
+            kind="feature",
+            feature_type="crater",
+            diameter_km=10.0,
+        )
         b = make_place("b", "Beta", source="mission_msl")
         # both fuzzy-ish equal scores hard to construct; use exact on distinct names
-        res = rank_query("alpha", [rankable(a, in_aoi=False), rankable(b, in_aoi=False)],
-                         descriptor_map=DESCRIPTORS)
+        res = rank_query(
+            "alpha",
+            [rankable(a, in_aoi=False), rankable(b, in_aoi=False)],
+            descriptor_map=DESCRIPTORS,
+        )
         assert [r.place.id for r in res] == ["a"]
 
     def test_source_priority(self):
         msl = make_place("m", "Same", source="mission_msl")
         iau = make_place("i", "Same", source="iau_gazetteer", kind="feature")
-        res = rank_query("same", [rankable(iau, in_aoi=False), rankable(msl, in_aoi=False)],
-                         descriptor_map=DESCRIPTORS)
+        res = rank_query(
+            "same",
+            [rankable(iau, in_aoi=False), rankable(msl, in_aoi=False)],
+            descriptor_map=DESCRIPTORS,
+        )
         assert res[0].place.id == "m"
 
 
@@ -223,7 +236,10 @@ class TestAmbiguity:
     def test_single_mission_exact_name_resolves(self):
         a = make_place("a", "Glen Etive", source="mission_msl")
         b = make_place("b", "Glen Etive", source="iau_gazetteer", kind="feature")
-        res = rank_query("glen etive", [rankable(a, in_aoi=True), rankable(b, in_aoi=False)],
-                         descriptor_map=DESCRIPTORS)
+        res = rank_query(
+            "glen etive",
+            [rankable(a, in_aoi=True), rankable(b, in_aoi=False)],
+            descriptor_map=DESCRIPTORS,
+        )
         # top is mission_msl exact_name; only one msl exact_name -> resolved
         assert is_ambiguous(res, 0.05) is False
