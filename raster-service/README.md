@@ -101,4 +101,14 @@ cases, domain and API stay untouched.
 
 ## Docker
 
-See WP7.
+The image never contains data: mount the repo `data/` folder read-only.
+`MS3_REJILLA_PATH` defaults to `/data/gale/processed/rejilla_ruta_90m.tif` inside the image.
+
+```bash
+docker build -t ms3-raster raster-service
+docker run --rm -d --name ms3 -p 8003:8003 -v "$(pwd)/data:/data:ro" ms3-raster
+curl "http://localhost:8003/health"   # {"status":"ok",...}; container HEALTHCHECK uses the same endpoint
+docker stop ms3
+```
+
+No Compose file yet (deferred). Build context is `raster-service/`.
