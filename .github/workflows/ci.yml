@@ -52,6 +52,14 @@ jobs:
             port: 8004
             health: /health
             mounts: -v $PWD/data:/data:ro
+          - svc: core
+            context: core
+            port: 8000
+            health: /api/health
+            mounts: -v $PWD/data:/data:ro
+            # No MS6 in the container: a default route proves the precalculated fallback reads the mounted data
+            route: true
+            route_path: /api/ruta
           - svc: routing-engine
             context: .
             port: 8006
@@ -96,7 +104,7 @@ jobs:
               echo "$body" | grep -qE '"status": ?"(ok|ready)"' || break
               echo "healthy after ~$((i * 2)) s"
               if [ "${{ matrix.route }}" = "true" ]; then
-                curl -fsS -m 60 -o route.json -X POST "http://localhost:${{ matrix.port }}/route" -H 'Content-Type: application/json' -d '{}' || { docker logs svc; exit 1; }
+                curl -fsS -m 60 -o route.json -X POST "http://localhost:${{ matrix.port }}${{ matrix.route_path || '/route' }}" -H 'Content-Type: application/json' -d '{}' || { docker logs svc; exit 1; }
                 head -c 300 route.json; echo
               fi
               exit 0
