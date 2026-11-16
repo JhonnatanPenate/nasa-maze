@@ -24,9 +24,9 @@ class AssessPoint:
     """Gathers slope (MS4), raster bands (MS3) and environmental profiles
     (local catalog) for one point and aggregates the SPEC weighted risk.
 
-    Phase 1: factor scores are pending (Phase 3), so ``risk`` is ``None``
-    and ``level`` is ``unknown`` while ``available`` flags reflect real
-    data coverage.
+    Phase 3 landed the domain scorers; wiring them into the builders is
+    Phase 4, so ``risk`` is still ``None`` and ``level`` ``unknown`` while
+    ``available`` flags reflect real data coverage.
     """
 
     def __init__(

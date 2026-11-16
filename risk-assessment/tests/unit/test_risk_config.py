@@ -29,6 +29,12 @@ def test_shipped_thresholds_load() -> None:
     assert config.levels.low_max == 0.25
     assert config.levels.high_max == 0.75
     assert config.slope.score_floor_deg == 5.0
+    # Phase 3 score full-scales (placeholder values, DECISIONS MS5-D16/D17).
+    assert config.temperature.band_min_K == 230.0
+    assert config.temperature.band_max_K == 290.0
+    assert config.temperature.score_full_scale_K == 60.0
+    assert config.radiation.warning_uGy_h == 20.0
+    assert config.radiation.score_full_scale_uGy_h == 30.0
 
 
 def test_shipped_vehicle_profiles() -> None:
@@ -37,6 +43,11 @@ def test_shipped_vehicle_profiles() -> None:
     assert "baseline_mars_rover" in names
     baseline = next(p for p in profiles if p.name == "baseline_mars_rover")
     assert baseline.slope_block_deg == 25.0
+    # Javi motion constants (optimizador_rutas.py:44-48).
+    assert baseline.tilt_speed_limit_deg == 30.0
+    assert baseline.tilt_speed_floor == 0.1
+    assert baseline.dune_speed_factor == 0.40
+    assert baseline.dose_budget_uGy is None  # dose accumulation is MS6
 
 
 def test_missing_file_fails_fast(tmp_path: Path) -> None:

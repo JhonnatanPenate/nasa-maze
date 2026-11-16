@@ -29,12 +29,14 @@ temperature:
   # placeholder pending Phase 3.
   band_min_K: 230.0
   band_max_K: 290.0
-  warning_margin_K: 10.0       # placeholder: warn when hourly mean exits band
+  warning_margin_K: 10.0       # placeholder: warn when hourly mean exits band by > margin
+  score_full_scale_K: 60.0     # placeholder: thermal excess (K) -> score 1.0
 
 radiation:
   # dose-E rate in uGy/h; Javi's 0.7*median filter is ingest-time, not a
   # warning threshold. Warning threshold is placeholder pending Phase 3.
   warning_uGy_h: 20.0          # placeholder (HIGH_RADIATION_RATE)
+  score_full_scale_uGy_h: 30.0 # placeholder: dose rate -> score 1.0
 
 levels:                        # SPEC §4.1/§5 — fixed, do not change
   low_max: 0.25

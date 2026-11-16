@@ -36,3 +36,25 @@ def aggregate(
         return None, RiskLevel.UNKNOWN
     risk = numerator / denominator
     return min(1.0, max(0.0, risk)), level_for_score(risk)
+
+
+def aggregate_path(
+    segments: Sequence[tuple[float | None, float]],
+) -> tuple[float | None, RiskLevel]:
+    """SPEC §4.1 / plan §4.4: ``overall_risk`` = distance-weighted mean of
+    segment risks. ``segments`` are ``(risk, distance_m)`` pairs; segments
+    with ``risk=None`` or non-positive length do not contribute. All-empty
+    -> ``(None, unknown)`` — never a silent zero."""
+    numerator = 0.0
+    denominator = 0.0
+    for risk, distance_m in segments:
+        if risk is None or distance_m <= 0.0:
+            continue
+        if not 0.0 <= risk <= 1.0:
+            raise ValueError(f"Segment risk {risk} outside [0, 1]")
+        numerator += risk * distance_m
+        denominator += distance_m
+    if denominator <= 0.0:
+        return None, RiskLevel.UNKNOWN
+    overall = numerator / denominator
+    return min(1.0, max(0.0, overall)), level_for_score(overall)

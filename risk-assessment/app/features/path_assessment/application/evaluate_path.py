@@ -4,9 +4,9 @@ Calls MS4 `/terrain/profile` once per path and MS3 `/sample` once per
 required band at the same arc-length step (SPEC §6 NFR). Segments are the
 intervals between consecutive path samples (~``sampling_step_m`` apart).
 
-Phase 1: factor scores are pending (Phase 3), so segment/overall risk is
-``None`` and the level is ``unknown`` while ``available`` flags reflect
-real data coverage.
+Phase 3 landed the domain scorers; wiring them into the builders is
+Phase 4, so segment/overall risk is still ``None`` and the level
+``unknown`` while ``available`` flags reflect real data coverage.
 """
 
 import math
@@ -129,7 +129,7 @@ class EvaluatePath:
             assumptions=(
                 "Vehicle profile values are inherited optimizer assumptions, "
                 "not certified flight limits.",
-                "Factor scores pending Phase 3; available flags reflect data coverage only.",
+                "Factor scores pending Phase 4 wiring; available flags reflect data coverage only.",
             ),
         )
 

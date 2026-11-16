@@ -32,7 +32,7 @@ class PathRisk:
     sol: int | None = None
     hora: int | None = None
     vehicle_profile: str | None = None
-    # Additive plan fields (plan §7.2); null/empty until scoring lands.
+    # Additive plan fields (plan §7.2); populated as scoring wiring lands.
     max_level: RiskLevel | None = None
     mean_score: float | None = None
     p95_score: float | None = None

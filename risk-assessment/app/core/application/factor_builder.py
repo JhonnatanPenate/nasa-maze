@@ -1,8 +1,8 @@
 """Shared factor-availability logic for point and path assessment.
 
-Phase 1 status: data plumbing is real (terrain/raster/environment reads
-through the ports); per-factor *scoring* lands in Phase 3, so every
-assessment carries ``score=None`` and aggregates to ``unknown``.
+Phase 3 landed the pure-domain scorers (``core/domain/*_risk.py``); wiring
+them into these builders happens in Phase 4, so assessments still carry
+``score=None`` and aggregate to ``unknown`` for now.
 """
 
 from collections.abc import Mapping, Sequence
@@ -146,5 +146,5 @@ def provenance_for(context: EnvironmentalContext) -> dict[str, object]:
         "reference_sol": context.reference_sol,
         "rems_sol": context.rems_sol,
         "rad_sol": context.rad_sol,
-        "scoring": "pending-phase-3",
+        "scoring": "domain-ready-phase-4-wiring",
     }

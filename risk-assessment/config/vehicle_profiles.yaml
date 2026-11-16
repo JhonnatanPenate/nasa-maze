@@ -17,3 +17,5 @@ profiles:
     thermal_min_K: 230.0             # operating band lower bound
     thermal_max_K: 290.0             # operating band upper bound
     dose_budget_uGy: null            # unset: dose accumulation belongs to MS6
+    tilt_speed_limit_deg: 30.0       # Javi INCLINACION_LIMITE_VELOCIDAD
+    tilt_speed_floor: 0.1            # Javi max(0.1, 1 - tilt/limit) floor

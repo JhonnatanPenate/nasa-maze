@@ -6,8 +6,9 @@ from app.core.domain.risk_level import RiskLevel
 
 
 class FactorScoreSchema(BaseModel):
-    """SPEC §4.1 ``factor_scores`` entry. ``score`` is null until Phase 3
-    scoring lands; ``available`` reflects real data coverage."""
+    """SPEC §4.1 ``factor_scores`` entry. ``score`` stays null until the
+    Phase 4 wiring connects the Phase 3 domain scorers; ``available``
+    reflects real data coverage."""
 
     score: float | None
     available: bool

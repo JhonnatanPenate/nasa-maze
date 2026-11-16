@@ -69,7 +69,9 @@ class _ThresholdBand(_YamlModel):
     band_min_K: float | None = None
     band_max_K: float | None = None
     warning_margin_K: float | None = None
+    score_full_scale_K: float | None = None
     warning_uGy_h: float | None = None
+    score_full_scale_uGy_h: float | None = None
 
 
 class _LevelThresholds(_YamlModel):
