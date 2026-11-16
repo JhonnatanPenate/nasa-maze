@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "risk-assessment"
 version = "0.1.0"
 description = "MS5 Risk Assessment Service: normalized terrain + environmental risk for Mars paths"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115,<1",
     "uvicorn[standard]>=0.30,<1",
@@ -15,6 +15,8 @@ dependencies = [
     "numpy>=1.26,<3",
     "httpx>=0.27,<1",
     "pyyaml>=6.0,<7.0",
+    "pandas>=3.1,<4",
+    "openpyxl>=3.1,<4",
 ]
 
 [project.optional-dependencies]
@@ -27,10 +29,6 @@ dev = [
     "mypy>=2.4,<3",
     "openapi-spec-validator>=0.9,<1",
     "jsonschema>=4,<5",
-]
-ingest = [
-    "pandas>=3.1,<4",
-    "openpyxl>=3.1,<4",
 ]
 
 [tool.setuptools.packages.find]
