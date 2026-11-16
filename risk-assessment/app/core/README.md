@@ -1,0 +1,1 @@
+Inner layers shared by all features: `config` (settings + YAML loaders), `domain` (pure risk/geo logic), `errors` (DomainError -> {"detail": ...}), `ports` (terrain/raster/environment/profile interfaces), `application` (shared use-case helpers).

@@ -1,0 +1,34 @@
+# Column mapping for the environmental workbooks (plan §5, §8).
+# Mirrors location-service/config/gazetteer_columns.yaml: source column ->
+# canonical name, unit, optional conversion. Used by `python -m app.ingest`.
+version: 1
+
+rems:
+  source: data/gale/raw/ambiental/rems_resumen_horario.xlsx
+  sheet: REMS
+  key_columns:
+    sol: {canonical: sol, unit: sol}
+    hora_lmst: {canonical: hora, unit: hour_lmst, conversion: int}
+  value_columns:
+    temp_suelo_K_media: {canonical: ground_temp_mean_K, unit: K}
+    temp_suelo_K_min: {canonical: ground_temp_min_K, unit: K}
+    temp_suelo_K_max: {canonical: ground_temp_max_K, unit: K}
+    temp_aire_K_media: {canonical: air_temp_mean_K, unit: K}
+    presion_Pa_media: {canonical: pressure_mean_Pa, unit: Pa}
+    uv_abc_W_m2_media: {canonical: uv_abc_mean_W_m2, unit: W/m2}
+    n: {canonical: sample_count, unit: count}
+
+rad:
+  source: data/gale/raw/ambiental/rad_dosis_observaciones.xlsx
+  sheet: RAD
+  key_columns:
+    sol: {canonical: sol, unit: sol}
+    hora_lmst: {canonical: hora, unit: hour_lmst, conversion: floor_int}
+    observacion: {canonical: observation_id, unit: id}
+  value_columns:
+    dosis_b_uGy_h: {canonical: dose_b_uGy_h, unit: uGy/h}
+    dosis_e_uGy_h: {canonical: dose_e_uGy_h, unit: uGy/h}
+  unit_column:
+    unidad_original: {canonical: unit_original, unit: unit}
+  # SPEC/MAPA channel: dose_e only; never combine channels.
+  selected_channel: dose_e_uGy_h

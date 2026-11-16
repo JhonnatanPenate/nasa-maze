@@ -1,0 +1,21 @@
+# MS5 vehicle profiles (plan §5). Values are inherited optimizer assumptions
+# from science/optimizador_rutas.py for a generic Gale rover scenario —
+# NOT certified flight limits. Javi's LMST [7,17) motion window is an MS6
+# scheduling concern and intentionally absent here.
+version: 1
+profiles:
+  - name: baseline_mars_rover
+    description: >-
+      Generic Gale rover baseline seeded from Javi's optimizer constants.
+      Inherited assumptions, not a certified vehicle specification.
+    nominal_speed_m_h: 1000.0        # VELOCIDAD_MAXIMA_M_H (m/h)
+    tilt_speed_factor: "max(0.1, 1 - tilt_deg/30)"  # speed penalty vs predicted tilt
+    dune_speed_factor: 0.40          # multiplier on arena_dunas cells
+    slope_block_deg: 25.0            # block when DEM slope >= this
+    tilt_block_deg: 20.0             # block when predicted tilt >= this
+    tilt_margin_sigma: 1.96          # safety margin: tilt + k*sigma <= tilt_block_deg
+    thermal_min_K: 230.0             # operating band lower bound
+    thermal_max_K: 290.0             # operating band upper bound
+    dose_budget_uGy: null            # unset: dose accumulation belongs to MS6
+    tilt_speed_limit_deg: 30.0       # Javi INCLINACION_LIMITE_VELOCIDAD
+    tilt_speed_floor: 0.1            # Javi max(0.1, 1 - tilt/limit) floor
