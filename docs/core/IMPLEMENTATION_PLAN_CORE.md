@@ -35,7 +35,7 @@ El Core es el **único punto de entrada del frontend**. Su trabajo es orquestar:
 
 ### 2.2 Fuera de alcance (este MVP)
 
-- Orquestación de MS5/MS3 (no existen). Si aparecen, se agregan como clientes nuevos sin tocar lo anterior.
+- ~~Orquestación de MS5~~ → **implementada** tras mergear MS5: `/api/ruta` agrega `riesgo` (best-effort, `null` si MS5 no responde). MS3 sigue sin usarse (el Core renderiza las capas por su cuenta).
 - Llamadas a MS4 (la respuesta de ruta ya trae pendiente por tramo; MS4 queda para enriquecimiento futuro, p.ej. perfil bajo demanda).
 - ~~Búsqueda de lugares vía MS1~~ → **implementada** tras mergear MS1: `GET /api/lugares/buscar?q=&limit=` (proxy a `/v1/places/search`; 503 si MS1 no está disponible; sin fallback local). El origen sigue fijo en Bradbury.
 - Auth, rate limiting, websockets, caché distribuida, docker-compose multi-servicio, frontend.
