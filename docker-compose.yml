@@ -8,6 +8,12 @@
 #     --report location-service/data/seed/ingest_report.json
 # Sin ese catálogo, location-service queda unhealthy pero el Core sigue funcionando (degraded != down).
 services:
+  frontend:
+    build: ./nasa-maze-app
+    ports: ["8080:80"]
+    depends_on:
+      - core
+
   core:
     build: ./core
     ports: ["8000:8000"]

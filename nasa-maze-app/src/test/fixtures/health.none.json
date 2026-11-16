@@ -1,0 +1,13 @@
+{
+  "status": "degraded",
+  "servicios": {
+    "ms6": "down",
+    "ms5": "no_configurado",
+    "ms4": "down",
+    "ms1": "no_configurado"
+  },
+  "fallback_precalculado": false,
+  "aoi": [137.345, -4.74, 137.455, -4.58],
+  "sols": [1360, 2140, 3290, 4710],
+  "bounds_rejilla": null
+}
