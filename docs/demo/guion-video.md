@@ -1,7 +1,7 @@
 # Planetary Explorer: 30-second video script
 
 The MP4 already has these lines burned in as English subtitles (and `demo.srt` has them as a separate file).
-It's silent, so you can upload it as is, or record a voiceover on top following the same timing.
+It has background music (AI-generated with Google Gemini). You can also record a voiceover on top following the same timing.
 If you narrate in Spanish, keep the English subtitles (they're required).
 
 | Time | On screen | English narration (= subtitles) | Spanish voiceover (optional) |
@@ -16,9 +16,9 @@ If you narrate in Spanish, keep the English subtitles (they're required).
 
 ## Rules checklist (from the submission guide)
 - Under 30 s (29.96 s) ✔ · All in English ✔ · No minors ✔ · No NASA logos or branding ✔
-- Visible "AI-assisted" watermark in the corner of every frame, plus a note in the file metadata ✔
+- Visible "AI-assisted video · AI-generated music (Gemini)" watermark on every frame, plus a note in the file metadata ✔
 - The map is drawn from the team's real route data (`data/gale/processed`), it's not an AI-generated image.
 - Hosting: upload it to YouTube (Unlisted is fine) or Drive with "Anyone with the link", and check it opens in a private window.
 
 ## AI-use text for the form (copy/paste)
-> We used AI coding assistants (Claude) to help write code, documentation, the slide deck and the demo video composition. The idea, the route-cost model and the scientific data processing are the team's own work. All visuals are rendered from our own processed NASA data; images and video carry a visible "AI-assisted" label.
+> We used AI coding assistants (Claude) to help write code, documentation, the slide deck and the demo video composition. The background music ("Toward the Crimson Ridge") was generated with Google Gemini. The idea, the route-cost model and the scientific data processing are the team's own work. All visuals are rendered from our own processed NASA data; the video carries a visible "AI-assisted video · AI-generated music" label and the same note in its metadata.
