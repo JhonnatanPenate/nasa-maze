@@ -1,0 +1,151 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [development, main]
+  push:
+    branches: [development, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  tests:
+    name: Tests (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - core
+          - location-service
+          - raster-service
+          - routing-engine
+          - terrain-analysis
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: ${{ matrix.service }}/pyproject.toml
+
+      - name: Install service
+        working-directory: ${{ matrix.service }}
+        run: python -m pip install -q -e ".[dev]"
+
+      - name: Run tests
+        working-directory: ${{ matrix.service }}
+        run: python -m pytest -q
+
+  docker-build:
+    name: Docker build (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: core
+            context: core
+            file: core/Dockerfile
+          - service: location-service
+            context: location-service
+            file: location-service/Dockerfile
+          - service: raster-service
+            context: raster-service
+            file: raster-service/Dockerfile
+          - service: terrain-analysis
+            context: terrain-analysis
+            file: terrain-analysis/Dockerfile
+          - service: routing-engine
+            context: .
+            file: routing-engine/Dockerfile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          tags: nasa-maze/${{ matrix.service }}:ci
+          push: false
+          cache-from: type=gha,scope=cd-${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=cd-${{ matrix.service }}
+
+  compose-validation:
+    name: Compose validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Compose file
+        run: docker compose config -q
+
+  deploy:
+    name: Deploy production to GCP VM
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [tests, docker-build, compose-validation]
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCE_ZONE: ${{ secrets.GCE_ZONE }}
+      GCE_INSTANCE: ${{ secrets.GCE_INSTANCE }}
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Deploy and smoke-test on VM
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gcloud compute ssh "$GCE_INSTANCE" \
+            --project="$GCP_PROJECT_ID" \
+            --zone="$GCE_ZONE" \
+            --quiet \
+            --command '
+              set -euo pipefail
+              cd "$HOME/nasa-maze"
+              git fetch origin main
+              git switch main
+              git pull --ff-only origin main
+
+              test -f location-service/data/seed/location_catalog_seed.sqlite
+
+              docker compose up --build -d
+              docker compose ps
+
+              for attempt in $(seq 1 30); do
+                if curl --fail --silent --show-error https://nasa-maze-sv.earth/api/health \
+                  | grep -q "\"status\":\"ok\""; then
+                  exit 0
+                fi
+                sleep 5
+              done
+
+              docker compose logs --tail=100
+              exit 1
+            '
