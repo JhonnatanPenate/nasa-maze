@@ -26,6 +26,7 @@ jobs:
           - raster-service
           - routing-engine
           - terrain-analysis
+          - risk-assessment
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -64,6 +65,9 @@ jobs:
           - service: terrain-analysis
             context: terrain-analysis
             file: terrain-analysis/Dockerfile
+          - service: risk-assessment
+            context: risk-assessment
+            file: risk-assessment/Dockerfile
           - service: routing-engine
             context: .
             file: routing-engine/Dockerfile
