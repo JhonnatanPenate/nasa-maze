@@ -1,0 +1,408 @@
+{
+  "generado": "2026-11-14T16:46:00",
+  "fuente": "C:\\Users\\jegal\\Documents\\NASA Space App\\planetary-explorer-fase2-3/data/processed/gale_matriz_calibracion.xlsx",
+  "variable_respuesta": "tilt_real_grados",
+  "reglas_suelo": {
+    "arena_dunas": "distancia_duna_m == 0 | fraccion_oscura >= 0.5",
+    "lecho_rocoso_firme": "rugosidad <= 0.60 & pendiente_grados <= 7.0 & albedo >= 0.2294",
+    "rocoso_fracturado": "rugosidad >= 1.10 | pendiente_grados >= 8.0 | albedo < 0.2291",
+    "regolito_compacto": "resto"
+  },
+  "parametros": {
+    "n_min": 30,
+    "alfa": 0.05,
+    "vif_max": 5,
+    "se_robusto": "HC3"
+  },
+  "resumen": [
+    {
+      "tipo_suelo": "rocoso_fracturado",
+      "n_obs": 342,
+      "tilt_media": 8.76,
+      "tilt_sd": 5.15,
+      "vel_media_m_sol": 14.1,
+      "vel_mediana_m_sol": 9.7,
+      "rad_media_uGy_h": 11.38,
+      "pct_riesgo_alto": 3.5
+    },
+    {
+      "tipo_suelo": "regolito_compacto",
+      "n_obs": 251,
+      "tilt_media": 7.1,
+      "tilt_sd": 4.37,
+      "vel_media_m_sol": 18.1,
+      "vel_mediana_m_sol": 11,
+      "rad_media_uGy_h": 11.16,
+      "pct_riesgo_alto": 13.9
+    },
+    {
+      "tipo_suelo": "lecho_rocoso_firme",
+      "n_obs": 220,
+      "tilt_media": 5.77,
+      "tilt_sd": 3.15,
+      "vel_media_m_sol": 20.3,
+      "vel_mediana_m_sol": 13.9,
+      "rad_media_uGy_h": 10.94,
+      "pct_riesgo_alto": 10
+    },
+    {
+      "tipo_suelo": "arena_dunas",
+      "n_obs": 38,
+      "tilt_media": 5.27,
+      "tilt_sd": 1.81,
+      "vel_media_m_sol": 16.8,
+      "vel_mediana_m_sol": 13.8,
+      "rad_media_uGy_h": 10.66,
+      "pct_riesgo_alto": 0
+    }
+  ],
+  "modelos": {
+    "arena_dunas": {
+      "suelo": "arena_dunas",
+      "n": 38,
+      "estado": "ajustado",
+      "metodo": "lm",
+      "formula": "tilt_real_grados ~ pendiente_grados + rugosidad + albedo",
+      "predictores": ["pendiente_grados", "rugosidad", "albedo"],
+      "predictores_descartados_vif": [],
+      "coeficientes": {
+        "(Intercept)": -677.426767308371,
+        "pendiente_grados": 0.822033805058484,
+        "rugosidad": -0.14157783230031,
+        "albedo": 2959.5905709277
+      },
+      "error_estandar": {
+        "(Intercept)": 253.321243378472,
+        "pendiente_grados": 0.19730434624662,
+        "rugosidad": 1.20130932072498,
+        "albedo": 1100.65657827195
+      },
+      "error_estandar_robusto_HC3": {
+        "(Intercept)": 216.429932554798,
+        "pendiente_grados": 0.195319909048001,
+        "rugosidad": 1.0455845746674,
+        "albedo": 940.213662241625
+      },
+      "p_valores": {
+        "(Intercept)": 0.0114302817133447,
+        "pendiente_grados": 0.000200521386778957,
+        "rugosidad": 0.906877678771672,
+        "albedo": 0.0110233876864076
+      },
+      "p_valores_robustos_HC3": {
+        "(Intercept)": 0.00357905526023625,
+        "pendiente_grados": 0.000177361931313412,
+        "rugosidad": 0.893089817389005,
+        "albedo": 0.00341512193274395
+      },
+      "se_tipo": "OLS",
+      "r2_ajustado": 0.442,
+      "sigma_residual": 1.351,
+      "rho_ar1": null,
+      "rango_predictores": {
+        "pendiente_grados": [1.5, 5.75],
+        "rugosidad": [0.18, 1.3],
+        "albedo": [0.2289, 0.2297]
+      },
+      "velocidad_mediana_m_sol": 13.75,
+      "supuestos": {
+        "shapiro_W": 0.9503,
+        "shapiro_p": 0.09123,
+        "normalidad_ok": true,
+        "breusch_pagan": 3.547,
+        "bp_p": 0.3147,
+        "homocedasticidad_ok": true,
+        "durbin_watson": 1.855,
+        "dw_p": 0.1889,
+        "independencia_ok": true,
+        "vif_max": 2.64,
+        "se_robustos_aplicados": false
+      }
+    },
+    "lecho_rocoso_firme": {
+      "suelo": "lecho_rocoso_firme",
+      "n": 220,
+      "estado": "ajustado",
+      "metodo": "gls_AR1",
+      "formula": "tilt_real_grados ~ pendiente_grados + rugosidad + albedo + dosis_rad_uGy_h",
+      "predictores": ["pendiente_grados", "rugosidad", "albedo", "dosis_rad_uGy_h"],
+      "predictores_descartados_vif": "inercia_termica_tiu",
+      "coeficientes": {
+        "(Intercept)": 219.887804378656,
+        "pendiente_grados": 0.694997397818775,
+        "rugosidad": 3.10355151733989,
+        "albedo": -956.599916185086,
+        "dosis_rad_uGy_h": 0.191867603892993
+      },
+      "error_estandar": {
+        "(Intercept)": 180.960527772486,
+        "pendiente_grados": 0.175203990404616,
+        "rugosidad": 2.20307750521817,
+        "albedo": 782.023725025238,
+        "dosis_rad_uGy_h": 0.502315355755939
+      },
+      "error_estandar_robusto_HC3": {
+        "(Intercept)": 129.585298026572,
+        "pendiente_grados": 0.133915888637787,
+        "rugosidad": 1.77364173891784,
+        "albedo": 559.296905063629,
+        "dosis_rad_uGy_h": 0.450660614551825
+      },
+      "p_valores": {
+        "(Intercept)": 0.225655041856129,
+        "pendiente_grados": 9.92368138056952e-05,
+        "rugosidad": 0.160358198323837,
+        "albedo": 0.222579427829242,
+        "dosis_rad_uGy_h": 0.702863528478395
+      },
+      "p_valores_robustos_HC3": {
+        "(Intercept)": 0.203080410420927,
+        "pendiente_grados": 3.91978698802071e-08,
+        "rugosidad": 0.165585670436112,
+        "albedo": 0.20113839548583,
+        "dosis_rad_uGy_h": 0.755407483599989
+      },
+      "se_tipo": "GLS_AR1",
+      "r2_ajustado": 0.2667,
+      "sigma_residual": 2.696,
+      "rho_ar1": 0.245,
+      "rango_predictores": {
+        "pendiente_grados": [0.25, 7],
+        "rugosidad": [0.2, 0.6],
+        "albedo": [0.2294, 0.2305],
+        "dosis_rad_uGy_h": [10.66, 12.257]
+      },
+      "velocidad_mediana_m_sol": 13.87,
+      "supuestos": {
+        "shapiro_W": 0.981,
+        "shapiro_p": 0.004616,
+        "normalidad_ok": false,
+        "breusch_pagan": 7.009,
+        "bp_p": 0.1354,
+        "homocedasticidad_ok": true,
+        "durbin_watson": 1.566,
+        "dw_p": 0.0002546,
+        "independencia_ok": false,
+        "vif_max": 2.16,
+        "se_robustos_aplicados": false
+      }
+    },
+    "rocoso_fracturado": {
+      "suelo": "rocoso_fracturado",
+      "n": 342,
+      "estado": "ajustado",
+      "metodo": "gls_AR1",
+      "formula": "tilt_real_grados ~ pendiente_grados + rugosidad + inercia_termica_tiu +     albedo + dosis_rad_uGy_h",
+      "predictores": ["pendiente_grados", "rugosidad", "inercia_termica_tiu", "albedo", "dosis_rad_uGy_h"],
+      "predictores_descartados_vif": [],
+      "coeficientes": {
+        "(Intercept)": -382.893409160549,
+        "pendiente_grados": 0.340540227734729,
+        "rugosidad": 0.886122254570343,
+        "inercia_termica_tiu": 0.216923080009426,
+        "albedo": 1210.58451740861,
+        "dosis_rad_uGy_h": 1.28629042458679
+      },
+      "error_estandar": {
+        "(Intercept)": 344.39289662626,
+        "pendiente_grados": 0.126326690024142,
+        "rugosidad": 0.549042344044318,
+        "inercia_termica_tiu": 0.221136001031684,
+        "albedo": 1385.41497171774,
+        "dosis_rad_uGy_h": 0.639636522745919
+      },
+      "error_estandar_robusto_HC3": {
+        "(Intercept)": 197.687248229413,
+        "pendiente_grados": 0.108555311255418,
+        "rugosidad": 0.463971199031783,
+        "inercia_termica_tiu": 0.113190601213327,
+        "albedo": 749.525863849316,
+        "dosis_rad_uGy_h": 0.399675996135663
+      },
+      "p_valores": {
+        "(Intercept)": 0.267022288569907,
+        "pendiente_grados": 0.00737733916004934,
+        "rugosidad": 0.107478801572723,
+        "inercia_termica_tiu": 0.32732380867049,
+        "albedo": 0.382847766964388,
+        "dosis_rad_uGy_h": 0.0451269285121953
+      },
+      "p_valores_robustos_HC3": {
+        "(Intercept)": 0.180028119697399,
+        "pendiente_grados": 3.92468143051595e-05,
+        "rugosidad": 0.224816087081469,
+        "inercia_termica_tiu": 0.28957799950577,
+        "albedo": 0.237004731592414,
+        "dosis_rad_uGy_h": 0.00275834989125559
+      },
+      "se_tipo": "GLS_AR1",
+      "r2_ajustado": 0.2132,
+      "sigma_residual": 4.567,
+      "rho_ar1": 0.339,
+      "rango_predictores": {
+        "pendiente_grados": [0.75, 16.5],
+        "rugosidad": [0.16, 3.14],
+        "inercia_termica_tiu": [428.2, 443],
+        "albedo": [0.2287, 0.2298],
+        "dosis_rad_uGy_h": [10.66, 12.257]
+      },
+      "velocidad_mediana_m_sol": 9.73,
+      "supuestos": {
+        "shapiro_W": 0.9763,
+        "shapiro_p": 2.049e-05,
+        "normalidad_ok": false,
+        "breusch_pagan": 49.454,
+        "bp_p": 1.792e-09,
+        "homocedasticidad_ok": false,
+        "durbin_watson": 1.381,
+        "dw_p": 1.036e-09,
+        "independencia_ok": false,
+        "vif_max": 1.89,
+        "se_robustos_aplicados": false
+      }
+    },
+    "regolito_compacto": {
+      "suelo": "regolito_compacto",
+      "n": 251,
+      "estado": "ajustado",
+      "metodo": "gls_AR1",
+      "formula": "tilt_real_grados ~ pendiente_grados + rugosidad + albedo + dosis_rad_uGy_h",
+      "predictores": ["pendiente_grados", "rugosidad", "albedo", "dosis_rad_uGy_h"],
+      "predictores_descartados_vif": "inercia_termica_tiu",
+      "coeficientes": {
+        "(Intercept)": 250.326819218514,
+        "pendiente_grados": 0.571082519261474,
+        "rugosidad": 3.98774932266335,
+        "albedo": -1122.92271237974,
+        "dosis_rad_uGy_h": 0.835528568507895
+      },
+      "error_estandar": {
+        "(Intercept)": 281.313567057921,
+        "pendiente_grados": 0.186865400129769,
+        "rugosidad": 1.83101019635412,
+        "albedo": 1223.48330181176,
+        "dosis_rad_uGy_h": 0.6031069799696
+      },
+      "error_estandar_robusto_HC3": {
+        "(Intercept)": 122.963858422324,
+        "pendiente_grados": 0.137908296995152,
+        "rugosidad": 1.31124038042503,
+        "albedo": 531.185106026001,
+        "dosis_rad_uGy_h": 0.449636084067723
+      },
+      "p_valores": {
+        "(Intercept)": 0.374415925873897,
+        "pendiente_grados": 0.0024894148873554,
+        "rugosidad": 0.0303641334435395,
+        "albedo": 0.359618373976368,
+        "dosis_rad_uGy_h": 0.167193060672973
+      },
+      "p_valores_robustos_HC3": {
+        "(Intercept)": 0.114042968792963,
+        "pendiente_grados": 3.97752147706671e-08,
+        "rugosidad": 0.00259918605534492,
+        "albedo": 0.102328103067202,
+        "dosis_rad_uGy_h": 0.226435998514876
+      },
+      "se_tipo": "GLS_AR1",
+      "r2_ajustado": 0.1618,
+      "sigma_residual": 4.004,
+      "rho_ar1": 0.416,
+      "rango_predictores": {
+        "pendiente_grados": [0.25, 7.75],
+        "rugosidad": [0.3, 1.08],
+        "albedo": [0.2291, 0.2305],
+        "dosis_rad_uGy_h": [10.66, 12.257]
+      },
+      "velocidad_mediana_m_sol": 10.97,
+      "supuestos": {
+        "shapiro_W": 0.8999,
+        "shapiro_p": 7.161e-12,
+        "normalidad_ok": false,
+        "breusch_pagan": 26.615,
+        "bp_p": 2.378e-05,
+        "homocedasticidad_ok": false,
+        "durbin_watson": 1.24,
+        "dw_p": 1.702e-10,
+        "independencia_ok": false,
+        "vif_max": 1.23,
+        "se_robustos_aplicados": false
+      }
+    }
+  },
+  "modelo_global": {
+    "suelo": "global",
+    "n": 851,
+    "estado": "ajustado",
+    "metodo": "gls_AR1",
+    "formula": "tilt_real_grados ~ pendiente_grados + rugosidad + inercia_termica_tiu +     albedo + dosis_rad_uGy_h",
+    "predictores": ["pendiente_grados", "rugosidad", "inercia_termica_tiu", "albedo", "dosis_rad_uGy_h"],
+    "predictores_descartados_vif": [],
+    "coeficientes": {
+      "(Intercept)": -296.070231254602,
+      "pendiente_grados": 0.382458598217026,
+      "rugosidad": 0.97737342895107,
+      "inercia_termica_tiu": 0.076552080938792,
+      "albedo": 1117.72699160819,
+      "dosis_rad_uGy_h": 0.955693543286094
+    },
+    "error_estandar": {
+      "(Intercept)": 196.342525712913,
+      "pendiente_grados": 0.0753320240189916,
+      "rugosidad": 0.380687170545967,
+      "inercia_termica_tiu": 0.0384055408388153,
+      "albedo": 800.507182832233,
+      "dosis_rad_uGy_h": 0.348113333458846
+    },
+    "error_estandar_robusto_HC3": {
+      "(Intercept)": 123.720988109826,
+      "pendiente_grados": 0.0669734953921029,
+      "rugosidad": 0.386176968155143,
+      "inercia_termica_tiu": 0.0213127838251237,
+      "albedo": 504.463311702215,
+      "dosis_rad_uGy_h": 0.255584617609381
+    },
+    "p_valores": {
+      "(Intercept)": 0.131946933591833,
+      "pendiente_grados": 4.71908620399781e-07,
+      "rugosidad": 0.0104176438571895,
+      "inercia_termica_tiu": 0.0465545516611207,
+      "albedo": 0.162998818093072,
+      "dosis_rad_uGy_h": 0.00617296123540225
+    },
+    "p_valores_robustos_HC3": {
+      "(Intercept)": 0.100243497397039,
+      "pendiente_grados": 5.16502147057968e-13,
+      "rugosidad": 0.0782775747550718,
+      "inercia_termica_tiu": 0.0118005633205092,
+      "albedo": 0.131741636942664,
+      "dosis_rad_uGy_h": 0.000728154640473942
+    },
+    "se_tipo": "GLS_AR1",
+    "r2_ajustado": 0.2571,
+    "sigma_residual": 3.914,
+    "rho_ar1": 0.339,
+    "rango_predictores": {
+      "pendiente_grados": [0.25, 16.5],
+      "rugosidad": [0.16, 3.14],
+      "inercia_termica_tiu": [411.4, 443],
+      "albedo": [0.2287, 0.2305],
+      "dosis_rad_uGy_h": [10.66, 12.257]
+    },
+    "velocidad_mediana_m_sol": 11.2,
+    "supuestos": {
+      "shapiro_W": 0.9492,
+      "shapiro_p": 1.6e-16,
+      "normalidad_ok": false,
+      "breusch_pagan": 95.772,
+      "bp_p": 4.107e-19,
+      "homocedasticidad_ok": false,
+      "durbin_watson": 1.354,
+      "dw_p": 4.282e-22,
+      "independencia_ok": false,
+      "vif_max": 4.39,
+      "se_robustos_aplicados": false
+    }
+  },
+  "ranking_r2": ["arena_dunas", "lecho_rocoso_firme", "rocoso_fracturado", "regolito_compacto"]
+}

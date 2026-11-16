@@ -1,0 +1,45 @@
+# MS5 risk thresholds (plan §5). SPEC-pinned values first; everything tagged
+# `placeholder` is a configurable stand-in pending domain calibration (Phase 3)
+# and is logged in docs/DECISIONS.md.
+version: 1
+
+# SPEC §5 normalization example for slope: 0 at <=5 deg, 1 at >=30 deg, linear.
+slope:
+  score_floor_deg: 5.0
+  score_ceil_deg: 30.0
+  warning_deg: 15.0            # Javi's slope warning threshold
+  block_deg: 25.0              # Javi's DEM-slope block (vehicle profile too)
+
+roughness:
+  # placeholder: no Javi score scale exists; bounds from rejilla band range
+  # (0.08-5.08 m observed). placeholder pending Phase 3 calibration.
+  score_floor_m: 0.5           # placeholder
+  score_ceil_m: 3.0            # placeholder
+  warning_m: 1.5               # placeholder (HIGH_ROUGHNESS)
+
+dunes:
+  # SPEC factor: proximity to Bagnold dunes / dark sand fraction.
+  # Javi soil rule: arena_dunas when distancia_duna_m == 0 or
+  # fraccion_oscura >= 0.5 — used as warning condition (BAGNOLD_DUNES_NEARBY).
+  dark_fraction_threshold: 0.5 # Javi regla_suelo arena_dunas
+  proximity_warning_m: 100.0   # placeholder (BAGNOLD_DUNES_NEARBY)
+
+temperature:
+  # Operating band from Javi's optimizer; score scale beyond the band is
+  # placeholder pending Phase 3.
+  band_min_K: 230.0
+  band_max_K: 290.0
+  warning_margin_K: 10.0       # placeholder: warn when hourly mean exits band by > margin
+  score_full_scale_K: 60.0     # placeholder: thermal excess (K) -> score 1.0
+
+radiation:
+  # dose-E rate in uGy/h; Javi's 0.7*median filter is ingest-time, not a
+  # warning threshold. Warning threshold is placeholder pending Phase 3.
+  warning_uGy_h: 20.0          # placeholder (HIGH_RADIATION_RATE)
+  score_full_scale_uGy_h: 30.0 # placeholder: dose rate -> score 1.0
+
+levels:                        # SPEC §4.1/§5 — fixed, do not change
+  low_max: 0.25
+  medium_max: 0.5
+  high_max: 0.75
+  # >= high_max -> critical; no factors -> unknown

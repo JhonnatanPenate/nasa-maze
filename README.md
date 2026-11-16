@@ -52,8 +52,12 @@ Frontend (map) ──▶ Core ──▶ MS6 Routing Engine ──▶ science/opt
 |---|---|---|
 | `science/` | Route optimizer (A*, mission cost function) and soil models | ✅ |
 | `data/gale/` | Processed Gale Crater dataset (90 m grid, 6 bands; routes; RAD/REMS) | ✅ |
+| `location-service/` | **MS1** — place search → planetocentric coordinates | ✅ |
+| `raster-service/` | **MS3** — raster access API (bands, point/sample) | ✅ |
 | `terrain-analysis/` | **MS4** — slope, profile and area analysis API | ✅ |
-| Routing Engine (MS6), Risk (MS5), Core, frontend | — | 🚧 in progress |
+| `risk-assessment/` | **MS5** — normalized point/path/area risk (SPEC_MS5 + extensions) | ✅ code + 293 tests; 🐳 docker run pending |
+| `routing-engine/` | **MS6** — wraps `science/optimizador_rutas.py` | ✅ |
+| Core, frontend, Data Management (MS2) | Orchestration, map UI, dataset registry | 🚧 in progress |
 
 **Tech:** Python 3.12 · FastAPI · rasterio/GDAL · numpy/pandas/scipy · R (soil models) · Docker · GitHub Actions · Google Cloud.
 

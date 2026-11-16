@@ -1,0 +1,609 @@
+openapi: 3.1.0
+info:
+  title: Planetary Explorer - Risk Assessment Service (Mars, MS5)
+  version: 0.1.0
+  description: >-
+    MS5 Risk Assessment. Scores how dangerous a location or path is by
+    combining terrain hazards (slope via MS4) with environmental factors
+    (surface roughness, dune proximity, temperature, radiation dose rate)
+    into a normalized 0..1 risk plus machine-readable warnings.
+
+    Authoritative contract: docs/SPEC_MS5_RISK_ASSESSMENT.md (v0.2.1).
+    Endpoints marked "plan extension" are additive plan capabilities that
+    do not alter SPEC fields, weights, or the weighted-risk formula; route
+    dose accumulation remains MS6's job.
+
+    Phase 1 note: per-factor scores are pending (Phase 3); `score` is null
+    and `risk`/`overall_risk` is null with `risk_level: "unknown"` — missing
+    data is never silently treated as safe (SPEC §5).
+  contact:
+    name: Planetary Explorer team
+servers:
+  - url: http://localhost:8005
+    description: Local development
+tags:
+  - name: risk
+  - name: health
+
+paths:
+  /health:
+    get:
+      tags: [health]
+      summary: Liveness + upstream connectivity (SPEC §6)
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is alive; upstreams may be ok or unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /risk/point:
+    get:
+      tags: [risk]
+      summary: Risk at a single point (SPEC §3.2/§4.2)
+      operationId: assessPoint
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema: {type: number, minimum: -90, maximum: 90}
+          description: Planetocentric latitude, degrees (IAU_2015:49900)
+        - name: lon
+          in: query
+          required: true
+          schema: {type: number, minimum: -180, maximum: 180}
+          description: East-positive longitude, degrees
+        - name: sol
+          in: query
+          required: false
+          schema: {type: integer}
+          description: >-
+            Reference sol for environmental profiles; nearest available sol
+            per dataset is used and echoed in the response.
+        - name: hora
+          in: query
+          required: false
+          schema: {type: integer, minimum: 0, maximum: 23}
+          description: >-
+            LMST hour 0-23 for the hourly environmental profile.
+            Plan extension: when omitted, all 24 hours are evaluated and the
+            worst result is returned (`by_hour` included only with
+            include_hourly=true).
+        - name: include_hourly
+          in: query
+          required: false
+          schema: {type: boolean, default: false}
+          description: Plan extension — include per-hour breakdown.
+        - name: factors
+          in: query
+          required: false
+          schema: {type: string}
+          description: >-
+            Plan extension — comma-separated subset of the factor catalog
+            (slope,roughness,dunes,temperature,radiation); default all.
+        - name: body
+          in: query
+          required: false
+          schema: {type: string, default: mars}
+      responses:
+        "200":
+          description: Point risk assessment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointRisk"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NoCoverage"
+        "502":
+          $ref: "#/components/responses/UpstreamUnavailable"
+
+  /risk/evaluate:
+    post:
+      tags: [risk]
+      summary: Risk evaluation along a path (SPEC §3.1/§4.1)
+      operationId: evaluatePath
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluateRequest"
+      responses:
+        "200":
+          description: Path risk evaluation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluateResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NoCoverage"
+        "422":
+          $ref: "#/components/responses/AreaTooLarge"
+        "502":
+          $ref: "#/components/responses/UpstreamUnavailable"
+
+  /risk/factors:
+    get:
+      tags: [risk]
+      summary: Factor catalog + data coverage (SPEC §3.3)
+      operationId: listFactors
+      responses:
+        "200":
+          description: Available risk factors and which have coverage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FactorsResponse"
+
+  # --- plan extensions (additive; not in SPEC_MS5) -----------------------
+
+  /risk/vehicle-profiles:
+    get:
+      tags: [risk]
+      summary: "Plan extension: configured vehicle profiles and limits"
+      operationId: listVehicleProfiles
+      responses:
+        "200":
+          description: Vehicle profiles from config/vehicle_profiles.yaml
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleProfilesResponse"
+
+  /risk/meta:
+    get:
+      tags: [risk]
+      summary: "Plan extension: weights, thresholds, model version, provenance"
+      operationId: getMeta
+      responses:
+        "200":
+          description: Configuration and coverage snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaResponse"
+
+  /risk/area:
+    post:
+      tags: [risk]
+      summary: "Plan extension: aggregate risk over a bounding box"
+      description: >-
+        Evaluates the SPEC weighted risk on a regular ~90 m grid covering
+        the bbox (one MS4 slope read + one MS3 point read per cell) and
+        returns aggregate statistics only — never a per-cell raster.
+        Cells outside coverage count as unknown; vehicle-profile
+        restrictions feed blocked_fraction only.
+      operationId: assessArea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AreaRequest"
+      responses:
+        "200":
+          description: Area aggregate statistics over the evaluated grid cells
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AreaResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/AreaTooLarge"
+
+components:
+  responses:
+    BadRequest:
+      description: Invalid path/factors/coordinates (SPEC §4.3)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NoCoverage:
+      description: No coverage at the requested location (SPEC §4.3)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    UpstreamUnavailable:
+      description: MS3/MS4 unreachable or failing (SPEC §4.3)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    AreaTooLarge:
+      description: AREA_TOO_LARGE — request exceeds configured cell cap
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: >-
+            Human-readable message; plan-named codes are prefixed
+            (e.g. "AREA_TOO_LARGE: ...", "VEHICLE_PROFILE_NOT_FOUND: ...").
+
+    HealthStatus:
+      type: object
+      required: [status, datasource_mode, terrain, raster, environment]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        datasource_mode:
+          type: string
+          enum: [synthetic, http, unavailable]
+        terrain:
+          type: string
+          enum: [ok, unavailable]
+          description: MS4 connectivity
+        raster:
+          type: string
+          enum: [ok, unavailable]
+          description: MS3 connectivity
+        environment:
+          type: string
+          enum: [ok, unavailable]
+          description: Local REMS/RAD catalog availability
+
+    GeoPoint:
+      type: object
+      required: [lat, lon]
+      properties:
+        lat: {type: number, minimum: -90, maximum: 90}
+        lon: {type: number, minimum: -180, maximum: 180}
+
+    FactorScore:
+      type: object
+      required: [score, available]
+      properties:
+        score:
+          type: [number, "null"]
+          minimum: 0
+          maximum: 1
+          description: >-
+            Normalized [0,1] factor score; null when the factor has no
+            coverage (excluded from weighting, never treated as safe)
+        available:
+          type: boolean
+          description: >-
+            false when the factor's dataset has no coverage; excluded from
+            weighting and never treated as safe (SPEC §5)
+
+    HourlyRisk:
+      type: object
+      required: [hora, risk, risk_level, factor_scores]
+      properties:
+        hora: {type: integer, minimum: 0, maximum: 23}
+        risk: {type: [number, "null"], minimum: 0, maximum: 1}
+        risk_level: {$ref: "#/components/schemas/RiskLevel"}
+        factor_scores:
+          type: object
+          additionalProperties: {$ref: "#/components/schemas/FactorScore"}
+
+    PointRisk:
+      type: object
+      required: [lat, lon, risk, risk_level, factor_scores, warnings]
+      properties:
+        lat: {type: number}
+        lon: {type: number}
+        risk:
+          type: [number, "null"]
+          minimum: 0
+          maximum: 1
+          description: SPEC §4.2; null when no factor is available (§5)
+        risk_level: {$ref: "#/components/schemas/RiskLevel"}
+        factor_scores:
+          type: object
+          additionalProperties: {$ref: "#/components/schemas/FactorScore"}
+        warnings:
+          type: array
+          items: {type: string}
+          description: Machine-readable warning codes (SPEC §5)
+        # --- additive plan fields -------------------------------------
+        sol: {type: [integer, "null"]}
+        hora: {type: [integer, "null"], minimum: 0, maximum: 23}
+        confidence:
+          anyOf:
+            - {type: string, enum: [high, medium, low]}
+            - {type: "null"}
+          description: Factor-coverage confidence (additive plan field)
+        provenance: {type: [object, "null"]}
+        data_quality_notes:
+          type: array
+          items: {type: string}
+        assumptions:
+          type: array
+          items: {type: string}
+        by_hour:
+          type: [array, "null"]
+          items: {$ref: "#/components/schemas/HourlyRisk"}
+          description: Present only with include_hourly=true and no hora
+
+    EvaluateRequest:
+      type: object
+      required: [path]
+      properties:
+        body: {type: string, default: mars}
+        path:
+          type: array
+          minItems: 2
+          items: {$ref: "#/components/schemas/GeoPoint"}
+        factors:
+          type: array
+          items:
+            type: string
+            enum: [slope, roughness, dunes, temperature, radiation]
+          description: Subset of the catalog; default all available
+        sol: {type: integer}
+        hora: {type: integer, minimum: 0, maximum: 23, default: 12}
+        # --- additive plan fields -------------------------------------
+        sampling_step_m: {type: [number, "null"], exclusiveMinimum: 0}
+        vehicle_profile: {type: [string, "null"]}
+        speed_mps: {type: [number, "null"], exclusiveMinimum: 0}
+
+    RiskSegment:
+      type: object
+      required: [from, to, distance_m, risk, factor_scores, warnings]
+      properties:
+        from: {$ref: "#/components/schemas/GeoPoint"}
+        to: {$ref: "#/components/schemas/GeoPoint"}
+        distance_m:
+          type: number
+          description: Additive — segment arc length (plan §7.2)
+        risk: {type: [number, "null"], minimum: 0, maximum: 1}
+        factor_scores:
+          type: object
+          additionalProperties: {$ref: "#/components/schemas/FactorScore"}
+        warnings:
+          type: array
+          items: {type: string}
+        local_time_hour:
+          type: [integer, "null"]
+          minimum: 0
+          maximum: 23
+          description: >-
+            Additive — LMST hour bin at segment arrival; advances from the
+            request's departure ``hora`` by effective-speed travel time
+            with mod-24 wrap (plan §4.4)
+
+    EvaluateResponse:
+      type: object
+      required: [overall_risk, risk_level, segments, warnings_summary]
+      properties:
+        overall_risk:
+          type: [number, "null"]
+          minimum: 0
+          maximum: 1
+          description: Distance-weighted mean of segment risks (SPEC §4.1)
+        risk_level: {$ref: "#/components/schemas/RiskLevel"}
+        segments:
+          type: array
+          items: {$ref: "#/components/schemas/RiskSegment"}
+        warnings_summary:
+          type: array
+          items: {type: string}
+        # --- additive plan fields -------------------------------------
+        sol: {type: [integer, "null"]}
+        hora: {type: [integer, "null"], minimum: 0, maximum: 23}
+        total_distance_m: {type: [number, "null"]}
+        max_level:
+          anyOf:
+            - $ref: "#/components/schemas/RiskLevel"
+            - type: "null"
+        mean_score: {type: [number, "null"]}
+        p95_score: {type: [number, "null"]}
+        dominant_factor: {type: [string, "null"]}
+        total_duration_s: {type: [number, "null"]}
+        end_local_time_hours: {type: [number, "null"]}
+        confidence:
+          anyOf:
+            - {type: string, enum: [high, medium, low]}
+            - {type: "null"}
+          description: Factor-coverage confidence (additive plan field)
+        provenance: {type: [object, "null"]}
+        data_quality_notes:
+          type: array
+          items: {type: string}
+        assumptions:
+          type: array
+          items: {type: string}
+        restrictions:
+          type: array
+          items: {type: object}
+        hotspots:
+          type: array
+          items: {type: object}
+        blocking_segments:
+          type: array
+          items: {type: integer}
+
+    RiskLevel:
+      type: string
+      enum: [low, medium, high, critical, unknown]
+      description: >-
+        SPEC §4.1: low <0.25, medium 0.25-<0.5, high 0.5-<0.75,
+        critical >=0.75, unknown when no factor is available.
+
+    FactorInfo:
+      type: object
+      required: [id, name, unit, weight, available, sources]
+      properties:
+        id:
+          type: string
+          enum: [slope, roughness, dunes, temperature, radiation]
+        name: {type: string}
+        unit: {type: [string, "null"]}
+        weight: {type: number}
+        available: {type: boolean}
+        sources:
+          type: array
+          items: {type: string}
+        note: {type: [string, "null"]}
+
+    FactorsResponse:
+      type: object
+      required: [factors, weights, model_version, default_sol, environmental_sols]
+      properties:
+        factors:
+          type: array
+          items: {$ref: "#/components/schemas/FactorInfo"}
+        weights:
+          type: object
+          additionalProperties: {type: number}
+          description: SPEC §5 defaults (slope .4, dunes .2, roughness .15, temperature .15, radiation .1)
+        model_version: {type: string}
+        default_sol: {type: integer}
+        environmental_sols:
+          type: object
+          properties:
+            rems: {type: array, items: {type: integer}}
+            rad: {type: array, items: {type: integer}}
+
+    VehicleProfile:
+      type: object
+      required:
+        - name
+        - description
+        - nominal_speed_m_h
+        - tilt_speed_factor
+        - dune_speed_factor
+        - slope_block_deg
+        - tilt_block_deg
+        - tilt_margin_sigma
+        - thermal_min_K
+        - thermal_max_K
+        - dose_budget_uGy
+      properties:
+        name: {type: string}
+        description: {type: string}
+        nominal_speed_m_h: {type: number}
+        tilt_speed_factor: {type: string}
+        dune_speed_factor: {type: number}
+        slope_block_deg: {type: number}
+        tilt_block_deg: {type: number}
+        tilt_margin_sigma: {type: number}
+        thermal_min_K: {type: number}
+        thermal_max_K: {type: number}
+        dose_budget_uGy: {type: [number, "null"]}
+
+    VehicleProfilesResponse:
+      type: object
+      required: [profiles, default]
+      properties:
+        profiles:
+          type: array
+          items: {$ref: "#/components/schemas/VehicleProfile"}
+        default: {type: string}
+        note: {type: [string, "null"]}
+
+    MetaResponse:
+      type: object
+      required:
+        - service
+        - model_version
+        - weights
+        - thresholds
+        - default_sol
+        - default_vehicle_profile
+        - datasource_mode
+        - upstream
+        - catalog
+        - coordinate_system
+      properties:
+        service: {type: string}
+        model_version: {type: string}
+        weights:
+          type: object
+          additionalProperties: {type: number}
+        thresholds: {type: object}
+        default_sol: {type: integer}
+        default_vehicle_profile: {type: string}
+        datasource_mode:
+          type: string
+          enum: [synthetic, http, unavailable]
+        upstream:
+          type: object
+          properties:
+            terrain: {type: string, enum: [ok, unavailable]}
+            raster: {type: string, enum: [ok, unavailable]}
+            environment: {type: string, enum: [ok, unavailable]}
+        catalog:
+          type: object
+          properties:
+            path: {type: [string, "null"]}
+            available: {type: boolean}
+            rems_sols: {type: array, items: {type: integer}}
+            rad_sols: {type: array, items: {type: integer}}
+        coordinate_system:
+          type: object
+          properties:
+            crs: {type: string}
+            lat_type: {type: string}
+            lon_convention: {type: string}
+            lon_range: {type: array, items: {type: number}}
+            radius_m: {type: number}
+
+    AreaRequest:
+      type: object
+      required: [bbox]
+      properties:
+        body: {type: string, default: mars}
+        bbox:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items: {type: number}
+          description: "[min_lon, min_lat, max_lon, max_lat] degrees"
+        sol: {type: [integer, "null"]}
+        hora: {type: integer, minimum: 0, maximum: 23, default: 12}
+        vehicle_profile: {type: [string, "null"]}
+        max_cells: {type: [integer, "null"], minimum: 1}
+
+    AreaResponse:
+      type: object
+      required:
+        - bbox
+        - cell_count
+        - cell_size_m
+        - level_counts
+        - blocked_fraction
+        - mean_score
+        - p95_score
+        - factor_stats
+        - hotspots
+        - aggregation
+        - note
+      properties:
+        bbox: {type: array, items: {type: number}}
+        cell_count: {type: integer}
+        cell_size_m: {type: [number, "null"]}
+        level_counts:
+          type: object
+          additionalProperties: {type: integer}
+        blocked_fraction: {type: [number, "null"]}
+        mean_score: {type: [number, "null"]}
+        p95_score: {type: [number, "null"]}
+        factor_stats: {type: object}
+        hotspots: {type: array, items: {type: object}}
+        aggregation:
+          type: string
+          description: '"grid_cells" — statistics over evaluated grid cells'
+        note: {type: string}
+        confidence: {type: [string, "null"], enum: [high, medium, low, null]}
+        uncovered_cells: {type: integer}
+        provenance: {type: object}
+        data_quality_notes: {type: array, items: {type: string}}

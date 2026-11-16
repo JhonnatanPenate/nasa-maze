@@ -1,0 +1,1 @@
+pydantic-settings (`RISK_` prefix) plus fail-fast loaders for `config/{risk_weights,risk_thresholds,vehicle_profiles,environment_columns}.yaml` and `config/modelos_por_suelo.json` (Javi per-soil tilt models, copied from the delivered `data/gale/processed/` artifact — DECISIONS MS5-D19).

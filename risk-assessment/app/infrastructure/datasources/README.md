@@ -1,0 +1,1 @@
+Terrain/raster source adapters. http_* map MS3/MS4 errors (400->DomainValidation, 404->NoCoverage, else->UpstreamUnavailable -> 502); synthetic_* are deterministic dev fakes; unavailable_* always fail. guarded_call adds bounded retries on transport errors.

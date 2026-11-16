@@ -1,0 +1,1 @@
+Composition root: the only place that wires concrete infrastructure adapters to `core/ports`. Settings (`RISK_*` env) select `synthetic`/`http`/`unavailable` datasource modes; use-case factories live here.

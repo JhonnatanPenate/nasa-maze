@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+!.env.example
+
+# Built catalogs are artifacts (Phase 2 ingest output), never committed —
+# except the committed seed copy under data/seed/ (plan §6/§11).
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+!data/seed/*.sqlite
