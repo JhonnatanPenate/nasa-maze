@@ -10,6 +10,7 @@ del raster y los modelos de suelo. No calcula ciencia. Plan: [`docs/core/IMPLEME
 |---|---|---|
 | GET | `/api/health` | Estado de servicios, fallback, AOI, sols y bounds de la rejilla (siempre 200) |
 | POST | `/api/ruta` | `{geojson, resumen, tramos, control_calidad, fuente}` — `fuente`: `ms6` \| `precalculada` |
+| — | `riesgo` en `/api/ruta` | Si `CORE_MS5_URL` está configurado, el Core manda la ruta a MS5 (`POST /risk/evaluate`, con `sol` y `hora` de la solicitud) y la respuesta de MS5 va en `riesgo`. Es `null` si MS5 no está configurado o falla: nunca rompe la ruta. La dosis acumulada sigue viniendo de MS6 (`resumen`/`tramos`), no de MS5 |
 | GET | `/api/capas/base` | FeatureCollection: puntos CheMin, traza Curiosity (en el AOI), origen Bradbury |
 | GET | `/api/capas/raster/{banda}?cmap=viridis\|gray` | PNG RGBA de una banda; bounds en header `X-Bounds` |
 | GET | `/api/modelos` | `modelos_por_suelo.json` |

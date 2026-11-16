@@ -2,7 +2,7 @@ import httpx
 
 MS6 = "http://ms6.test"
 REQ = {"lon": 137.4416, "lat": -4.5895, "material": "hematita", "sol": 1360, "hora": 9.0, "vmax": 1000}
-CONTRATO = {"geojson", "resumen", "tramos", "control_calidad", "fuente"}
+CONTRATO = {"geojson", "resumen", "tramos", "control_calidad", "fuente", "riesgo"}
 
 
 def test_ms6_passthrough(make_client):

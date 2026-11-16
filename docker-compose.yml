@@ -14,6 +14,7 @@ services:
     environment:
       CORE_DATA_DIR: /data/gale
       CORE_MS6_URL: http://routing-engine:8006
+      CORE_MS5_URL: http://risk-assessment:8005
       CORE_MS4_URL: http://terrain-analysis:8004
       CORE_MS1_URL: http://location-service:8001
     volumes:
@@ -36,6 +37,21 @@ services:
     ports: ["8003:8003"]
     volumes:
       - ./data:/data:ro
+
+  risk-assessment:
+    build: ./risk-assessment
+    ports: ["8005:8005"]
+    environment:
+      RISK_DATASOURCE_MODE: http
+      RISK_RASTER_BASE_URL: http://raster-service:8003
+      RISK_TERRAIN_BASE_URL: http://terrain-analysis:8004
+      RISK_SEED_CATALOG_PATH: /app/data/seed/risk_catalog_seed.sqlite
+      RISK_CONFIG_DIR: /app/config
+      # MS4 tarda ~6 s en perfilar una ruta completa (7.7 km); con el default de 5 s MS5 responde 502
+      RISK_UPSTREAM_TIMEOUT_S: "60"
+    volumes:
+      - ./risk-assessment/data/seed:/app/data/seed:ro
+      - ./risk-assessment/config:/app/config:ro
 
   location-service:
     build: ./location-service
