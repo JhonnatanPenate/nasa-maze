@@ -155,9 +155,15 @@ curl -s -X POST http://localhost:8005/risk/area \
   -d '{"bbox": [137.345, -4.740, 137.455, -4.580], "hora": 12}' | jq
 ```
 
-`/risk/area` is a Phase 1 stub: it validates the bbox, enforces
-`max_cells`/`RISK_MAX_AREA_CELLS` (422 `AREA_TOO_LARGE`), and returns
-`aggregation: "pending"` until Phase 5 implements per-cell evaluation.
+`/risk/area` evaluates the SPEC weighted risk on a regular ~90 m grid
+covering the bbox (one MS4 slope read + one MS3 point read per cell) and
+returns aggregate statistics only — `level_counts`, `blocked_fraction`,
+`mean_score`/`p95_score`, per-factor `factor_stats`, `hotspots` (capped at
+100), plus additive `confidence`/`uncovered_cells`/`provenance`/
+`data_quality_notes`. It never returns a per-cell raster. The request
+`max_cells`/`RISK_MAX_AREA_CELLS` cap still applies (422
+`AREA_TOO_LARGE`); cells outside coverage count as `unknown`. Cost is
+O(2·cells) upstream point reads — keep bboxes modest.
 
 ## 6. Modes
 

@@ -15,8 +15,8 @@ class AreaRequest(BaseModel):
 
 
 class AreaResponse(BaseModel):
-    """Plan extension area aggregate. Phase 1 stub: structural zeros with
-    ``aggregation="pending"`` until Phase 5 implements per-cell evaluation."""
+    """Plan extension area aggregate: statistics over the evaluated grid
+    cells — never a per-cell raster."""
 
     bbox: list[float]
     cell_count: int
@@ -29,3 +29,8 @@ class AreaResponse(BaseModel):
     hotspots: list[dict[str, Any]]
     aggregation: str
     note: str
+    # Additive explainability fields (same convention as point/path).
+    confidence: str | None = None
+    uncovered_cells: int = 0
+    provenance: dict[str, Any] = Field(default_factory=dict)
+    data_quality_notes: list[str] = Field(default_factory=list)

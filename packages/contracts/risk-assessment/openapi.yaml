@@ -172,11 +172,13 @@ paths:
   /risk/area:
     post:
       tags: [risk]
-      summary: "Plan extension: aggregate risk over a bounding box (Phase 5)"
+      summary: "Plan extension: aggregate risk over a bounding box"
       description: >-
-        Phase 1 stub: validates the bbox and enforces the cell cap, then
-        returns structural zeros with aggregation="pending". Per-cell
-        evaluation lands in Phase 5.
+        Evaluates the SPEC weighted risk on a regular ~90 m grid covering
+        the bbox (one MS4 slope read + one MS3 point read per cell) and
+        returns aggregate statistics only — never a per-cell raster.
+        Cells outside coverage count as unknown; vehicle-profile
+        restrictions feed blocked_fraction only.
       operationId: assessArea
       requestBody:
         required: true
@@ -186,7 +188,7 @@ paths:
               $ref: "#/components/schemas/AreaRequest"
       responses:
         "200":
-          description: Area aggregate (pending until Phase 5)
+          description: Area aggregate statistics over the evaluated grid cells
           content:
             application/json:
               schema:
@@ -599,5 +601,9 @@ components:
         hotspots: {type: array, items: {type: object}}
         aggregation:
           type: string
-          description: '"pending" until Phase 5 implements per-cell evaluation'
+          description: '"grid_cells" — statistics over evaluated grid cells'
         note: {type: string}
+        confidence: {type: [string, "null"], enum: [high, medium, low, null]}
+        uncovered_cells: {type: integer}
+        provenance: {type: object}
+        data_quality_notes: {type: array, items: {type: string}}

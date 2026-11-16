@@ -322,6 +322,26 @@ def list_vehicle_profiles(
 
 
 def get_assess_area(
+    terrain: TerrainSource = Depends(get_terrain_source),
+    raster: RasterSource = Depends(get_raster_source),
+    env_resolver: EnvironmentContextResolver = Depends(get_env_context_resolver),
+    vehicle_profiles: VehicleProfileRepository = Depends(get_vehicle_profile_repository),
+    distance_calculator: DistanceCalculator = Depends(get_distance_calculator),
     settings: Settings = Depends(get_settings),
+    thresholds: ScoringThresholds = Depends(get_scoring_thresholds),
+    tilt_models: TiltModelSet = Depends(get_tilt_models),
+    model_version: str = Depends(get_model_version),
 ) -> AssessArea:
-    return AssessArea(settings.max_area_cells)
+    return AssessArea(
+        terrain=terrain,
+        raster=raster,
+        env_resolver=env_resolver,
+        vehicle_profiles=vehicle_profiles,
+        distance_calculator=distance_calculator,
+        weights=_weights_dict(settings),
+        thresholds=thresholds,
+        tilt_models=tilt_models,
+        model_version=model_version,
+        default_vehicle_profile=settings.default_vehicle_profile,
+        max_area_cells=settings.max_area_cells,
+    )

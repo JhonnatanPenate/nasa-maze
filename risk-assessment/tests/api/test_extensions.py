@@ -1,5 +1,6 @@
-"""Plan-extension endpoints: vehicle-profiles, meta, area (additive stubs)."""
+"""Plan-extension endpoints: vehicle-profiles, meta, area (additive)."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 
@@ -37,20 +38,66 @@ def test_meta(client: TestClient) -> None:
     assert body["coordinate_system"]["crs"] == "IAU_2015:49900"
 
 
-def test_area_stub_validates_and_caps(client: TestClient) -> None:
+def test_area_aggregates_grid_cells(client: TestClient) -> None:
     response = client.post(
         "/risk/area",
         json={
-            "bbox": [137.345, -4.740, 137.455, -4.580],
+            "bbox": [137.36, -4.65, 137.44, -4.60],
             "sol": 1360,
             "hora": 12,
         },
     )
     assert response.status_code == 200, response.text
     body = response.json()
-    assert body["aggregation"] == "pending"
+    assert body["aggregation"] == "grid_cells"
     assert body["cell_count"] > 0
+    assert body["cell_size_m"] == pytest.approx(90.0, abs=5.0)
+    level_counts = body["level_counts"]
+    assert set(level_counts) == {"low", "medium", "high", "critical", "unknown"}
+    assert sum(level_counts.values()) == body["cell_count"]
+    assert body["mean_score"] is not None
+    assert 0.0 <= body["mean_score"] <= 1.0
+    assert body["p95_score"] is not None
+    assert body["blocked_fraction"] is not None
+    assert 0.0 <= body["blocked_fraction"] <= 1.0
+    assert set(body["factor_stats"]) == {
+        "slope",
+        "roughness",
+        "dunes",
+        "temperature",
+        "radiation",
+    }
+    assert body["confidence"] == "high"
+    assert body["uncovered_cells"] == 0
+    assert body["provenance"]["vehicle_profile"] == "baseline_mars_rover"
+    # Statistics only — never a per-cell raster.
+    assert "cells" not in body and "grid" not in body
+
+
+def test_area_outside_coverage_is_unknown(client: TestClient) -> None:
+    response = client.post(
+        "/risk/area",
+        json={"bbox": [10.0, -20.0, 10.02, -19.98]},
+    )
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["level_counts"]["unknown"] == body["cell_count"]
+    assert body["uncovered_cells"] == body["cell_count"]
     assert body["mean_score"] is None
+    assert body["blocked_fraction"] is None
+    assert body["confidence"] == "low"
+
+
+def test_area_unknown_vehicle_profile_is_404(client: TestClient) -> None:
+    response = client.post(
+        "/risk/area",
+        json={
+            "bbox": [137.36, -4.65, 137.44, -4.60],
+            "vehicle_profile": "no_such_rover",
+        },
+    )
+    assert response.status_code == 404
+    assert "VEHICLE_PROFILE_NOT_FOUND" in response.json()["detail"]
 
 
 def test_area_too_large_is_422(client: TestClient) -> None:
