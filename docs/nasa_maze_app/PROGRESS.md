@@ -8,7 +8,7 @@ The orchestrator updates this file in the same commit as each WP and before ever
 | WP | Title | Status | Commit | Notes |
 |---|---|---|---|---|
 | WP0 | Bootstrap (plan, profiles, merge development) | done | see `git log` (`docs(app): WP0 ...`) | |
-| WP1 | Scaffold | pending | | |
+| WP1 | Scaffold | in_progress | | |
 | WP2 | API client | pending | | |
 | WP3 | Domain | pending | | |
 | ◆A | Checkpoint | pending | | |
@@ -45,3 +45,5 @@ The orchestrator updates this file in the same commit as each WP and before ever
 ## Deviations
 
 1. Plan updated during WP0: `development` (merged into `feature/frontend`) added `riesgo` (MS5 evaluation, nullable) to `POST /api/ruta` and `ms5` to `/api/health`. Plan §1/§2 D8/D9/§4 now use it (risk badge, MS5 warnings, color-by Risk).
+2. WP1 version deviations: jsdom 29.1.1 (31 needs node >= 24.15; local is 24.10), msw 2.15.0 (not v3), eslint 9.39.5, typescript 5.9.3 (typescript-eslint peer), `vite/client` types via tsconfig instead of `vite-env.d.ts`.
+3. Windows shell note: in this environment bash pipes/`&&` chains to npm hit a WSL shim error; run npm commands via PowerShell.
