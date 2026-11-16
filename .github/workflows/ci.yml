@@ -6,7 +6,29 @@ on:
   push:
     branches: [development, main]
 
+permissions:
+  contents: read
+
 jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nasa-maze-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: nasa-maze-app/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -74,6 +96,11 @@ jobs:
             health: /health
             # Gale data is baked into the image; a default route proves it
             route: true
+          - svc: frontend
+            context: nasa-maze-app
+            file: nasa-maze-app/Dockerfile
+            port: 80
+            health: /
     name: docker (${{ matrix.svc }})
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +108,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
-          file: ${{ matrix.svc }}/Dockerfile
+          file: ${{ matrix.file || format('{0}/Dockerfile', matrix.svc) }}
           tags: ${{ matrix.svc }}:ci
           load: true
           push: false
@@ -109,6 +136,9 @@ jobs:
           for i in $(seq 1 60); do
             if body=$(curl -fsS "http://localhost:${{ matrix.port }}${{ matrix.health }}"); then
               echo "$body"
+              if [ "${{ matrix.svc }}" = "frontend" ]; then
+                exit 0
+              fi
               echo "$body" | grep -qE '"status": ?"(ok|ready)"' || break
               echo "healthy after ~$((i * 2)) s"
               if [ "${{ matrix.route }}" = "true" ]; then

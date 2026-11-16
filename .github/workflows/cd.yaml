@@ -46,6 +46,38 @@ jobs:
         working-directory: ${{ matrix.service }}
         run: python -m pytest -q
 
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nasa-maze-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: nasa-maze-app/package-lock.json
+
+      - name: Install frontend
+        run: npm ci
+
+      - name: Test frontend
+        run: npm test
+
+      - name: Typecheck frontend
+        run: npm run typecheck
+
+      - name: Lint frontend
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
   docker-build:
     name: Docker build (${{ matrix.service }})
     runs-on: ubuntu-latest
@@ -71,6 +103,9 @@ jobs:
           - service: routing-engine
             context: .
             file: routing-engine/Dockerfile
+          - service: frontend
+            context: nasa-maze-app
+            file: nasa-maze-app/Dockerfile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -101,7 +136,7 @@ jobs:
   deploy:
     name: Deploy production to GCP VM
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [tests, docker-build, compose-validation]
+    needs: [tests, frontend, docker-build, compose-validation]
     runs-on: ubuntu-latest
     environment: production
     permissions:
@@ -154,30 +189,14 @@ jobs:
               git switch main
               git pull --ff-only origin main
 
-              if docker info >/dev/null 2>&1; then
-                DOCKER=(docker)
-              else
-                sudo -n docker info >/dev/null
-                DOCKER=(sudo -n docker)
-              fi
-
-              if [ ! -f location-service/data/seed/location_catalog_seed.sqlite ]; then
-                "${DOCKER[@]}" compose build location-service
-                "${DOCKER[@]}" compose run --rm --no-deps --user root \
-                  -v "$REPO_DIR:/workspace" \
-                  -w /workspace/location-service \
-                  location-service \
-                  python -m location_service.ingest build \
-                    --mission /workspace/data/gale/processed/gale_puntos_quimica.xlsx \
-                    --config /workspace/location-service/config \
-                    --out /workspace/location-service/data/seed/location_catalog_seed.sqlite \
-                    --report /workspace/location-service/data/seed/ingest_report.json
-              fi
-
               test -f location-service/data/seed/location_catalog_seed.sqlite
 
-              "${DOCKER[@]}" compose up --build -d
-              "${DOCKER[@]}" compose ps
+              FRONTEND_PORT=8000 CORE_PORT=8001 \
+                docker compose up --build -d
+              docker compose ps
+
+              curl --fail --silent --show-error \
+                http://localhost:8000/ >/dev/null
 
               for attempt in $(seq 1 30); do
                 if curl --fail --silent --show-error \
@@ -190,6 +209,6 @@ jobs:
                 sleep 5
               done
 
-              "${DOCKER[@]}" compose logs --tail=100
+              docker compose logs --tail=100
               exit 1
             '

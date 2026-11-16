@@ -1,5 +1,5 @@
 # Stack completo de Planetary Explorer. Desde la raíz del repo:
-#   docker compose up --build            # Core en http://localhost:8000/docs
+#   docker compose up --build            # Core en http://localhost:8000/docs, app en http://localhost:3000
 #
 # location-service necesita su catálogo semilla (ignorado por git). Generarlo una vez:
 #   pip install ./location-service
@@ -8,9 +8,15 @@
 #     --report location-service/data/seed/ingest_report.json
 # Sin ese catálogo, location-service queda unhealthy pero el Core sigue funcionando (degraded != down).
 services:
+  frontend:
+    build: ./nasa-maze-app
+    ports: ["${FRONTEND_PORT:-8080}:80"]
+    depends_on:
+      - core
+
   core:
     build: ./core
-    ports: ["8000:8000"]
+    ports: ["${CORE_PORT:-8000}:8000"]
     environment:
       CORE_DATA_DIR: /data/gale
       CORE_MS6_URL: http://routing-engine:8006
@@ -19,6 +25,16 @@ services:
       CORE_MS1_URL: http://location-service:8001
     volumes:
       - ./data:/data:ro
+
+  app:
+    build:
+      context: ./nasa-maze-app
+      args:
+        VITE_MARS_TILE_URL: ${VITE_MARS_TILE_URL:-}
+    ports: ["3000:80"]
+    environment:
+      CORE_UPSTREAM: http://core:8000
+    depends_on: [core]
 
   routing-engine:
     build:
