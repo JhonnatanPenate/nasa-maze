@@ -54,3 +54,18 @@ def test_non_integer_sol_rejected(bad: object) -> None:
     resolver = EnvironmentContextResolver(_repo(), default_sol=1360)
     with pytest.raises(DomainValidationError):
         resolver.resolve(bad, 9)  # type: ignore[arg-type]
+
+
+def test_daily_predictors_are_selected_sol_means() -> None:
+    resolver = EnvironmentContextResolver(_repo(), default_sol=1360)
+    ctx = resolver.resolve(5000, 9)  # rems->2140, rad->4710
+    predictors = resolver.daily_predictors(ctx)
+    # Fake catalog is uniform: ground mean 255 K, dose-E 12.5 uGy/h.
+    assert predictors["temp_suelo_K_media"] == pytest.approx(255.0)
+    assert predictors["dosis_rad_uGy_h"] == pytest.approx(12.5)
+
+
+def test_daily_predictors_empty_without_catalog() -> None:
+    resolver = EnvironmentContextResolver(FakeEnvironmentRepository(), default_sol=1360)
+    ctx = resolver.resolve(1360, 9)
+    assert resolver.daily_predictors(ctx) == {}

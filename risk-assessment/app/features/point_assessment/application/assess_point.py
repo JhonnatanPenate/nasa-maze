@@ -2,9 +2,15 @@
 
 from app.core.application.environment_context import EnvironmentContextResolver
 from app.core.application.factor_builder import (
+    ScoringThresholds,
     build_point_assessments,
+    coverage_confidence,
+    coverage_notes,
+    merged_warnings,
     provenance_for,
     raster_factors_requested,
+    scored_cell_counts,
+    sol_fallback_notes,
     terrain_requested,
     validate_factor_selection,
 )
@@ -19,14 +25,22 @@ from app.features.point_assessment.domain.point_risk import (
     PointRisk,
 )
 
+_POINT_ASSUMPTIONS = (
+    "Factor scores use the SPEC weighted model; thresholds marked "
+    "placeholder are documented in docs/DECISIONS.md.",
+    "Unavailable factors are excluded from the weighted mean and are "
+    "never scored as safe.",
+)
+
 
 class AssessPoint:
     """Gathers slope (MS4), raster bands (MS3) and environmental profiles
     (local catalog) for one point and aggregates the SPEC weighted risk.
 
-    Phase 3 landed the domain scorers; wiring them into the builders is
-    Phase 4, so ``risk`` is still ``None`` and ``level`` ``unknown`` while
-    ``available`` flags reflect real data coverage.
+    ``hora=None`` evaluates all 24 LMST bins and reports the worst hour
+    (plus an optional per-hour breakdown); ``hora`` given evaluates that
+    single bin. With no environment catalog the environmental factors
+    report ``available: false`` — never a fabricated score.
     """
 
     def __init__(
@@ -35,11 +49,15 @@ class AssessPoint:
         raster: RasterSource,
         env_resolver: EnvironmentContextResolver,
         weights: dict[str, float],
+        thresholds: ScoringThresholds,
+        model_version: str,
     ) -> None:
         self._terrain = terrain
         self._raster = raster
         self._env_resolver = env_resolver
         self._weights = weights
+        self._thresholds = thresholds
+        self._model_version = model_version
 
     def execute(
         self,
@@ -64,6 +82,7 @@ class AssessPoint:
                 slope_deg=slope_deg,
                 band_values=band_values,
                 context=context,
+                thresholds=self._thresholds,
             )
             risk, level = aggregate(assessments, self._weights)
             hourly.append(
@@ -77,18 +96,27 @@ class AssessPoint:
 
         worst = self._worst(hourly)
         context = self._env_resolver.resolve(sol, worst.hora)
-        provenance = provenance_for(context)
+        provenance = provenance_for(context, self._model_version)
         provenance["include_hourly"] = include_hourly
+
+        scored, total = scored_cell_counts([h.factor_scores for h in hourly])
+        # Selected sols are fixed per dataset across hours -> one context
+        # is enough for the fallback note.
+        notes = sol_fallback_notes([context])
         return PointRisk(
             lat=point.lat,
             lon=point.lon,
             risk=worst.risk,
             level=worst.level,
             factor_scores=worst.factor_scores,
+            warnings=merged_warnings([worst.factor_scores]),
             sol=context.reference_sol,
             hora=worst.hora,
             provenance=provenance,
             by_hour=tuple(hourly) if include_hourly else None,
+            confidence=coverage_confidence(scored, total),
+            data_quality_notes=notes + coverage_notes(selected, [h.factor_scores for h in hourly]),
+            assumptions=_POINT_ASSUMPTIONS,
         )
 
     @staticmethod

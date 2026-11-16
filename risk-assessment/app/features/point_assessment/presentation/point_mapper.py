@@ -34,6 +34,9 @@ class PointMapper:
             sol=risk.sol,
             hora=risk.hora,
             provenance=risk.provenance or None,
+            confidence=risk.confidence,
+            data_quality_notes=list(risk.data_quality_notes),
+            assumptions=list(risk.assumptions),
             by_hour=(
                 [
                     HourlyRiskSchema(

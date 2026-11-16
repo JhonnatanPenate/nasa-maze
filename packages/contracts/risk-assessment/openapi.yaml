@@ -272,7 +272,9 @@ components:
           type: [number, "null"]
           minimum: 0
           maximum: 1
-          description: Normalized [0,1]; null until Phase 3 scoring lands
+          description: >-
+            Normalized [0,1] factor score; null when the factor has no
+            coverage (excluded from weighting, never treated as safe)
         available:
           type: boolean
           description: >-
@@ -312,7 +314,11 @@ components:
         # --- additive plan fields -------------------------------------
         sol: {type: [integer, "null"]}
         hora: {type: [integer, "null"], minimum: 0, maximum: 23}
-        confidence: {type: [number, "null"]}
+        confidence:
+          anyOf:
+            - {type: string, enum: [high, medium, low]}
+            - {type: "null"}
+          description: Factor-coverage confidence (additive plan field)
         provenance: {type: [object, "null"]}
         data_quality_notes:
           type: array
@@ -363,6 +369,14 @@ components:
         warnings:
           type: array
           items: {type: string}
+        local_time_hour:
+          type: [integer, "null"]
+          minimum: 0
+          maximum: 23
+          description: >-
+            Additive — LMST hour bin at segment arrival; advances from the
+            request's departure ``hora`` by effective-speed travel time
+            with mod-24 wrap (plan §4.4)
 
     EvaluateResponse:
       type: object
@@ -393,7 +407,11 @@ components:
         dominant_factor: {type: [string, "null"]}
         total_duration_s: {type: [number, "null"]}
         end_local_time_hours: {type: [number, "null"]}
-        confidence: {type: [number, "null"]}
+        confidence:
+          anyOf:
+            - {type: string, enum: [high, medium, low]}
+            - {type: "null"}
+          description: Factor-coverage confidence (additive plan field)
         provenance: {type: [object, "null"]}
         data_quality_notes:
           type: array

@@ -46,6 +46,8 @@ class RiskSegmentSchema(BaseModel):
     risk: float | None
     factor_scores: dict[str, FactorScoreSchema]
     warnings: list[str]
+    # Additive (plan §4.4): LMST hour bin at segment arrival.
+    local_time_hour: int | None = None
 
 
 class EvaluateResponse(BaseModel):
@@ -65,7 +67,7 @@ class EvaluateResponse(BaseModel):
     dominant_factor: str | None = None
     total_duration_s: float | None = None
     end_local_time_hours: float | None = None
-    confidence: float | None = None
+    confidence: str | None = None  # "high" | "medium" | "low" (plan §4.1)
     provenance: dict[str, Any] | None = None
     data_quality_notes: list[str] = []
     assumptions: list[str] = []

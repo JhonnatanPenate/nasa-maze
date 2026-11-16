@@ -89,6 +89,16 @@ def test_raster_sample_500_maps_to_upstream() -> None:
 
 
 @respx.mock
+def test_raster_point_timeout_maps_to_upstream() -> None:
+    respx.get(f"{MS3}/raster/rejilla/point").mock(
+        side_effect=httpx.ReadTimeout("slow")
+    )
+    source = HttpRasterSource(httpx.Client(base_url=MS3), "rejilla", retries=0)
+    with pytest.raises(UpstreamUnavailableError):
+        source.point_values(POINT)
+
+
+@respx.mock
 def test_raster_sample_parses_entries() -> None:
     respx.post(f"{MS3}/raster/rejilla/sample").mock(
         return_value=httpx.Response(
@@ -165,3 +175,23 @@ def test_terrain_400_maps_to_domain_validation() -> None:
     source = HttpTerrainSource(httpx.Client(base_url=MS4), "mars", retries=0)
     with pytest.raises(DomainValidationError):
         source.slope_at(POINT)
+
+
+@respx.mock
+def test_terrain_profile_404_maps_to_no_coverage() -> None:
+    respx.post(f"{MS4}/terrain/profile").mock(
+        return_value=httpx.Response(404, json={"detail": "outside grid"})
+    )
+    source = HttpTerrainSource(httpx.Client(base_url=MS4), "mars", retries=0)
+    with pytest.raises(NoCoverageError):
+        source.slope_profile(PATH, 90.0)
+
+
+@respx.mock
+def test_terrain_profile_500_maps_to_upstream() -> None:
+    respx.post(f"{MS4}/terrain/profile").mock(
+        return_value=httpx.Response(503, json={"detail": "dem unavailable"})
+    )
+    source = HttpTerrainSource(httpx.Client(base_url=MS4), "mars", retries=0)
+    with pytest.raises(UpstreamUnavailableError):
+        source.slope_profile(PATH, 90.0)

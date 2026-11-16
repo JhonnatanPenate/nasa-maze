@@ -30,7 +30,7 @@ GAP_PATH = [
 OFF_GRID_POINT = {"lat": 0.0, "lon": 0.0}
 
 
-def full_environment() -> FakeEnvironmentRepository:
+def full_environment(rad_provenance: str | None = None) -> FakeEnvironmentRepository:
     rems = {
         (sol, hora): TemperatureReading(
             sol=sol,
@@ -52,6 +52,7 @@ def full_environment() -> FakeEnvironmentRepository:
             dose_e_uGy_h=12.5,
             dose_b_uGy_h=3.0,
             unit="uGy/h",
+            provenance=rad_provenance,
         )
         for sol in (1360, 2140, 3290, 4710)
         for hora in range(24)
@@ -85,6 +86,8 @@ def reset_singletons() -> None:
         dependencies.get_raster_source,
         dependencies._load_weights,
         dependencies._load_thresholds,
+        dependencies._scoring_thresholds,
+        dependencies._tilt_models,
         dependencies._environment_repository,
         dependencies._vehicle_profile_repository,
     ):

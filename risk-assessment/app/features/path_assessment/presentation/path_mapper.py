@@ -42,6 +42,7 @@ class PathMapper:
                     for a in segment.factor_scores
                 },
                 "warnings": list(segment.warnings),
+                "local_time_hour": segment.local_time_hour,
             }
         )
 

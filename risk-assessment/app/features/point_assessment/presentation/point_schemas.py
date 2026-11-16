@@ -6,9 +6,8 @@ from app.core.domain.risk_level import RiskLevel
 
 
 class FactorScoreSchema(BaseModel):
-    """SPEC §4.1 ``factor_scores`` entry. ``score`` stays null until the
-    Phase 4 wiring connects the Phase 3 domain scorers; ``available``
-    reflects real data coverage."""
+    """SPEC §4.1 ``factor_scores`` entry: normalized ``score`` in [0, 1]
+    (null when the factor has no coverage) plus the ``available`` flag."""
 
     score: float | None
     available: bool
@@ -44,7 +43,7 @@ class PointRiskResponse(BaseModel):
     # provenance and assumptions. None of these alter SPEC fields.
     sol: int | None = None
     hora: int | None = None
-    confidence: float | None = None
+    confidence: str | None = None  # "high" | "medium" | "low" (plan §4.1)
     provenance: dict[str, Any] | None = None
     data_quality_notes: list[str] = []
     assumptions: list[str] = []

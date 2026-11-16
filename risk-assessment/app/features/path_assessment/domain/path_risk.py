@@ -20,6 +20,8 @@ class RiskSegment:
     risk: float | None
     factor_scores: tuple[FactorAssessment, ...]
     warnings: tuple[str, ...] = ()
+    # Additive (plan §4.4): LMST hour bin at segment arrival (24-bin wrap).
+    local_time_hour: int | None = None
 
 
 @dataclass(frozen=True)
@@ -39,7 +41,7 @@ class PathRisk:
     dominant_factor: str | None = None
     total_duration_s: float | None = None
     end_local_time_hours: float | None = None
-    confidence: float | None = None
+    confidence: str | None = None  # plan §4.1: "high" | "medium" | "low"
     provenance: dict[str, Any] = field(default_factory=dict)
     data_quality_notes: tuple[str, ...] = ()
     assumptions: tuple[str, ...] = ()

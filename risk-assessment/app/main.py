@@ -29,17 +29,21 @@ def create_app() -> FastAPI:
     )
     register_exception_handlers(app)
     # Fail fast on invalid YAML config at startup (plan §5).
+    from pathlib import Path
+
     from app.composition.dependencies import get_settings
     from app.core.config.risk_config import (
         load_thresholds,
         load_vehicle_profiles,
         load_weights,
     )
+    from app.core.config.tilt_models import load_tilt_models
 
     _settings = get_settings()
     load_weights(_settings.config_dir)
     load_thresholds(_settings.config_dir)
     load_vehicle_profiles(_settings.config_dir)
+    load_tilt_models(Path(_settings.config_dir) / "modelos_por_suelo.json")
 
     app.include_router(health_router)
     app.include_router(point_router)

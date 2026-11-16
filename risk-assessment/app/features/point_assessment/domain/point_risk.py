@@ -30,3 +30,7 @@ class PointRisk:
     hora: int | None = None
     provenance: dict[str, Any] = field(default_factory=dict)
     by_hour: tuple[HourlyPointRisk, ...] | None = None
+    # Additive plan fields (plan §4.5/§7.2).
+    confidence: str | None = None  # "high" | "medium" | "low"
+    data_quality_notes: tuple[str, ...] = ()
+    assumptions: tuple[str, ...] = ()

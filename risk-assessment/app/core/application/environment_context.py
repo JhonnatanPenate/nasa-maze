@@ -58,3 +58,35 @@ class EnvironmentContextResolver:
             temperature=temperature,
             radiation=radiation,
         )
+
+    def daily_predictors(self, context: EnvironmentalContext) -> dict[str, float]:
+        """Per-selected-sol daily means for the tilt model (Javi
+        ``predictores_diarios``): ``temp_suelo_K_media`` from the REMS sol's
+        hourly ground means and ``dosis_rad_uGy_h`` from the RAD sol's
+        hourly dose-E rates. Missing hours are skipped; empty -> key absent
+        (``predict_tilt`` then applies Javi's 0.0 default before clipping).
+        """
+        predictors: dict[str, float] = {}
+        if context.rems_sol is not None:
+            temps = [
+                reading.ground_temp_mean_K
+                for reading in (
+                    self._repository.temperature_at(context.rems_sol, hora)
+                    for hora in range(24)
+                )
+                if reading is not None and reading.ground_temp_mean_K is not None
+            ]
+            if temps:
+                predictors["temp_suelo_K_media"] = sum(temps) / len(temps)
+        if context.rad_sol is not None:
+            doses = [
+                reading.dose_e_uGy_h
+                for reading in (
+                    self._repository.radiation_at(context.rad_sol, hora)
+                    for hora in range(24)
+                )
+                if reading is not None and reading.dose_e_uGy_h is not None
+            ]
+            if doses:
+                predictors["dosis_rad_uGy_h"] = sum(doses) / len(doses)
+        return predictors

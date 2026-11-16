@@ -14,6 +14,7 @@ import httpx
 from fastapi import Depends
 
 from app.core.application.environment_context import EnvironmentContextResolver
+from app.core.application.factor_builder import ScoringThresholds
 from app.core.config.risk_config import (
     RiskThresholdsConfig,
     RiskWeightsConfig,
@@ -21,9 +22,16 @@ from app.core.config.risk_config import (
     load_weights,
 )
 from app.core.config.settings import Settings
+from app.core.config.tilt_models import load_tilt_models
 from app.core.domain.distance_calculator import DistanceCalculator
+from app.core.domain.dunes_risk import DunesThresholds
 from app.core.domain.factor_catalog import DEFAULT_WEIGHTS
 from app.core.domain.path_sampler import PathSampler
+from app.core.domain.radiation_risk import RadiationThresholds
+from app.core.domain.roughness_risk import RoughnessThresholds
+from app.core.domain.slope_risk import SlopeThresholds
+from app.core.domain.temperature_risk import TemperatureThresholds
+from app.core.domain.tilt_model import TiltModelSet
 from app.core.ports.environment_repository import EnvironmentRepository
 from app.core.ports.raster_source import RasterSource
 from app.core.ports.terrain_source import TerrainSource
@@ -105,6 +113,68 @@ def get_risk_thresholds(
 def _weights_dict(settings: Settings) -> dict[str, float]:
     config = _load_weights(settings.config_dir)
     return config.weights or dict(DEFAULT_WEIGHTS)
+
+
+def get_model_version(
+    settings: Settings = Depends(get_settings),
+) -> str:
+    return _load_weights(settings.config_dir).model_version
+
+
+# --- scoring config ---------------------------------------------------------
+
+
+def _opt(value: float | None, default: float) -> float:
+    """YAML threshold or the domain default when the key is absent."""
+    return default if value is None else value
+
+
+@cache
+def _scoring_thresholds(config_dir: str) -> ScoringThresholds:
+    cfg = _load_thresholds(config_dir)
+    return ScoringThresholds(
+        slope=SlopeThresholds(
+            score_floor_deg=_opt(cfg.slope.score_floor_deg, 5.0),
+            score_ceil_deg=_opt(cfg.slope.score_ceil_deg, 30.0),
+            warning_deg=_opt(cfg.slope.warning_deg, 15.0),
+        ),
+        roughness=RoughnessThresholds(
+            score_floor_m=_opt(cfg.roughness.score_floor_m, 0.5),
+            score_ceil_m=_opt(cfg.roughness.score_ceil_m, 3.0),
+            warning_m=_opt(cfg.roughness.warning_m, 1.5),
+        ),
+        dunes=DunesThresholds(
+            dark_fraction_threshold=_opt(cfg.dunes.dark_fraction_threshold, 0.5),
+            proximity_warning_m=_opt(cfg.dunes.proximity_warning_m, 100.0),
+        ),
+        temperature=TemperatureThresholds(
+            band_min_K=_opt(cfg.temperature.band_min_K, 230.0),
+            band_max_K=_opt(cfg.temperature.band_max_K, 290.0),
+            warning_margin_K=_opt(cfg.temperature.warning_margin_K, 10.0),
+            score_full_scale_K=_opt(cfg.temperature.score_full_scale_K, 60.0),
+        ),
+        radiation=RadiationThresholds(
+            warning_uGy_h=_opt(cfg.radiation.warning_uGy_h, 20.0),
+            score_full_scale_uGy_h=_opt(cfg.radiation.score_full_scale_uGy_h, 30.0),
+        ),
+    )
+
+
+def get_scoring_thresholds(
+    settings: Settings = Depends(get_settings),
+) -> ScoringThresholds:
+    return _scoring_thresholds(settings.config_dir)
+
+
+@cache
+def _tilt_models(config_dir: str) -> TiltModelSet:
+    return load_tilt_models(f"{config_dir}/modelos_por_suelo.json")
+
+
+def get_tilt_models(
+    settings: Settings = Depends(get_settings),
+) -> TiltModelSet:
+    return _tilt_models(settings.config_dir)
 
 
 # --- upstream datasources -------------------------------------------------
@@ -204,12 +274,16 @@ def get_assess_point(
     raster: RasterSource = Depends(get_raster_source),
     env_resolver: EnvironmentContextResolver = Depends(get_env_context_resolver),
     settings: Settings = Depends(get_settings),
+    thresholds: ScoringThresholds = Depends(get_scoring_thresholds),
+    model_version: str = Depends(get_model_version),
 ) -> AssessPoint:
     return AssessPoint(
         terrain=terrain,
         raster=raster,
         env_resolver=env_resolver,
         weights=_weights_dict(settings),
+        thresholds=thresholds,
+        model_version=model_version,
     )
 
 
@@ -220,6 +294,9 @@ def get_evaluate_path(
     vehicle_profiles: VehicleProfileRepository = Depends(get_vehicle_profile_repository),
     path_sampler: PathSampler = Depends(get_path_sampler),
     settings: Settings = Depends(get_settings),
+    thresholds: ScoringThresholds = Depends(get_scoring_thresholds),
+    tilt_models: TiltModelSet = Depends(get_tilt_models),
+    model_version: str = Depends(get_model_version),
 ) -> EvaluatePath:
     return EvaluatePath(
         terrain=terrain,
@@ -228,6 +305,9 @@ def get_evaluate_path(
         vehicle_profiles=vehicle_profiles,
         path_sampler=path_sampler,
         weights=_weights_dict(settings),
+        thresholds=thresholds,
+        tilt_models=tilt_models,
+        model_version=model_version,
         default_vehicle_profile=settings.default_vehicle_profile,
         max_path_points=settings.max_path_points,
         max_samples=settings.max_samples,

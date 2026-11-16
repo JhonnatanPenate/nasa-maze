@@ -38,18 +38,21 @@ curl -s 'http://localhost:8005/risk/point?lat=-4.62&lon=137.40&sol=1360&hora=9' 
 ```json
 {
   "lat": -4.62, "lon": 137.40,
-  "risk": null, "risk_level": "unknown",
+  "risk": 0.347, "risk_level": "medium",
   "factor_scores": {
-    "slope":      {"score": null, "available": true},
-    "roughness":  {"score": null, "available": true},
-    "dunes":      {"score": null, "available": true},
-    "temperature":{"score": null, "available": true},
-    "radiation":  {"score": null, "available": true}
+    "slope":      {"score": 0.423, "available": true},
+    "roughness":  {"score": 0.275, "available": true},
+    "dunes":      {"score": 0.473, "available": true},
+    "temperature":{"score": 0.0,   "available": true},
+    "radiation":  {"score": 0.417, "available": true}
   },
-  "warnings": [],
+  "warnings": ["STEEP_SLOPE_16DEG"],
   "sol": 1360, "hora": 9,
+  "confidence": "high",
   "provenance": {"reference_sol": 1360, "rems_sol": 1360, "rad_sol": 1360,
-                 "scoring": "pending-phase-3", "include_hourly": false}
+                 "scoring": "ms5-risk-v0.1", "include_hourly": false},
+  "data_quality_notes": [],
+  "assumptions": ["..."]
 }
 ```
 
@@ -59,8 +62,9 @@ curl -s 'http://localhost:8005/risk/point?lat=-4.62&lon=137.40&sol=1360&hora=9' 
 - `hora` omitted → all 24 LMST hours evaluated, worst result returned;
   add `include_hourly=true` for the per-hour breakdown (`by_hour`).
 - `factors=slope,temperature` restricts the catalog subset.
-- Phase 1: `score`/`risk` are `null` and `risk_level` is `"unknown"` —
-  scoring lands in Phase 3; `available` already reflects real coverage.
+- `score`/`risk` are real normalized values (Phase 4 wiring); a factor
+  with no coverage reports `available: false`, `score: null` and is
+  excluded from the weighted mean — never scored as safe (SPEC §5).
 
 ## 3. Risk along a path (SPEC §3.1/§4.1)
 
@@ -78,24 +82,37 @@ curl -s -X POST http://localhost:8005/risk/evaluate \
 
 ```json
 {
-  "overall_risk": null,
-  "risk_level": "unknown",
+  "overall_risk": 0.515,
+  "risk_level": "high",
   "segments": [
     {
       "from": {"lat": -4.60, "lon": 137.44},
       "to":   {"lat": -4.604, "lon": 137.4396},
       "distance_m": 90.0,
-      "risk": null,
-      "factor_scores": {"slope": {"score": null, "available": true}, "...": "..."},
-      "warnings": []
+      "risk": 0.592,
+      "factor_scores": {"slope": {"score": 0.964, "available": true}, "...": "..."},
+      "warnings": ["STEEP_SLOPE_29DEG"],
+      "local_time_hour": 9
     }
   ],
-  "warnings_summary": [],
-  "sol": 1360, "hora": 9, "total_distance_m": 9052.3,
+  "warnings_summary": ["STEEP_SLOPE_29DEG", "..."],
+  "sol": 1360, "hora": 9, "total_distance_m": 3190.6,
+  "max_level": "high", "mean_score": 0.513, "p95_score": 0.588,
+  "dominant_factor": "slope",
+  "total_duration_s": 17200.8, "end_local_time_hours": 13.78,
+  "confidence": "high",
   "provenance": {"reference_sol": 1360, "rems_sol": 1360, "rad_sol": 1360,
-                 "scoring": "pending-phase-3",
+                 "scoring": "ms5-risk-v0.1",
                  "vehicle_profile": "baseline_mars_rover",
-                 "sampling_step_m": 90.0}
+                 "sampling_step_m": 90.0,
+                 "thermal_excess_Kh": 0.0},
+  "data_quality_notes": [],
+  "assumptions": ["..."],
+  "restrictions": [{"segment": 0, "code": "SLOPE_BLOCK", "blocking": true,
+                    "message": "Slope 29.1 deg >= profile block limit 25.0 deg",
+                    "factor": "slope", "value": 29.09, "limit": 25.0}],
+  "hotspots": [{"segment": 0, "risk": 0.592, "level": "high", "distance_m": 90.0}],
+  "blocking_segments": [0, 1, 2]
 }
 ```
 
@@ -104,10 +121,19 @@ curl -s -X POST http://localhost:8005/risk/evaluate \
   once per path and MS3 `/sample` once per required band (SPEC §6 NFR).
 - `overall_risk` is the distance-weighted mean of segment risks; all
   unscored → `null` + `"unknown"` (SPEC §5 — never a silent zero).
+- `hora` is the **departure** LMST bin; each segment's `local_time_hour`
+  advances by `distance / effective_speed` hours with mod-24 wrap
+  (Javi's 24-bin convention). `end_local_time_hours` is the wrapped
+  arrival time. `speed_mps` overrides the vehicle effective speed.
+- Radiation is a per-segment **rate** only — MS5 never accumulates route
+  dose (that is MS6's job, SPEC §8).
 - Additive plan fields: `sampling_step_m`, `vehicle_profile`, `speed_mps`
-  (request); `total_distance_m`, `max_level`, `provenance`, `assumptions`,
-  `restrictions`, `hotspots`, `blocking_segments` (response). None alter
-  the SPEC formula; restrictions never force `critical`.
+  (request); `total_distance_m`, `max_level`, `mean_score`, `p95_score`,
+  `dominant_factor`, `total_duration_s`, `end_local_time_hours`,
+  `confidence` (`high|medium|low`), `provenance`, `data_quality_notes`,
+  `assumptions`, `restrictions`, `hotspots`, `blocking_segments`,
+  per-segment `local_time_hour` (response). None alter the SPEC formula;
+  restrictions never force `critical`.
 
 ## 4. Factor catalog + coverage (SPEC §3.3)
 

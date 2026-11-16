@@ -12,9 +12,10 @@ def test_point_happy_path(client: TestClient) -> None:
     body = response.json()
     assert body["lat"] == GAP_POINT["lat"]
     assert body["lon"] == GAP_POINT["lon"]
-    # Phase 1: scores pending -> unknown, never a silent zero.
-    assert body["risk"] is None
-    assert body["risk_level"] == "unknown"
+    # Phase 4: real weighted score from the domain scorers.
+    assert body["risk"] is not None
+    assert 0.0 <= body["risk"] <= 1.0
+    assert body["risk_level"] in {"low", "medium", "high", "critical", "unknown"}
     assert set(body["factor_scores"]) == {
         "slope",
         "roughness",
@@ -23,13 +24,16 @@ def test_point_happy_path(client: TestClient) -> None:
         "radiation",
     }
     for entry in body["factor_scores"].values():
-        assert entry["score"] is None
+        assert entry["score"] is not None
+        assert 0.0 <= entry["score"] <= 1.0
         assert entry["available"] is True
-    assert body["warnings"] == []
+    assert body["confidence"] in {"high", "medium", "low"}
+    assert body["assumptions"]
     assert body["sol"] == 1360
     assert body["hora"] == 9
     assert body["provenance"]["rems_sol"] == 1360
     assert body["provenance"]["rad_sol"] == 1360
+    assert body["provenance"]["scoring"] == "ms5-risk-v0.1"
 
 
 def test_point_factor_subset(client: TestClient) -> None:
@@ -69,7 +73,11 @@ def test_point_omitted_hora_returns_worst_and_hourly(client: TestClient) -> None
     body = response.json()
     assert body["hora"] is not None
     assert len(body["by_hour"]) == 24
-    assert all(h["risk_level"] == "unknown" for h in body["by_hour"])
+    for hourly in body["by_hour"]:
+        # Fake catalog has uniform profiles -> every hour scores the same.
+        assert hourly["risk"] is not None
+        assert 0.0 <= hourly["risk"] <= 1.0
+        assert hourly["risk_level"] in {"low", "medium", "high", "critical", "unknown"}
 
 
 def test_point_no_environment_still_answers(client: TestClient, app) -> None:  # type: ignore[no-untyped-def]
@@ -85,9 +93,16 @@ def test_point_no_environment_still_answers(client: TestClient, app) -> None:  #
     body = response.json()
     scores = body["factor_scores"]
     assert scores["slope"]["available"] is True  # MS4 synthetic still up
+    assert scores["slope"]["score"] is not None
     assert scores["temperature"]["available"] is False
+    assert scores["temperature"]["score"] is None
     assert scores["radiation"]["available"] is False
-    assert body["risk_level"] == "unknown"
+    assert scores["radiation"]["score"] is None
+    # Terrain/raster factors still score -> real risk, not unknown.
+    assert body["risk"] is not None
+    assert body["risk_level"] != "unknown"
+    # Missing environmental coverage is reported, not hidden.
+    assert any("unavailable" in note for note in body["data_quality_notes"])
 
 
 @pytest.mark.parametrize("missing", ["lat", "lon"])

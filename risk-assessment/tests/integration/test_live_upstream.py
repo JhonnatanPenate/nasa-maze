@@ -61,5 +61,5 @@ def test_live_evaluate(http_client: TestClient) -> None:
     assert response.status_code == 200, response.text
     body = response.json()
     assert len(body["segments"]) >= 1
-    assert body["overall_risk"] is None  # scores pending Phase 3
-    assert body["risk_level"] == "unknown"
+    assert body["overall_risk"] is not None
+    assert body["risk_level"] in {"low", "medium", "high", "critical", "unknown"}
