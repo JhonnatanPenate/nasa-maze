@@ -13,8 +13,8 @@ The orchestrator updates this file in the same commit as each WP and before ever
 | WP3 | Domain | done | `feat(app): WP3 domain` | 47 domain tests (64 total) |
 | ◆A | Checkpoint | done | `docs(app): checkpoint A` | handoff written in WP3 commit 36408c4 |
 | WP4 | Map shell | done | `feat(app): WP4 map shell` (24a2353) | 98 tests (F6, F7 green) |
-| WP5 | Route panel | done | `feat(app): WP5 route panel` | 130 tests (F8 green) |
-| ◆B | Checkpoint | pending | | wire WP4+WP5 into App.tsx |
+| WP5 | Route panel | done | `feat(app): WP5 route panel` (40e2a3f) | 130 tests (F8 green) |
+| ◆B | Checkpoint | done | `docs(app): checkpoint B` | wired WP4+WP5 into App.tsx (130 tests green) |
 | WP6 | Route rendering | pending | | |
 | ◆C | Checkpoint | pending | | |
 | WP7 | Docker + compose | pending | | |
@@ -23,14 +23,13 @@ The orchestrator updates this file in the same commit as each WP and before ever
 
 ## Resume here
 
-- **Branch:** `feature/frontend` (not pushed). **Last commit:** `feat(app): WP5 route panel` (see `git log --oneline`). WP1–WP5 done.
-- **Next:** Checkpoint ◆B. Orchestrator integrates WP4 (`MarsMap`, `Basemap`, `RasterOverlay`, `SitesLayer`, `Legend`, `OriginClickHandler`) and WP5 (`RoutePanel`, `StatusBadge`, `LayerControls`) into `src/App.tsx`.
-- **Checkpoint ◆B scope:**
-  - Wire `App.tsx`: Full-screen `MarsMap` with floating `RoutePanel` top-left, `StatusBadge` top-right, `LayerControls` and `Legend` bottom-right.
-  - Run verification (`npm run typecheck && npm run lint && npm test && npm run build`).
-  - Update `App.test.tsx` to assert integrated shell.
-  - Commit `feat(app): checkpoint B wire map and panel into App.tsx`.
-  - Pause for user checkpoint ◆B before starting WP6 (Route rendering).
+- **Branch:** `feature/frontend` (not pushed). **Last commit:** `docs(app): checkpoint B` (see `git log --oneline`). WP1–WP5 + ◆B done.
+- **Checkpoint ◆B reached:**
+  - WP4 (`MarsMap`, `Basemap`, `RasterOverlay`, `SitesLayer`, `Legend`, `OriginClickHandler`) and WP5 (`RoutePanel`, `OriginPicker`, `MineralPicker`, `MissionSettings`, `StatusBadge`, `LayerControls`, `useRoute`) are fully implemented, tested (130 tests passing across 23 test suites), and integrated into `src/App.tsx`.
+  - All verification checks (`typecheck`, `lint`, `test`, `build`) are completely green.
+- **Next:** WP6 (Route rendering).
+  - When the user approves: spawn `app-tdd-developer-plus` with the prompt below.
+  - WP6 scope: `RouteLayer.tsx`, `RouteSummary.tsx`, integration in `App.tsx` (casing, soil/slope/risk coloring, alternatives comparison, popup inspection, fitBounds on route calculated).
 - **WP6 prompt** (profile `app-tdd-developer-plus`, after ◆B is approved):
 
   ```
@@ -38,7 +37,7 @@ The orchestrator updates this file in the same commit as each WP and before ever
   Read: docs/nasa_maze_app/IMPLEMENTATION_PLAN_APP.md §1, §2 (D8, D9), §3 + §3.1, §4 row F9, §5, §6 row WP6; nasa-maze-app/AGENTS.md.
   Files to create/modify (exhaustive): src/components/map/RouteLayer.tsx, src/components/panel/RouteSummary.tsx, src/App.tsx + their test files.
   Existing modules you may import: src/api/{types,coreClient}.ts, src/domain/*.ts, src/test/handlers.ts, WP4 map components, WP5 panel components.
-  Route styling: white casing + 6px colored line per ruta_optima segment (soil/slope/risk modes). Alternative: dashed gray line. RouteSummary: KPIs, source badge, risk badge, Bagnold comparison, warnings, "New route" button.
+  Route styling: white casing + 6px colored line per ruta_optima segment (soil/slope/risk modes). Alternative: dashed gray line. RouteSummary: KPIs, source badge, risk badge, Bagnold comparison, warnings, "New route" button. Fit bounds to route on calculation.
   Done when: typecheck, lint, test, build green; F9 row green. Do not commit.
   ```
 
