@@ -26,6 +26,7 @@ jobs:
           - raster-service
           - routing-engine
           - terrain-analysis
+          - risk-assessment
     steps:
       - name: Checkout
         uses: actions/checkout@v4
