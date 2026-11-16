@@ -6,7 +6,7 @@ If you narrate in Spanish, keep the English subtitles (they're required).
 
 | Time | On screen | English narration (= subtitles) | Spanish voiceover (optional) |
 |---|---|---|---|
-| 0:00–0:02 | Team name + members | Hi! We're Team [NAME]. | ¡Hola! Somos el equipo [NOMBRE]. |
+| 0:00–0:02 | Team name + members | Hi! We are team Orden 66. | ¡Hola! Somos el equipo Orden 66. |
 | 0:02–0:05 | Challenge title | Our challenge: how does an astronaut walk safely on Mars? | Nuestro reto: ¿cómo camina seguro un astronauta en Marte? |
 | 0:05–0:10 | "Planetary Explorer · A Waze for Mars" | Meet Planetary Explorer: a Waze for Mars. | Les presentamos Planetary Explorer: un Waze para Marte. |
 | 0:10–0:15 | Routes drawing on the Gale Crater map | Pick a science target and get the safest route from Curiosity's landing site. | Eliges un objetivo científico y obtienes la ruta más segura desde donde aterrizó Curiosity. |
