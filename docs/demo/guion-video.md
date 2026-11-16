@@ -1,4 +1,4 @@
-# Planetary Explorer: 30-second video script
+# Maze: 30-second video script
 
 The MP4 already has these lines burned in as English subtitles (and `demo.srt` has them as a separate file).
 It has background music (AI-generated with Google Gemini). You can also record a voiceover on top following the same timing.
@@ -8,7 +8,7 @@ If you narrate in Spanish, keep the English subtitles (they're required).
 |---|---|---|---|
 | 0:00–0:02 | Team name + members | Hi! We are team Orden 66. | ¡Hola! Somos el equipo Orden 66. |
 | 0:02–0:05 | Challenge title | Our challenge: how does an astronaut walk safely on Mars? | Nuestro reto: ¿cómo camina seguro un astronauta en Marte? |
-| 0:05–0:10 | "Planetary Explorer · A Waze for Mars" | Meet Planetary Explorer: a Waze for Mars. | Les presentamos Planetary Explorer: un Waze para Marte. |
+| 0:05–0:10 | "Maze · Mars + Waze" | Meet Maze: Mars meets Waze. | Les presentamos Maze: Marte más Waze. |
 | 0:10–0:15 | Routes drawing on the Gale Crater map | Pick a science target and get the safest route from Curiosity's landing site. | Eliges un objetivo científico y obtienes la ruta más segura desde donde aterrizó Curiosity. |
 | 0:15–0:20 | NASA data cards (HiRISE, TES, RAD, REMS), "8.4 h saved" | It layers NASA terrain, soil, radiation and temperature data to dodge dunes, steep slopes and extra dose. | Combina datos de la NASA de terreno, suelo, radiación y temperatura para evitar dunas, pendientes y dosis extra. |
 | 0:20–0:25 | What's next | Next: any region on Mars or the Moon, with live dust and weather. | Lo que sigue: cualquier región de Marte o la Luna, con polvo y clima en vivo. |
