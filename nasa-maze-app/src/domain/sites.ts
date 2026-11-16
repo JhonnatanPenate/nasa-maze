@@ -84,6 +84,7 @@ export function originOptions(layers: BaseLayersResponse): NamedPoint[] {
   const options: NamedPoint[] = []
   const seen = new Set<string>()
   const push = (p: NamedPoint) => {
+    // 4 decimals (~10 m on Mars): points closer than that count as the same origin
     const key = `${p.lon.toFixed(4)},${p.lat.toFixed(4)}`
     if (!seen.has(key)) {
       seen.add(key)

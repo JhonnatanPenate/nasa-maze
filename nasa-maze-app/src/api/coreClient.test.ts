@@ -47,7 +47,17 @@ describe('coreClient', () => {
     })
 
     it('getRasterBand returns an object URL and parsed X-Bounds', async () => {
+      let query = ''
+      server.use(
+        http.get('/api/capas/raster/:banda', ({ request }) => {
+          query = new URL(request.url).search
+          return new HttpResponse(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), {
+            headers: { 'Content-Type': 'image/png', 'X-Bounds': '137.345,-4.74,137.455,-4.58' },
+          })
+        }),
+      )
       const raster = await getRasterBand('pendiente_grados', 'viridis')
+      expect(query).toContain('cmap=viridis')
       expect(URL.createObjectURL).toHaveBeenCalled()
       expect(raster.url).toBe('blob:mock')
       expect(raster.bounds).toEqual([137.345, -4.74, 137.455, -4.58])

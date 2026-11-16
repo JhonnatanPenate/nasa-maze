@@ -15,49 +15,30 @@ The orchestrator updates this file in the same commit as each WP and before ever
 | WP4 | Map shell | done | `feat(app): WP4 map shell` (24a2353) | 98 tests (F6, F7 green) |
 | WP5 | Route panel | done | `feat(app): WP5 route panel` (40e2a3f) | 130 tests (F8 green) |
 | ◆B | Checkpoint | done | `docs(app): checkpoint B` | wired WP4+WP5 into App.tsx (130 tests green) |
-| WP6 | Route rendering | pending | | |
+| WP6 | Route rendering | done (verified) | uncommitted | 139 tests green; typecheck, lint, build green (F9) |
 | ◆C | Checkpoint | pending | | |
-| WP7 | Docker + compose | pending | | |
-| WP8 | E2E + review + docs | pending | | |
+| WP7 | Docker + compose | done, docker build not run (no docker in sandbox) | uncommitted | Dockerfile, .dockerignore, nginx template, compose `app` service |
+| WP8 | E2E + review + docs | partial: code/docs done, offline-badge E2E passed; route-flow E2E pending | uncommitted | see "Pending" below |
 | ◆D | Final checkpoint / PR | pending | | |
 
 ## Resume here
 
-- **Branch:** `feature/frontend` (not pushed). **Last commit:** `docs(app): checkpoint B` (see `git log --oneline`). WP1–WP5 + ◆B done.
-- **Checkpoint ◆B reached:**
-  - WP4 (`MarsMap`, `Basemap`, `RasterOverlay`, `SitesLayer`, `Legend`, `OriginClickHandler`) and WP5 (`RoutePanel`, `OriginPicker`, `MineralPicker`, `MissionSettings`, `StatusBadge`, `LayerControls`, `useRoute`) are fully implemented, tested (130 tests passing across 23 test suites), and integrated into `src/App.tsx`.
-  - All verification checks (`typecheck`, `lint`, `test`, `build`) are completely green.
-- **Next:** WP6 (Route rendering).
-  - When the user approves: spawn `app-tdd-developer-plus` with the prompt below.
-  - WP6 scope: `RouteLayer.tsx`, `RouteSummary.tsx`, integration in `App.tsx` (casing, soil/slope/risk coloring, alternatives comparison, popup inspection, fitBounds on route calculated).
-- **WP6 prompt** (profile `app-tdd-developer-plus`, after ◆B is approved):
+- **Branch:** `feature/frontend` (not pushed). **Last commit:** `docs(app): checkpoint B`. WP6, WP7 and most of WP8 are written and **uncommitted** in the working tree.
+- **Verified (Node 24 locally):** `npm run typecheck`, `lint`, `test` (144 passing) and `build` all green; offline-basemap Playwright smoke passes against local production preview.
+- **Done in WP6-WP8:** RouteLayer, RouteSummary, App integration (RoutePanel stays mounted but hidden while a route is shown, so mission settings survive "New route"); Dockerfile, `.dockerignore`, `nginx/default.conf.template`, compose `app` service; `playwright.config.ts` + `e2e/smoke.spec.ts` (vitest excludes `e2e/`); `.env.example`; offline basemap probe now controls initial status while manual selection remains authoritative; minors fixed (`@types/node` 24.19.2, `engines.node >=24`, `@types/geojson` pinned, `BANDAS: RasterBand[]`, float-safe hour step, Legend soils from `labels.ts`, `cmap` query asserted, `originOptions` dedupe documented, `eslint-plugin-jsx-a11y` 6.10.2 enabled with zero findings); extra tests for RouteLayer popups, alternative selection and App risk-to-slope fallback; READMEs, root `README.md` and `docs/ARCHITECTURE.md` status, `UPSTREAM_REQUESTS.md`, `USO-DE-IA.md` line. Independent review by `app-code-reviewer` done: nginx timeout fixed to 180 s, warning list keys, offline-basemap e2e test added, `.git` in `.dockerignore`. Reviewer noted (accepted): `eslint-plugin-jsx-a11y` and `@types/node` 24 are intentional; hidden RoutePanel stays mounted by design.
 
-  ```
-  WP6 — Route rendering. Root: nasa-maze-app/. Windows: run npm via PowerShell.
-  Read: docs/nasa_maze_app/IMPLEMENTATION_PLAN_APP.md §1, §2 (D8, D9), §3 + §3.1, §4 row F9, §5, §6 row WP6; nasa-maze-app/AGENTS.md.
-  Files to create/modify (exhaustive): src/components/map/RouteLayer.tsx, src/components/panel/RouteSummary.tsx, src/App.tsx + their test files.
-  Existing modules you may import: src/api/{types,coreClient}.ts, src/domain/*.ts, src/test/handlers.ts, WP4 map components, WP5 panel components.
-  Route styling: white casing + 6px colored line per ruta_optima segment (soil/slope/risk modes). Alternative: dashed gray line. RouteSummary: KPIs, source badge, risk badge, Bagnold comparison, warnings, "New route" button. Fit bounds to route on calculation.
-  Done when: typecheck, lint, test, build green; F9 row green. Do not commit.
-  ```
+## Pending (what is left; needs Docker, a browser or the user)
 
-- **WP6 note:** expose `factor_scores` / `local_time_hour` in `RiskSegmentView` (src/domain/routeView.ts) if popups need them, instead of reading raw `riesgo`.
-- **Open review findings / minors (batched for WP8):**
-  - WP1: pin `@types/node` to 24.x; add `engines.node`; consider `eslint-plugin-jsx-a11y`; eslint 9 deprecation warning (eslint 10 optional).
-  - WP2: `handlers.ts` `BANDAS` should be typed `RasterBand[]`; raster test should assert the `cmap` query; consumers must not switch exhaustively on `fuente`/`risk_level` without a default.
-  - WP3: add explicit pinned `@types/geojson` devDependency (currently transitive via @types/leaflet); `mission.ts:42` float step check (use rounding); document `originOptions` 4-decimal dedupe precision.
-  - WP4: derive Legend `DEFAULT_SOILS` from `domain/labels.ts`; site markers are `span` (use buttons if they become interactive); MarsMap wrapper div exists only for aria-label/test id.
-- **Environment notes:** Node 24 available. Core for manual checks: from `core/`, `python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"` then `.venv/Scripts/uvicorn app.main:app --port 8000` (fallback-only routes work without MS6), or `docker compose up --build` from the root.
-- **Known issues:** none. Generating fixtures with system Python needs `pandas` + `openpyxl`; stub `app.settings` if `pydantic_settings` is missing.
+1. **Docker never run** (no docker in the sandbox): `docker compose up --build`, then open http://localhost:3000. Generate the location-service seed catalog first (see compose header). If the `app` image fails, run `docker compose build app`.
+2. **Route-flow Playwright smoke (1 test) not run:** requires the stack up (`E2E_BASE_URL` to override). Offline-basemap smoke passed against the local production preview.
+3. **Manual check against live Core:** route over live MS6, fallback-only, and no-backend states (DoD §8); online/offline basemap switch; visual check of route casing/colors and fitBounds.
+4. ~~Independent review~~ done, findings applied.
+5. **Commits:** nothing from WP6-WP8 is committed. Suggested: `feat(app): WP6 route rendering`, `feat(app): WP7 docker + compose`, `feat(app): WP8 e2e + docs`, then `docs(app): checkpoint D`.
+6. **Minors not done:** eslint 10 upgrade (optional); `npm audit` reports 7 moderate issues (minimatch via dev tooling; not fixed to avoid breaking upgrades); site markers are `span` (use buttons if they become interactive); MarsMap wrapper div only for aria-label/test id.
+7. **Final step (◆D):** open PR `feature/frontend` to `development` (only with user approval); tick the DoD in plan §8.
 
-- **WP6 note:** expose `factor_scores` / `local_time_hour` in `RiskSegmentView` (src/domain/routeView.ts) if popups need them, instead of reading raw `riesgo`.
-- **Open review findings / minors (batched for WP8):**
-  - WP1: pin `@types/node` to 24.x; add `engines.node`; consider `eslint-plugin-jsx-a11y`; eslint 9 deprecation warning (eslint 10 optional).
-  - WP2: `handlers.ts` `BANDAS` should be typed `RasterBand[]`; raster test should assert the `cmap` query; consumers must not switch exhaustively on `fuente`/`risk_level` without a default.
-  - WP3: add explicit pinned `@types/geojson` devDependency (currently transitive via @types/leaflet); `mission.ts:42` float step check (use rounding); document `originOptions` 4-decimal dedupe precision.
-  - WP4: derive Legend `DEFAULT_SOILS` from `domain/labels.ts`; site markers are `span` (use buttons if they become interactive); MarsMap wrapper div exists only for aria-label/test id.
-- **Environment notes:** Node 24 available. Core for manual checks: from `core/`, `python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"` then `.venv/Scripts/uvicorn app.main:app --port 8000` (fallback-only routes work without MS6), or `docker compose up --build` from the root.
-- **Known issues:** none. Generating fixtures with system Python needs `pandas` + `openpyxl`; stub `app.settings` if `pydantic_settings` is missing.
+- **Environment notes:** Node >= 24. Core for manual checks: from `core/`, `python -m venv .venv && .venv/Scripts/pip install -e ".[dev]"` then `.venv/Scripts/uvicorn app.main:app --port 8000` (fallback-only routes work without MS6), or `docker compose up --build` from the root.
+- **Known issues:** none known. Generating fixtures with system Python needs `pandas` + `openpyxl`; stub `app.settings` if `pydantic_settings` is missing.
 
 ## Deviations
 

@@ -14,6 +14,8 @@ const SOIL_LABELS: Record<string, string> = {
   rocoso_fracturado: 'Fractured rock',
 }
 
+export const SOIL_TYPES = Object.keys(SOIL_LABELS)
+
 const SOIL_COLORS: Record<string, string> = {
   arena_dunas: '#fbbf24',
   lecho_rocoso_firme: '#38bdf8',

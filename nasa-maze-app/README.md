@@ -27,6 +27,13 @@ still loads and reports routing as unavailable.
 | `npm run lint` | ESLint flat config |
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Serve the production build locally |
+| `npm run e2e` | Playwright smoke test against the running stack (`E2E_BASE_URL`, default `http://localhost:3000`; first run `npx playwright install chromium`) |
+
+## Docker
+
+`docker compose up --build` from the repo root serves the app on
+http://localhost:3000; nginx proxies `/api/` to `CORE_UPSTREAM`
+(`http://core:8000`). `VITE_MARS_TILE_URL` is a build-time arg (empty = offline basemap only).
 
 ## Layout
 

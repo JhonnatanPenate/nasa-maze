@@ -1,4 +1,4 @@
-import { riskLevelColor, riskLevelLabel, soilColor, soilLabel } from '../../domain/labels'
+import { riskLevelColor, riskLevelLabel, SOIL_TYPES, soilColor, soilLabel } from '../../domain/labels'
 import { slopeColor } from '../../domain/routeView'
 
 export type ColorByMode = 'soil' | 'slope' | 'risk'
@@ -17,9 +17,7 @@ const SLOPE_BUCKETS = [
 
 const RISK_LEVELS = ['low', 'medium', 'high', 'unknown']
 
-const DEFAULT_SOILS = ['arena_dunas', 'lecho_rocoso_firme', 'regolito_compacto', 'rocoso_fracturado']
-
-export function Legend({ mode, soilTypes = DEFAULT_SOILS }: LegendProps) {
+export function Legend({ mode, soilTypes = SOIL_TYPES }: LegendProps) {
   return (
     <div
       aria-label="Map legend"
