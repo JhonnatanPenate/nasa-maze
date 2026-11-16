@@ -52,6 +52,14 @@ jobs:
             port: 8004
             health: /health
             mounts: -v $PWD/data:/data:ro
+          - svc: risk-assessment
+            context: risk-assessment
+            port: 8005
+            health: /health
+            mounts: >-
+              -v $PWD/data:/data:ro
+              -v $PWD/risk-assessment/data/seed:/app/data/seed:ro
+              -v $PWD/risk-assessment/config:/app/config:ro
           - svc: core
             context: core
             port: 8000
