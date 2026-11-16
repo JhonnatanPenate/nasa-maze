@@ -43,3 +43,14 @@ def test_hora_distinta_calcula_ruta_nueva(e2e):
 def test_error_4xx_de_ms6_se_reenvia(e2e):
     assert e2e.post("/api/ruta", json={**REQ, "sol": 999}).status_code == 400
     assert e2e.post("/api/ruta", json={**REQ, "lon": 10.0}).status_code == 400
+
+
+MS5 = os.environ.get("CORE_E2E_MS5_URL", "")
+
+
+@pytest.mark.skipif(not MS5, reason="define CORE_E2E_MS5_URL (MS5 con RISK_UPSTREAM_TIMEOUT_S>=30) para probar el riesgo real")
+def test_ruta_real_incluye_riesgo_de_ms5(make_client):
+    c = make_client(ms6_url=MS6, ms5_url=MS5, risk_timeout_s=120, precalc_fallback=False)
+    riesgo = c.post("/api/ruta", json=REQ).json()["riesgo"]
+    assert riesgo["risk_level"] in {"low", "medium", "high", "critical"}
+    assert riesgo["total_distance_m"] == pytest.approx(7717, abs=5) and len(riesgo["segments"]) > 50

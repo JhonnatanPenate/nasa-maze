@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 env:
   PYTHON_VERSION: "3.12"
@@ -27,6 +26,7 @@ jobs:
           - raster-service
           - routing-engine
           - terrain-analysis
+          - risk-assessment
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,6 +65,9 @@ jobs:
           - service: terrain-analysis
             context: terrain-analysis
             file: terrain-analysis/Dockerfile
+          - service: risk-assessment
+            context: risk-assessment
+            file: risk-assessment/Dockerfile
           - service: routing-engine
             context: .
             file: routing-engine/Dockerfile
@@ -101,10 +104,18 @@ jobs:
     needs: [tests, docker-build, compose-validation]
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+
     env:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCE_ZONE: ${{ secrets.GCE_ZONE }}
       GCE_INSTANCE: ${{ secrets.GCE_INSTANCE }}
+
     steps:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -125,10 +136,20 @@ jobs:
           gcloud compute ssh "$GCE_INSTANCE" \
             --project="$GCP_PROJECT_ID" \
             --zone="$GCE_ZONE" \
+            --tunnel-through-iap \
             --quiet \
             --command '
               set -euo pipefail
-              cd "$HOME/nasa-maze"
+
+              REPO_DIR="$HOME/nasa-maze"
+
+              if [ ! -d "$REPO_DIR/.git" ]; then
+                git clone --branch main --single-branch \
+                  https://github.com/JhonnatanPenate/nasa-maze.git \
+                  "$REPO_DIR"
+              fi
+
+              cd "$REPO_DIR"
               git fetch origin main
               git switch main
               git pull --ff-only origin main
@@ -139,8 +160,11 @@ jobs:
               docker compose ps
 
               for attempt in $(seq 1 30); do
-                if curl --fail --silent --show-error https://nasa-maze-sv.earth/api/health \
+                if curl --fail --silent --show-error \
+                  http://localhost:8000/api/health \
                   | grep -q "\"status\":\"ok\""; then
+                  curl --fail --silent --show-error \
+                    https://nasa-maze-sv.earth/api/health
                   exit 0
                 fi
                 sleep 5

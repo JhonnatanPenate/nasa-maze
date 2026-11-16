@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from app.clients.risk_client import evaluate_route
 from app.clients.routing_client import RoutingClient, RoutingUnavailableError
 from app.datasources import precalculated_routes as precalc
 from app.routers.deps import get_transport
@@ -22,6 +23,13 @@ class RutaRequest(BaseModel):
     vmax: float = Field(1000.0, gt=0)
 
 
+def _con_riesgo(body: dict, req: RutaRequest, settings: Settings, transport: httpx.BaseTransport | None) -> dict:
+    riesgo = None
+    if settings.ms5_url:
+        riesgo = evaluate_route(settings.ms5_url, body["geojson"], req.sol, req.hora, settings.risk_timeout_s, transport)
+    return {**body, "riesgo": riesgo}
+
+
 @router.post("/ruta")
 def ruta(
     req: RutaRequest,
@@ -36,10 +44,11 @@ def ruta(
         else:
             body = resp.json()
             if resp.is_success:
-                body["fuente"] = "ms6"
+                body = _con_riesgo({**body, "fuente": "ms6"}, req, settings, transport)
             return JSONResponse(body, status_code=resp.status_code)
 
     if settings.precalc_fallback and precalc.es_elegible(req, settings.bradbury_lon, settings.bradbury_lat):
-        return {**precalc.cargar_ruta(settings.processed, req.material), "fuente": "precalculada"}
+        body = {**precalc.cargar_ruta(settings.processed, req.material), "fuente": "precalculada"}
+        return _con_riesgo(body, req, settings, transport)
 
     raise HTTPException(503, "sin backend de ruta disponible para esta solicitud")

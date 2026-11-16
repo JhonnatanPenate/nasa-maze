@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     datasource_mode: Literal["synthetic", "http", "unavailable"] = "synthetic"
     raster_base_url: str = "http://localhost:8003"
     terrain_base_url: str = "http://localhost:8004"
-    upstream_timeout_s: float = 5.0
+    upstream_timeout_s: float = 60.0
     upstream_retries: int = 2
 
     # Environmental climatology catalog (SQLite, read-only at runtime).

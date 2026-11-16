@@ -6,7 +6,7 @@ MS6 = "http://ms6.test"
 def test_health_con_ms6_ok(make_client):
     h = lambda request: httpx.Response(200, json={"status": "ok"})
     body = make_client(h, ms6_url=MS6).get("/api/health").json()
-    assert body["status"] == "ok" and body["servicios"] == {"ms6": "ok", "ms4": "no_configurado", "ms1": "no_configurado"}
+    assert body["status"] == "ok" and body["servicios"] == {"ms6": "ok", "ms5": "no_configurado", "ms4": "no_configurado", "ms1": "no_configurado"}
     assert body["aoi"] == [137.345, -4.74, 137.455, -4.58] and len(body["bounds_rejilla"]) == 4
 
 

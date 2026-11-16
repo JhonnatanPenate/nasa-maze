@@ -19,7 +19,9 @@ class Settings(BaseSettings):
     ms6_url: str = ""
     ms4_url: str = ""
     ms1_url: str = ""
+    ms5_url: str = ""
     route_timeout_s: float = 120.0
+    risk_timeout_s: float = 30.0
     health_timeout_s: float = 2.0
     search_timeout_s: float = 5.0
     precalc_fallback: bool = True
