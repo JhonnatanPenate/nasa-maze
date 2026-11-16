@@ -191,8 +191,8 @@ jobs:
 
               test -f location-service/data/seed/location_catalog_seed.sqlite
 
-              FRONTEND_PORT=8000 CORE_PORT=8001 \
-                sudo -n docker compose up --build -d
+              sudo -n env FRONTEND_PORT=8000 CORE_PORT=8001 \
+                docker compose up --build -d
                 sudo -n docker compose ps
 
               curl --fail --silent --show-error \
