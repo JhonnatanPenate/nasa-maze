@@ -57,7 +57,8 @@ Frontend (map) ──▶ Core ──▶ MS6 Routing Engine ──▶ science/opt
 | `terrain-analysis/` | **MS4** — slope, profile and area analysis API | ✅ |
 | `risk-assessment/` | **MS5** — normalized point/path/area risk (SPEC_MS5 + extensions) | ✅ code + 293 tests; 🐳 docker run pending |
 | `routing-engine/` | **MS6** — wraps `science/optimizador_rutas.py` | ✅ |
-| Core, frontend, Data Management (MS2) | Orchestration, map UI, dataset registry | 🚧 in progress |
+| `nasa-maze-app/` | Frontend — Waze-like Mars route map (React + Leaflet), served on :3000 | ✅ code + 139 tests; 🐳 docker + e2e run pending |
+| Core, Data Management (MS2) | Orchestration, dataset registry | 🚧 in progress |
 
 **Tech:** Python 3.12 · FastAPI · rasterio/GDAL · numpy/pandas/scipy · R (soil models) · Docker · GitHub Actions · Google Cloud.
 

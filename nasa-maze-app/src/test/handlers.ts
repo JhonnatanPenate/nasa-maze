@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw'
+import type { RasterBand } from '../api/types'
 
 const fixtureModules = import.meta.glob<unknown>('./fixtures/*.json', {
   eager: true,
@@ -11,7 +12,7 @@ export function loadFixture<T = Record<string, unknown>>(name: string): T {
   return fixture as T
 }
 
-const BANDAS = [
+const BANDAS: RasterBand[] = [
   'pendiente_grados',
   'rugosidad_m',
   'fraccion_oscura',
@@ -61,7 +62,7 @@ export const handlers = [
   http.get('/api/health', () => HttpResponse.json(loadFixture('health.live.json'))),
   http.get('/api/capas/base', () => HttpResponse.json(loadFixture('baseLayers.json'))),
   http.get('/api/capas/raster/:banda', ({ params }) => {
-    if (!BANDAS.includes(String(params.banda))) {
+    if (!BANDAS.includes(String(params.banda) as RasterBand)) {
       return HttpResponse.json({ detail: `banda desconocida: ${params.banda}` }, { status: 404 })
     }
     return new HttpResponse(new Uint8Array([0x89, 0x50, 0x4e, 0x47]), {

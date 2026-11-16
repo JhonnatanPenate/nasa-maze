@@ -27,6 +27,13 @@ still loads and reports routing as unavailable.
 | `npm run lint` | ESLint flat config |
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Serve the production build locally |
+| `npm run e2e` | Playwright smoke test against the running stack (`E2E_BASE_URL`, default `http://localhost:3000`; first run `npx playwright install chromium`) |
+
+## Docker
+
+`docker compose up --build` from the repo root serves the app on
+http://localhost:3000; nginx proxies `/api/` to `CORE_UPSTREAM`
+(`http://core:8000`). `VITE_MARS_TILE_URL` is a build-time arg (empty = offline basemap only).
 
 ## Layout
 
@@ -39,11 +46,3 @@ view-models, English labels/colors for the Spanish contract fields.
 
 See `AGENTS.md` for the working rules and
 `docs/nasa_maze_app/IMPLEMENTATION_PLAN_APP.md` for the full plan.
-
-## Production container
-
-The root Compose stack builds this app with `Dockerfile` and serves its Vite
-production build through Nginx on port 8080 by default. Nginx serves the SPA
-fallback and proxies `/api/*` to the `core` Compose service. Production
-overrides `FRONTEND_PORT=8000` so an existing VM reverse proxy targeting
-`127.0.0.1:8000` serves the frontend without changing the VM configuration.

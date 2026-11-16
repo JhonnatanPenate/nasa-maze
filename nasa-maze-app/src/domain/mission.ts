@@ -39,7 +39,7 @@ export function validateMission(mission: MissionParams, allowedSols: number[]): 
     !Number.isFinite(hora) ||
     hora < HORA_MIN ||
     hora > HORA_MAX ||
-    !Number.isInteger(hora / HORA_STEP)
+    Math.abs(hora / HORA_STEP - Math.round(hora / HORA_STEP)) > 1e-9
   ) {
     errors.hora = `Start hour must be between ${HORA_MIN} and ${HORA_MAX} in ${HORA_STEP} h steps`
   }

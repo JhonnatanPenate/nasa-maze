@@ -1,0 +1,12 @@
+node_modules
+e2e
+playwright.config.ts
+test-results
+.git
+playwright-report
+dist
+.env
+.env.*
+!.env.example
+Dockerfile
+.dockerignore
