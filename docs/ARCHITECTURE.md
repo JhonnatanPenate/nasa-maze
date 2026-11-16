@@ -34,15 +34,15 @@ El proyecto se desarrollará utilizando una arquitectura de microservicios dentr
 
 La arquitectura estará compuesta por seis microservicios y un componente central denominado **Core**, encargado de coordinar su comunicación.
 
-| Componente | Responsabilidad | Fuente de datos principal (`data/gale/`) |
-|---|---|---|
-| **1. Location Service** | Buscar ubicaciones planetarias y convertir nombres en coordenadas. | `processed/gale_puntos_quimica.xlsx` (21 puntos CheMin), `raw/pe_msl_vectores.json` (waypoints Curiosity), Bradbury Landing como origen fijo. |
-| **2. Data Management Service** | Registrar, versionar y validar los datasets entregados por el equipo de datos (en el MVP los datos ya están locales; no hay descarga externa). | Todo `data/`; catálogo SQLite opcional. |
-| **3. Raster Service** | Administrar el acceso a archivos geoespaciales y proporcionar consultas sobre sus valores y bandas. | `processed/rejilla_ruta_90m.tif` (6 bandas; ver §4). |
-| **4. Terrain Analysis Service** | Analizar elevación, pendientes y características físicas del terreno (punto, perfil, área). | Banda 1 `pendiente_grados` del GeoTIFF + DEM de elevación *pendiente de entrega* (ver plan de realineación). |
-| **5. Risk Assessment Service** | Evaluar riesgos ambientales y geográficos (pendiente, rugosidad, dunas, térmico, radiación) sobre un tramo o punto. | Bandas del GeoTIFF + `raw/ambiental/rad_dosis_observaciones.xlsx` + `raw/ambiental/rems_resumen_horario.xlsx`. |
-| **6. Routing Engine** | Calcular y optimizar rutas; **envuelve el optimizador existente** (`MapaMision`, `calcular_ruta_optima`, `tabla_tramos_ruta`) sin reescribir la función objetivo. | `optimizador_rutas.py` (canónico; pendiente de incluirse en el repo) + `processed/modelos_por_suelo.json` + rejilla + RAD/REMS. |
-| **Core** | Recibir solicitudes, coordinar los microservicios e integrar sus resultados para entregarlos al usuario. | Orquesta todo lo anterior; entrega GeoJSON + tramos + KPIs al frontend (formato de respuesta: `docs/data/EJEMPLO_API_RESPUESTA.json`). |
+| Componente | Responsabilidad | Fuente de datos principal (`data/gale/`) | Estado (2026-11) |
+|---|---|---|---|
+| **1. Location Service** | Buscar ubicaciones planetarias y convertir nombres en coordenadas. | `processed/gale_puntos_quimica.xlsx` (21 puntos CheMin), `raw/pe_msl_vectores.json` (waypoints Curiosity), Bradbury Landing como origen fijo. | ✅ `location-service/` |
+| **2. Data Management Service** | Registrar, versionar y validar los datasets entregados por el equipo de datos (en el MVP los datos ya están locales; no hay descarga externa). | Todo `data/`; catálogo SQLite opcional. | 🚧 sin servicio dedicado (catálogos SQLite por servicio) |
+| **3. Raster Service** | Administrar el acceso a archivos geoespaciales y proporcionar consultas sobre sus valores y bandas. | `processed/rejilla_ruta_90m.tif` (6 bandas; ver §4). | ✅ `raster-service/` (:8003) |
+| **4. Terrain Analysis Service** | Analizar elevación, pendientes y características físicas del terreno (punto, perfil, área). | Banda 1 `pendiente_grados` del GeoTIFF + DEM de elevación *pendiente de entrega* (ver plan de realineación). | ✅ `terrain-analysis/` (:8004) |
+| **5. Risk Assessment Service** | Evaluar riesgos ambientales y geográficos (pendiente, rugosidad, dunas, térmico, radiación) sobre un tramo o punto. | Bandas del GeoTIFF + `raw/ambiental/rad_dosis_observaciones.xlsx` + `raw/ambiental/rems_resumen_horario.xlsx`. | ✅ `risk-assessment/` (:8005 — SPEC + extensiones; handoff en `docs/risk-assessment/HANDOFF_ROUTING_CORE.md`; corrida docker pendiente) |
+| **6. Routing Engine** | Calcular y optimizar rutas; **envuelve el optimizador existente** (`MapaMision`, `calcular_ruta_optima`, `tabla_tramos_ruta`) sin reescribir la función objetivo. | `optimizador_rutas.py` (canónico; pendiente de incluirse en el repo) + `processed/modelos_por_suelo.json` + rejilla + RAD/REMS. | ✅ `routing-engine/` (:8006) |
+| **Core** | Recibir solicitudes, coordinar los microservicios e integrar sus resultados para entregarlos al usuario. | Orquesta todo lo anterior; entrega GeoJSON + tramos + KPIs al frontend (formato de respuesta: `docs/data/EJEMPLO_API_RESPUESTA.json`). | 🚧 frontend/Core sin implementar aún |
 
 Cada microservicio tendrá independencia lógica y podrá desarrollarse, ejecutarse y probarse individualmente. La comunicación entre ellos se realizará principalmente mediante APIs REST.
 

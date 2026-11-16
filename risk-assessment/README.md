@@ -38,6 +38,18 @@ uvicorn app.main:app --port 8005            # against real MS3/MS4
 pytest -q && ruff check . && mypy
 ```
 
-Phase status: Phase 1 skeleton — SPEC endpoints and additive stubs are wired;
-factor scoring lands in Phase 3, ingestion in Phase 2. See
-`docs/risk-assessment/IMPLEMENTATION_PLAN_RISK_ASSESSMENT.md`.
+Docker (no root compose yet — standalone snippet, repo-root relative paths):
+
+```bash
+# from the repo root
+docker compose --project-directory . -f risk-assessment/docker-compose.yml up risk-assessment
+# or merge the service block into a future root docker-compose.yml
+```
+
+Phase status: **all phases complete (Gate 2 pending)** — SPEC endpoints,
+environmental catalog ingestion, pure-domain risk model, ports/adapters,
+plan extensions (`vehicle-profiles`, `meta`, `area`), golden-route
+validation. See `docs/risk-assessment/` (PHASE0_NOTES, DATA_INVENTORY_MS5,
+HANDOFF_ROUTING_CORE, UPSTREAM_REQUESTS) and
+`docs/DECISIONS.md` (MS5-D*). Deferred: docker build/compose run and live
+MS3/MS4 integration (no docker in the dev environment).

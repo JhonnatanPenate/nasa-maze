@@ -1,6 +1,7 @@
 # Risk Assessment Service - standalone compose snippet (README section).
-# Merge into the root docker-compose.yml when the full stack lands, or run:
-#   docker compose -f risk-assessment/docker-compose.yml up risk-assessment
+# Paths are repo-root relative so this merges cleanly into a future root
+# docker-compose.yml. Standalone use (from the repo root):
+#   docker compose --project-directory . -f risk-assessment/docker-compose.yml up risk-assessment
 # Upstream modes:
 #   synthetic    - no MS3/MS4 needed (default; deterministic fakes)
 #   http         - set RISK_DATASOURCE_MODE=http and run MS3 :8003 + MS4 :8004
