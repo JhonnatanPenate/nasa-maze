@@ -5,6 +5,7 @@
 **/__pycache__
 *.egg-info
 tests
-data
+data/*
+!data/seed
 .env
 .env.*
