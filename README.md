@@ -83,12 +83,16 @@ docker run --rm -p 8004:8004 -v "$(pwd)/../data:/data:ro" ms4-terrain-analysis
 
 ## Team
 
+**Team Orden 66** · NASA Space Apps Challenge 2026.
+
 | Member | Role |
 |---|---|
 | Javier Galdámez ([@JavyGG04](https://github.com/JavyGG04)) | Science & data: optimizer, soil models, Gale dataset |
 | Armando Salgado ([@Armando-J-Salgado](https://github.com/Armando-J-Salgado)) | MS4 Terrain Analysis |
-| Alex Alas ([@Alex-Alas](https://github.com/Alex-Alas)) | AI agents setup & docs |
+| Alexander Alas ([@Alex-Alas](https://github.com/Alex-Alas)) | AI agents setup & docs |
 | Jhonnatan Peñate ([@JhonnatanPenate](https://github.com/JhonnatanPenate)) | Repository, CI/CD, cloud deployment, MS6 Routing Engine |
+| Eliézer Martínez | Team member |
+| Nehemías Rivas | Team member |
 
 ## Contributing
 
