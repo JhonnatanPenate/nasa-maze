@@ -1,0 +1,28 @@
+1
+00:00:00,000 --> 00:00:02,000
+Hi! We're Team [NAME].
+
+2
+00:00:02,000 --> 00:00:05,000
+Our challenge: how does an astronaut walk safely on Mars?
+
+3
+00:00:05,000 --> 00:00:10,000
+Meet Planetary Explorer: a Waze for Mars.
+
+4
+00:00:10,000 --> 00:00:15,000
+Pick a science target and get the safest route from Curiosity's landing site.
+
+5
+00:00:15,000 --> 00:00:20,000
+It layers NASA terrain, soil, radiation and temperature data to dodge dunes, steep slopes and extra dose.
+
+6
+00:00:20,000 --> 00:00:25,000
+Next: any region on Mars or the Moon, with live dust and weather.
+
+7
+00:00:25,000 --> 00:00:30,000
+So every first step on another world is a safe one.
+
