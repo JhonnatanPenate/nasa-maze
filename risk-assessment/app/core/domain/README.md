@@ -1,0 +1,1 @@
+Pure domain: GeoPoint/BoundingBox/DistanceCalculator/PathSampler (same semantics as MS3/MS4), LMST helpers, SPEC factor catalog, risk levels, factor assessments, weighted aggregation, vehicle profile. No FastAPI/pydantic/httpx/sqlite3/openpyxl imports (enforced by tests/unit/test_architecture.py).

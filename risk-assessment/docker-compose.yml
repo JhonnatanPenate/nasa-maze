@@ -1,0 +1,26 @@
+# Risk Assessment Service - standalone compose snippet (README section).
+# Merge into the root docker-compose.yml when the full stack lands, or run:
+#   docker compose -f risk-assessment/docker-compose.yml up risk-assessment
+# Upstream modes:
+#   synthetic    - no MS3/MS4 needed (default; deterministic fakes)
+#   http         - set RISK_DATASOURCE_MODE=http and run MS3 :8003 + MS4 :8004
+services:
+  risk-assessment:
+    build: ./risk-assessment
+    ports: ["8005:8005"]
+    environment:
+      RISK_DATASOURCE_MODE: ${RISK_DATASOURCE_MODE:-synthetic}
+      RISK_RASTER_BASE_URL: http://raster-service:8003
+      RISK_TERRAIN_BASE_URL: http://terrain-analysis:8004
+      RISK_CATALOG_PATH: /app/data/processed/mars/risk/risk_catalog.sqlite
+      RISK_SEED_CATALOG_PATH: /app/data/seed/risk_catalog_seed.sqlite
+      RISK_CONFIG_DIR: /app/config
+      RISK_LOG_LEVEL: INFO
+    volumes:
+      - ./data/processed/mars/risk:/app/data/processed/mars/risk:ro
+      - ./risk-assessment/data/seed:/app/data/seed:ro
+      - ./risk-assessment/config:/app/config:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 10s
+      retries: 5

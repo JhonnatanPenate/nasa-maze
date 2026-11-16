@@ -1,0 +1,9 @@
+# MS5 risk weights — SPEC §5 fixed defaults. No dominance multiplier (plan §13).
+version: 1
+model_version: ms5-risk-v0.1   # bump when scoring rules change
+weights:
+  slope: 0.4
+  dunes: 0.2
+  roughness: 0.15
+  temperature: 0.15
+  radiation: 0.1
