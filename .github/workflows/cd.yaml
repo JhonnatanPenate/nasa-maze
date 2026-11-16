@@ -154,9 +154,16 @@ jobs:
               git switch main
               git pull --ff-only origin main
 
+              if docker info >/dev/null 2>&1; then
+                DOCKER=(docker)
+              else
+                sudo -n docker info >/dev/null
+                DOCKER=(sudo -n docker)
+              fi
+
               if [ ! -f location-service/data/seed/location_catalog_seed.sqlite ]; then
-                docker compose build location-service
-                docker compose run --rm --no-deps --user root \
+                "${DOCKER[@]}" compose build location-service
+                "${DOCKER[@]}" compose run --rm --no-deps --user root \
                   -v "$REPO_DIR:/workspace" \
                   -w /workspace/location-service \
                   location-service \
@@ -169,8 +176,8 @@ jobs:
 
               test -f location-service/data/seed/location_catalog_seed.sqlite
 
-              docker compose up --build -d
-              docker compose ps
+              "${DOCKER[@]}" compose up --build -d
+              "${DOCKER[@]}" compose ps
 
               for attempt in $(seq 1 30); do
                 if curl --fail --silent --show-error \
@@ -183,6 +190,6 @@ jobs:
                 sleep 5
               done
 
-              docker compose logs --tail=100
+              "${DOCKER[@]}" compose logs --tail=100
               exit 1
             '
