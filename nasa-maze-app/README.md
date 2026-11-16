@@ -43,6 +43,7 @@ See `AGENTS.md` for the working rules and
 ## Production container
 
 The root Compose stack builds this app with `Dockerfile` and serves its Vite
-production build through Nginx on port 8080. Nginx serves the SPA fallback and
-proxies `/api/*` to the `core` Compose service. The VM's public reverse proxy
-must forward the application domain to `127.0.0.1:8080`.
+production build through Nginx on port 8080 by default. Nginx serves the SPA
+fallback and proxies `/api/*` to the `core` Compose service. Production
+overrides `FRONTEND_PORT=8000` so an existing VM reverse proxy targeting
+`127.0.0.1:8000` serves the frontend without changing the VM configuration.
