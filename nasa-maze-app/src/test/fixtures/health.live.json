@@ -1,0 +1,13 @@
+{
+  "status": "ok",
+  "servicios": {
+    "ms6": "ok",
+    "ms5": "ok",
+    "ms4": "ok",
+    "ms1": "ok"
+  },
+  "fallback_precalculado": true,
+  "aoi": [137.345, -4.74, 137.455, -4.58],
+  "sols": [1360, 2140, 3290, 4710],
+  "bounds_rejilla": [137.345, -4.74, 137.455, -4.58]
+}
