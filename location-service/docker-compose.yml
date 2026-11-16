@@ -3,9 +3,7 @@
 #   docker compose -f location-service/docker-compose.yml up location-service
 services:
   location-service:
-    build:
-      context: .
-      dockerfile: location-service/Dockerfile
+    build: ./location-service
     ports: ["8001:8001"]
     environment:
       LOCATION_CATALOG_PATH: /app/data/processed/mars/location/location_catalog.sqlite

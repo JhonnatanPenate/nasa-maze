@@ -127,17 +127,17 @@ startup fails with an ingestion command if neither catalog is available.
 
 ## Docker
 
-Build the image from the repository root (the seed catalog is generated from
-`data/gale` during the build, so no catalog or config mounts are needed):
+Build and run the image (the versioned seed catalog in `data/seed` and
+`config/` are baked in, so no mounts are needed):
 
 ```bash
-docker build -f location-service/Dockerfile -t planetary-location-service .
+docker build -t planetary-location-service ./location-service
 docker run --rm -p 8001:8001 planetary-location-service
 ```
 
 The image runs as the non-root `location` user. It exposes port `8001` and
-checks readiness at `/ready`. The seed catalog and configuration are baked into
-the image; mount a catalog at `LOCATION_CATALOG_PATH` to override it. The standalone
+checks readiness at `/ready`. Mount a catalog at `LOCATION_CATALOG_PATH` (or
+`/app/data/seed`) to override the baked-in one. The standalone
 [`docker-compose.yml`](./docker-compose.yml) documents the equivalent service
 mounts for integration into the project stack.
 

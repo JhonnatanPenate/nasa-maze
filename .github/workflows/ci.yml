@@ -36,7 +36,7 @@ jobs:
       matrix:
         include:
           - svc: location-service
-            context: .
+            context: location-service
             port: 8001
             health: /ready
           - svc: raster-service

@@ -57,7 +57,5 @@ services:
       - ./risk-assessment/config:/app/config:ro
 
   location-service:
-    build:
-      context: .
-      dockerfile: location-service/Dockerfile
+    build: ./location-service
     ports: ["8001:8001"]
