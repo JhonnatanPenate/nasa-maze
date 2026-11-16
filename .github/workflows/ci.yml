@@ -36,12 +36,9 @@ jobs:
       matrix:
         include:
           - svc: location-service
-            context: location-service
+            context: .
             port: 8001
             health: /ready
-            mounts: >-
-              -v $PWD/location-service/data/seed:/app/data/seed:ro
-              -v $PWD/location-service/config:/app/config:ro
           - svc: raster-service
             context: raster-service
             port: 8003
@@ -79,21 +76,6 @@ jobs:
           push: false
           cache-from: type=gha,scope=${{ matrix.svc }}
           cache-to: type=gha,mode=max,scope=${{ matrix.svc }}
-      # The location catalog is git-ignored data: build the seed catalog the same way its README does
-      - if: matrix.svc == 'location-service'
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-      - if: matrix.svc == 'location-service'
-        name: Build location seed catalog
-        run: |
-          pip install -q ./location-service
-          python -m location_service.ingest build \
-            --mission data/gale/processed/gale_puntos_quimica.xlsx \
-            --config location-service/config \
-            --out location-service/data/seed/location_catalog_seed.sqlite \
-            --report location-service/data/seed/ingest_report.json
       - name: Smoke test
         run: |
           docker run -d --name svc -p ${{ matrix.port }}:${{ matrix.port }} ${{ matrix.mounts }} ${{ matrix.svc }}:ci

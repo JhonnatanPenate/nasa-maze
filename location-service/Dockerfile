@@ -1,4 +1,6 @@
 # Location Service - Mars gazetteer/POI resolution (offline, read-only SQLite catalog)
+# Build from the repo root: docker build -f location-service/Dockerfile -t location-service .
+# The seed catalog is built from data/gale during the image build, so no host mounts are needed.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -6,10 +8,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
-COPY pyproject.toml ./
-COPY src ./src
-# Runtime dependencies only (no ingest extras: pandas/openpyxl stay offline-build tools)
+COPY location-service/pyproject.toml ./
+COPY location-service/src ./src
+COPY location-service/config ./config
+COPY data/gale/processed/gale_puntos_quimica.xlsx /tmp/gale_puntos_quimica.xlsx
 RUN pip install --no-cache-dir . \
+    && python -m location_service.ingest build \
+        --mission /tmp/gale_puntos_quimica.xlsx --config /app/config \
+        --out /app/data/seed/location_catalog_seed.sqlite \
+        --report /app/data/seed/ingest_report.json \
+    && rm /tmp/gale_puntos_quimica.xlsx \
     && useradd --create-home --uid 10001 location
 
 USER location
