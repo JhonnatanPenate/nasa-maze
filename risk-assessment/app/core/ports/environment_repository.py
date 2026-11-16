@@ -30,13 +30,16 @@ class TemperatureReading:
 class RadiationReading:
     """Hourly RAD dose-rate profile at (sol, hora). ``dose_e_uGy_h`` is
     the SPEC channel (uGy/h); dose-B is kept for provenance only and is
-    never combined with dose-E."""
+    never combined with dose-E. ``provenance`` marks how the hourly value
+    was derived: ``hourly_mean`` of filtered observations or
+    ``sol_mean_fallback`` for bins with no observations (Javi's rule)."""
 
     sol: int
     hora: int
     dose_e_uGy_h: float | None
     dose_b_uGy_h: float | None
     unit: str | None
+    provenance: str | None = None
 
 
 class EnvironmentRepository(Protocol):

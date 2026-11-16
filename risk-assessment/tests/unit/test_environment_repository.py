@@ -3,6 +3,7 @@
 import sqlite3
 from pathlib import Path
 
+import pytest
 from app.infrastructure.repositories.sqlite_environment_repository import (
     SqliteEnvironmentRepository,
 )
@@ -81,6 +82,16 @@ def test_empty_catalog_no_tables(tmp_path: Path) -> None:
     assert repo.ping() is True
     assert repo.available_sols("rems") == ()
     assert repo.temperature_at(1360, 9) is None
+
+
+def test_catalog_opened_read_only(tmp_path: Path) -> None:
+    catalog = tmp_path / "catalog.sqlite"
+    _make_catalog(catalog)
+    repo = SqliteEnvironmentRepository(str(catalog))
+    assert repo.ping() is True
+    conn = repo._connect()
+    with pytest.raises(sqlite3.OperationalError, match="readonly"):
+        conn.execute("INSERT INTO thermal_climatology VALUES (1, 0, 0, 0, 0, 0, 0, 0)")
 
 
 def test_unavailable_repository_is_empty() -> None:

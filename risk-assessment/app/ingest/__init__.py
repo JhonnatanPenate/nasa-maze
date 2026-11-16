@@ -1,5 +1,6 @@
-"""Offline ingestion CLI — implemented in Phase 2 (plan §8).
+"""Offline ingestion CLI (plan §8, Phase 2).
 
 `python -m app.ingest` builds `risk_catalog.sqlite` from the delivered
-REMS/RAD workbooks. This stub keeps the entry point importable.
+REMS/RAD workbooks. This package is never imported by the runtime app;
+pandas/openpyxl live only in the reader modules (`rems.py`, `rad.py`).
 """

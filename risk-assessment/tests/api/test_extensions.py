@@ -30,7 +30,10 @@ def test_meta(client: TestClient) -> None:
         "raster": "ok",
         "environment": "ok",
     }
-    assert body["catalog"]["available"] is False  # no catalog file yet
+    # Phase 2 ships a real catalog (data/processed or the committed seed).
+    assert body["catalog"]["available"] is True
+    assert body["catalog"]["rems_sols"] == [1360, 2140]
+    assert body["catalog"]["rad_sols"] == [1360, 2140, 3290, 4710]
     assert body["coordinate_system"]["crs"] == "IAU_2015:49900"
 
 

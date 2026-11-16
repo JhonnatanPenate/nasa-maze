@@ -7,7 +7,7 @@ opens it with ``mode=ro`` and never writes. Expected schema (Phase 2):
         air_temp_mean_K, ground_temp_mean_K, ground_temp_min_K,
         ground_temp_max_K, pressure_mean_Pa, uv_abc_mean_W_m2 REAL)
     radiation_climatology(sol INTEGER, hora INTEGER,
-        dose_e_uGy_h, dose_b_uGy_h REAL, unit TEXT)
+        dose_e_uGy_h, dose_b_uGy_h REAL, unit TEXT, provenance TEXT)
     meta(key TEXT PRIMARY KEY, value TEXT)
     data_quality(dataset TEXT, period TEXT, note TEXT, severity TEXT)
 
@@ -124,12 +124,14 @@ class SqliteEnvironmentRepository:
             return None
         if row is None:
             return None
+        keys = set(row.keys())
         return RadiationReading(
             sol=int(row["sol"]),
             hora=int(row["hora"]),
             dose_e_uGy_h=row["dose_e_uGy_h"],
             dose_b_uGy_h=row["dose_b_uGy_h"],
             unit=row["unit"],
+            provenance=row["provenance"] if "provenance" in keys else None,
         )
 
 

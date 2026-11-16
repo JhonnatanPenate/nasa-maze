@@ -9,8 +9,10 @@ htmlcov/
 .coverage
 !.env.example
 
-# Built catalogs are artifacts (Phase 2 ingest output), never committed.
+# Built catalogs are artifacts (Phase 2 ingest output), never committed —
+# except the committed seed copy under data/seed/ (plan §6/§11).
 *.sqlite
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+!data/seed/*.sqlite
