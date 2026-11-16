@@ -11,7 +11,7 @@ The orchestrator updates this file in the same commit as each WP and before ever
 | WP1 | Scaffold | in_progress | | |
 | WP2 | API client | pending | | |
 | WP3 | Domain | done | `feat(app): WP3 domain` | 47 domain tests (64 total) |
-| ◆A | Checkpoint | done | `docs(app): checkpoint A` | |
+| ◆A | Checkpoint | done | `docs(app): checkpoint A` | handoff written in WP3 commit 36408c4 |
 | WP4 | Map shell | pending | | |
 | WP5 | Route panel | pending | | |
 | ◆B | Checkpoint | pending | | |
