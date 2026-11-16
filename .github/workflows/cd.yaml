@@ -154,6 +154,19 @@ jobs:
               git switch main
               git pull --ff-only origin main
 
+              if [ ! -f location-service/data/seed/location_catalog_seed.sqlite ]; then
+                docker compose build location-service
+                docker compose run --rm --no-deps --user root \
+                  -v "$REPO_DIR:/workspace" \
+                  -w /workspace/location-service \
+                  location-service \
+                  python -m location_service.ingest build \
+                    --mission /workspace/data/gale/processed/gale_puntos_quimica.xlsx \
+                    --config /workspace/location-service/config \
+                    --out /workspace/location-service/data/seed/location_catalog_seed.sqlite \
+                    --report /workspace/location-service/data/seed/ingest_report.json
+              fi
+
               test -f location-service/data/seed/location_catalog_seed.sqlite
 
               docker compose up --build -d
